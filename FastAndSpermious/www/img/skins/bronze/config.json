@@ -1,0 +1,9 @@
+﻿{
+    "name_fr":  "Bronze",
+    "name_en":  "Bronze",
+    "name_es":  "Bronce",
+    "type":  "always",
+    "requiredScore":  0,
+    "frames":  6,
+    "frameSize":  256
+}

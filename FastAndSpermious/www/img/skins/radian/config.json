@@ -1,0 +1,9 @@
+﻿{
+    "name_fr":  "Radian",
+    "name_en":  "Radiant",
+    "name_es":  "Radiante",
+    "type":  "always",
+    "requiredScore":  0,
+    "frames":  6,
+    "frameSize":  256
+}

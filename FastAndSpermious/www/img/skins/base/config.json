@@ -1,0 +1,9 @@
+﻿{
+    "name_fr":  "Skin de base",
+    "name_en":  "Base skin",
+    "name_es":  "Skin básico",
+    "type":  "always",
+    "requiredScore":  0,
+    "frames":  6,
+    "frameSize":  256
+}

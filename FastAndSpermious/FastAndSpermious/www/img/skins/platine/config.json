@@ -1,0 +1,9 @@
+﻿{
+    "name_fr":  "Platine",
+    "name_en":  "Platinum",
+    "name_es":  "Platino",
+    "type":  "always",
+    "requiredScore":  0,
+    "frames":  6,
+    "frameSize":  256
+}

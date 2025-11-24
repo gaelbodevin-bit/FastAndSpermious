@@ -1,0 +1,9 @@
+﻿{
+    "name_fr":  "God Mode",
+    "name_en":  "God Mode",
+    "name_es":  "Modo Dios",
+    "type":  "always",
+    "requiredScore":  0,
+    "frames":  6,
+    "frameSize":  256
+}

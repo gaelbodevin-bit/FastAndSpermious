@@ -1,0 +1,9 @@
+﻿{
+    "name_fr":  "Argent",
+    "name_en":  "Silver",
+    "name_es":  "Plata",
+    "type":  "always",
+    "requiredScore":  0,
+    "frames":  6,
+    "frameSize":  256
+}

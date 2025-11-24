@@ -1,0 +1,101 @@
+﻿[
+    {
+        "id":  "base",
+        "name_fr":  "Skin de base",
+        "name_en":  "Base skin",
+        "name_es":  "Skin básico",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/base/sprite.png"
+    },
+    {
+        "id":  "bronze",
+        "name_fr":  "Bronze",
+        "name_en":  "Bronze",
+        "name_es":  "Bronce",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/bronze/sprite.png"
+    },
+    {
+        "id":  "silver",
+        "name_fr":  "Argent",
+        "name_en":  "Silver",
+        "name_es":  "Plata",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/silver/sprite.png"
+    },
+    {
+        "id":  "gold",
+        "name_fr":  "Or",
+        "name_en":  "Gold",
+        "name_es":  "Oro",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/gold/sprite.png"
+    },
+    {
+        "id":  "platine",
+        "name_fr":  "Platine",
+        "name_en":  "Platinum",
+        "name_es":  "Platino",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/platine/sprite.png"
+    },
+    {
+        "id":  "emeraude",
+        "name_fr":  "Émeraude",
+        "name_en":  "Emerald",
+        "name_es":  "Esmeralda",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/emeraude/sprite.png"
+    },
+    {
+        "id":  "radian",
+        "name_fr":  "Radian",
+        "name_en":  "Radiant",
+        "name_es":  "Radiante",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/radian/sprite.png"
+    },
+    {
+        "id":  "celeste",
+        "name_fr":  "Céleste",
+        "name_en":  "Celestial",
+        "name_es":  "Celeste",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/celeste/sprite.png"
+    },
+    {
+        "id":  "god",
+        "name_fr":  "God Mode",
+        "name_en":  "God Mode",
+        "name_es":  "Modo Dios",
+        "type":  "always",
+        "requiredScore":  0,
+        "frames":  6,
+        "frameSize":  256,
+        "img":  "img/skins/god/sprite.png"
+    }
+]
