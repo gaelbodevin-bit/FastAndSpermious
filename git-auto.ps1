@@ -1,56 +1,58 @@
 ###############################################################
-# FAST AND SPERMIOUS - AUTO PUSH GITHUB
-# Script GitHub automatisé pour D:\Dev\FastAndSpermious
-# Dépôt : https://github.com/gaelbodevin-bit/FastAndSpermious.git
+# FAST AND SPERMIOUS - GIT AUTO + BUILD WEB
+# Script stable 2025
 ###############################################################
 
 $ErrorActionPreference = "Stop"
+$root = "D:\Dev\FastAndSpermious"
 
-# Emplacement du projet
-$projectPath = "D:\Dev\FastAndSpermious"
+Write-Host "?? Git auto-sync…" -ForegroundColor Cyan
+Set-Location $root
 
-Write-Host "?? Passage au dossier projet..." -ForegroundColor Cyan
-Set-Location $projectPath
+# 1. PULL
+try {
+    git pull
+    Write-Host "??  Pull OK" -ForegroundColor Green
+} catch {
+    Write-Host "? Git pull error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-Write-Host "?? Vérification du dépôt Git..." -ForegroundColor Cyan
+# 2. ADD
+try {
+    git add .
+    Write-Host "? Add OK" -ForegroundColor Green
+} catch {
+    Write-Host "? Git add error: $($_.Exception.Message)" -ForegroundColor Red
+}
 
-# Si le dépôt .git n'existe pas ? initialisation
-if (!(Test-Path "$projectPath\.git")) {
-    Write-Host "?? Dépôt non initialisé. Initialisation..." -ForegroundColor Yellow
+# 3. COMMIT
+$timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+try {
+    git commit -m "Auto-commit: $timestamp"
+    Write-Host "?? Commit OK" -ForegroundColor Green
+} catch {
+    Write-Host "?? Aucun commit à faire" -ForegroundColor Yellow
+}
 
-    git init
-
-    $remoteUrl = "https://github.com/gaelbodevin-bit/FastAndSpermious.git"
-    git remote add origin $remoteUrl
-    git branch -M main
-
-    Write-Host "?? Dépôt Git initialisé et connecté à GitHub." -ForegroundColor Green
+# 4. PUSH
+try {
+    git push
+    Write-Host "??  Push OK" -ForegroundColor Green
+} catch {
+    Write-Host "? Git push error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 ###############################################################
-# STAGE
+# 5. BUILD WEB AUTO
 ###############################################################
 
-Write-Host "? Ajout des fichiers..." -ForegroundColor Cyan
-git add .
+$buildScript = Join-Path $root "Build-FastAndSpermious-Web.ps1"
 
-###############################################################
-# COMMIT AUTOMATIQUE
-###############################################################
+if (Test-Path $buildScript) {
+    Write-Host "?? Lancement du build Web…" -ForegroundColor Cyan
+    powershell -ExecutionPolicy Bypass -File $buildScript
+} else {
+    Write-Host "? Script de build introuvable : $buildScript" -ForegroundColor Red
+}
 
-$timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-$autoMessage = "Auto-commit FastAndSpermious - $timestamp"
-
-Write-Host "?? Commit : $autoMessage" -ForegroundColor Magenta
-
-git commit -m "$autoMessage" 2>$null
-
-###############################################################
-# PUSH
-###############################################################
-
-Write-Host "?? Envoi sur GitHub..." -ForegroundColor Cyan
-git push -u origin main
-
-Write-Host "? Synchronisation terminée !" -ForegroundColor Green
-###############################################################
+Write-Host "?? Git + Build terminé." -ForegroundColor Green
