@@ -1,0 +1,41 @@
+#langSelect{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:14px;
+}
+
+#langSelect .langBtn{
+  padding:10px 22px;
+  border-radius:18px;
+  border:none;
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  cursor:pointer;
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+
+  background-color:rgba(0,0,0,0.35);
+  background-blend-mode:overlay;
+
+  transition:transform .15s ease;
+}
+
+#langSelect .lang-fr{
+  background-image:url("../img/flags/fr_64x42.png");
+}
+
+#langSelect .lang-en{
+  background-image:url("../img/flags/en_64x42.png");
+}
+
+#langSelect .lang-es{
+  background-image:url("../img/flags/es_64x42.png");
+}
+
+#langSelect .langBtn:hover{
+  transform:scale(1.07);
+}
