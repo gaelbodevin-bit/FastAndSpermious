@@ -1,7 +1,10 @@
 ﻿dbg("? game.js chargé");
 dbg("?? VERSION BUILD :", "2025.11.21.01");
 
-// ========================= LANGUES ==========================
+/* ===========================================================
+   ===============        SYSTEME DE LANGUE      ===============
+   =========================================================== */
+
 const LANG = {
   fr: {
     menuTitle: "Fast and Spermious",
@@ -22,7 +25,10 @@ const LANG = {
     shopEquip: "Équiper",
     shopEquipped: "Équipé",
     shopComingSoon: "Disponible prochainement",
-    shopUnlockAt: "Débloqué dès {score} points"
+    shopUnlockAt: "Débloqué dès {score} points",
+    leaderboardSelectTitle: "Classement par niveaux",
+    leaderboardSelectInstruction: "Choisissez un niveau.",
+    back: "Retour"
   },
   en: {
     menuTitle: "Fast and Spermious",
@@ -43,7 +49,10 @@ const LANG = {
     shopEquip: "Equip",
     shopEquipped: "Equipped",
     shopComingSoon: "Coming soon",
-    shopUnlockAt: "Unlocked at {score} points"
+    shopUnlockAt: "Unlocked at {score} points",
+    leaderboardSelectTitle: "Leaderboard by level",
+    leaderboardSelectInstruction: "Choose a level.",
+    back: "Back"
   },
   es: {
     menuTitle: "Fast and Spermious",
@@ -64,7 +73,10 @@ const LANG = {
     shopEquip: "Equipar",
     shopEquipped: "Equipado",
     shopComingSoon: "Próximamente",
-    shopUnlockAt: "Se desbloquea con {score} puntos"
+    shopUnlockAt: "Se desbloquea con {score} puntos",
+    leaderboardSelectTitle: "Clasificación por niveles",
+    leaderboardSelectInstruction: "Elige un nivel.",
+    back: "Volver"
   }
 };
 
@@ -76,7 +88,9 @@ function t(key){
   return key;
 }
 
-// ========================= SKINS (AUTO) ======================
+/* ===========================================================
+   ===================      SKINS SYSTEM      =================
+   =========================================================== */
 
 let totalScore   = parseInt(localStorage.getItem("totalScore") || "0", 10);
 let ownedSkins   = JSON.parse(localStorage.getItem("ownedSkins") || "[]");
@@ -99,14 +113,32 @@ let lastLevelPlayed = 15;
 
 const sperm = { x:180, y:500, angle:0, amp:30, vy:0, dist:0 };
 
-async function loadSkins(){
-  try{
-    const res = await fetch("skins.json?" + Date.now());
+/* -----------------------------------------------------------
+      💥 OPTION B : CHARGEMENT SKINS VIA CORDOVA ABSOLU
+   -----------------------------------------------------------*/
+
+async function loadSkins() {
+  try {
+    let url;
+
+    if (window.cordova && cordova.file && cordova.file.applicationDirectory) {
+      url = cordova.file.applicationDirectory + "www/skins.json";
+      dbg("?? Chargement skins depuis APK:", url);
+    } else {
+      url = "skins.json?" + Date.now();
+      dbg("?? Chargement skins depuis navigateur:", url);
+    }
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
     SKINS = await res.json();
     skinsLoaded = true;
 
     SKINS.forEach(s => {
-      if (!ownedSkins.includes(s.id)) ownedSkins.push(s.id);
+      if (!ownedSkins.includes(s.id) && s.type === "always") {
+        ownedSkins.push(s.id);
+      }
     });
 
     if (!equippedSkin || !ownedSkins.includes(equippedSkin)) {
@@ -115,9 +147,11 @@ async function loadSkins(){
 
     saveSkinState();
     updateSkin();
-    dbg("?? Skins chargés:", SKINS.length);
-  }catch(e){
-    dbg("? Erreur loadSkins:", String(e));
+
+    dbg("?? Skins chargés avec succès:", SKINS.length);
+
+  } catch (e) {
+    dbg("? Erreur loadSkins:", e);
   }
 }
 
@@ -133,7 +167,9 @@ function updateSkin(){
   frames = skin.frames || 6;
 }
 
-// ========================= JEU ==============================
+/* ===========================================================
+   =====================       JEU         ====================
+   =========================================================== */
 
 function resizeCanvas(){
   if(!canvas) return;
@@ -156,10 +192,11 @@ function handleMotion(e){
 }
 
 function hidePanels(){
-  ["menu","leaderboard","gameover","shop"].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.style.display="none";
-  });
+  ["menu","leaderboard","leaderboardSelect","gameover","shop"]
+    .forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display="none";
+    });
 }
 
 function startGame(d){
@@ -266,34 +303,50 @@ async function submitScore(){
   openLeaderboard();
 }
 
+/* ===========================================================
+   =====================   LEADERBOARD   ======================
+   =========================================================== */
+
+function openLeaderboardSelect(){
+  hidePanels();
+  canvas.style.display="none";
+  document.getElementById("leaderboardSelect").style.display = "block";
+  applyLang();
+}
+
 function openLeaderboard(){
   hidePanels();
   canvas.style.display="none";
+  document.getElementById("leaderboard").style.display = "block";
+  loadLeaderboardForLevel(lastLevelPlayed);
+}
 
+function switchLeaderboard(level){
+  lastLevelPlayed = level;
+  hidePanels();
+  canvas.style.display="none";
+  document.getElementById("leaderboard").style.display = "block";
+  loadLeaderboardForLevel(level);
+}
+
+function loadLeaderboardForLevel(level){
   const lbTitle = document.getElementById("lbTitle");
-  const lbInfo  = document.getElementById("lbInfo");
-  if(lbTitle) lbTitle.innerText = t("leaderboardTitle")+" "+lastLevelPlayed+"s";
-  if(lbInfo)  lbInfo.innerText  = "";
+  if(lbTitle) lbTitle.innerText = t("leaderboardTitle")+" "+level+"s";
 
   const scoresDiv=document.getElementById("scores");
-  scoresDiv.innerText="Chargement…";
-  document.getElementById("leaderboard").style.display="block";
+  scoresDiv.innerText = "Chargement…";
 
-  firebaseLoadTop(lastLevelPlayed).then(list=>{
-    dbg("?? openLeaderboard list.length=", list ? list.length : 0);
+  firebaseLoadTop(level).then(list=>{
     if(!list || list.length===0){
       scoresDiv.innerHTML="<p>Aucun score pour ce niveau.</p>";
       return;
     }
 
     let html="";
-    for(let i=0;i<list.length;i++){
-      const s=list[i] || {};
-      const rank=i+1;
-      const name=s.name || "?";
-      const score=(typeof s.score==="number" ? s.score : parseInt(s.score||"0",10) || 0);
-      html += `<p>${rank}. ${name} — ${score}</p>`;
-    }
+    list.forEach((s,i)=>{
+      html += `<p>${i+1}. ${s.name || "?"} — ${s.score}</p>`;
+    });
+
     scoresDiv.innerHTML=html;
   });
 }
@@ -309,7 +362,9 @@ function backToMenu(){
   canvas.style.display="none";
 }
 
-// ========================= LANG / UI ========================
+/* ===========================================================
+   ======================       UI        ======================
+   =========================================================== */
 
 function applyLang(){
   const map = {
@@ -324,12 +379,16 @@ function applyLang(){
     menuFromGameBtn: "menu",
     lbCloseBtn: "close",
     shopTitle: "shopTitle",
-    shopCloseBtn: "close"
+    shopCloseBtn: "close",
+    leaderboardSelectTitle:"leaderboardSelectTitle",
+    leaderboardSelectInstruction:"leaderboardSelectInstruction",
+    backBtn:"back"
   };
-  Object.keys(map).forEach(id=>{
-    const el=document.getElementById(id);
+
+  for(const id in map){
+    const el = document.getElementById(id);
     if(el) el.innerText = t(map[id]);
-  });
+  }
 }
 
 function setLang(l){
@@ -339,7 +398,9 @@ function setLang(l){
   refreshShopUI();
 }
 
-// ========================= BOUTIQUE =========================
+/* ===========================================================
+   ======================     BOUTIQUE     =====================
+   =========================================================== */
 
 function openShop(){
   hidePanels();
@@ -364,33 +425,25 @@ function equipSkin(id){
 function refreshShopUI(){
   const statsEl = document.getElementById("shopStats");
   const listEl  = document.getElementById("shopList");
-  if(!statsEl || !listEl) return;
 
   statsEl.innerText = t("shopTotalScore")+" "+totalScore;
 
-  if(!SKINS || SKINS.length===0){
-    listEl.innerHTML = "<p>Aucun skin chargé.</p>";
-    return;
-  }
-
   let html="";
   SKINS.forEach(s=>{
-    const owned = ownedSkins.includes(s.id) || s.type === "always";
+    const owned = ownedSkins.includes(s.id) || s.type==="always";
+    let status="", btn="";
 
-    let statusText = "";
-    let btnHtml    = "";
-
-    if (!owned && s.type === "score") {
-      statusText = t("shopUnlockAt").replace("{score}", s.requiredScore || 0);
-    } else if (!owned && s.type === "premium") {
-      statusText = t("shopComingSoon");
-    } else if (owned) {
-      statusText = t("shopOwned");
-      if (equippedSkin === s.id) {
-        btnHtml = `<button disabled>${t("shopEquipped")}</button>`;
-      } else {
-        btnHtml = `<button onclick="equipSkin('${s.id}')">${t("shopEquip")}</button>`;
-      }
+    if (!owned && s.type==="score") {
+      status = t("shopUnlockAt").replace("{score}", s.requiredScore);
+    }
+    else if (!owned && s.type==="premium") {
+      status = t("shopComingSoon");
+    }
+    else if (owned) {
+      status = t("shopOwned");
+      btn = (equippedSkin===s.id)
+        ? `<button disabled>${t("shopEquipped")}</button>`
+        : `<button onclick="equipSkin('${s.id}')">${t("shopEquip")}</button>`;
     }
 
     const name = s["name_"+currentLang] || s.name_fr || s.name_en || s.id;
@@ -398,16 +451,17 @@ function refreshShopUI(){
     html += `
       <div class="shop-item">
         <strong>${name}</strong><br>
-        <span>${statusText}</span><br>
-        ${btnHtml}
-      </div>
-    `;
+        <span>${status}</span><br>
+        ${btn}
+      </div>`;
   });
 
   listEl.innerHTML = html;
 }
 
-// ========================= INIT =============================
+/* ===========================================================
+   ======================     INIT APP     =====================
+   =========================================================== */
 
 window.onload = async () => {
   dbg("? onload OK");
@@ -423,8 +477,6 @@ window.onload = async () => {
   if(window.DeviceMotionEvent){
     window.addEventListener("devicemotion",handleMotion,true);
     dbg("? Shake actif");
-  } else {
-    dbg("?? DeviceMotion non supporté");
   }
 
   applyLang();

@@ -1,73 +1,101 @@
-﻿dbg("?? firebase.js démarré");
+﻿// ==========================================================
+//  Firebase – Fast and Spermious
+//  Arborescence :
+//  scores/
+//    15s/
+//      -PUSHID: { name, score, ts }
+//    30s/
+//    60s/
+// ==========================================================
 
-let db = null;
-
-function getScoresRef(level){
-  if(!db){
-    dbg("?? getScoresRef sans db");
-    return null;
-  }
-  const key = String(level) + "s"; // "15s", "30s", "60s"
-  return db.ref("scores/" + key);
-}
-
-try{
-  firebase.initializeApp({
-    apiKey:"AIzaSyCeHwyUe32aOlCNjPZQxekfr9M6AxaJC-0",
-    authDomain:"fast-and-spermious.firebaseapp.com",
-    databaseURL:"https://fast-and-spermious-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId:"fast-and-spermious",
-    storageBucket:"fast-and-spermious.appspot.com",
-    appId:"1:791766983410:web:6b1d77401727b52f60a66b"
-  });
-  dbg("? Firebase initialisé");
-  db = firebase.database();
-  dbg("? db OK");
-}catch(e){
-  dbg("? ERREUR INIT FIREBASE", String(e));
-}
-
-async function firebaseSaveScore(data, level){
-  dbg("?? SAVE", data, "level=", level);
-  const ref = getScoresRef(level);
-  if(!ref){
-    dbg("? firebaseSaveScore ref null");
-    return {ok:0,err:"ref_null"};
-  }
-  try{
-    await ref.push(data);
-    dbg("? Score envoyé");
-    return {ok:1};
-  }catch(e){
-    dbg("? SAVE ERROR", String(e));
-    return {ok:0,err:String(e)};
-  }
-}
-
-function firebaseLoadTop(level, n=20){
-  dbg("?? LOAD classement level=", level);
-  const ref = getScoresRef(level);
-  if(!ref){
-    dbg("? firebaseLoadTop ref null");
-    return Promise.resolve([]);
+(function () {
+  if (typeof firebase === "undefined") {
+    console.error("Firebase SDK non chargé (firebase.js)");
+    return;
   }
 
-  return new Promise(function(resolve){
-    ref.orderByChild("score").limitToLast(n).once("value", function(snap){
-      let arr = [];
-      snap.forEach(function(child){
-        let v = child.val() || {};
-        if(typeof v.score === "string"){
-          v.score = parseInt(v.score, 10) || 0;
-        }
-        arr.push(v);
-      });
-      arr.sort(function(a,b){ return (b.score||0) - (a.score||0); });
-      dbg("?? Scores reçus:", arr.length, arr);
-      resolve(arr);
-    }, function(err){
-      dbg("? LOAD ERROR", String(err));
-      resolve([]);
-    });
-  });
-}
+  const firebaseConfig = {
+    apiKey: "AIzaSyC9_psT-efferD3iCrvls5f9BsI7jp3HWC",
+    authDomain: "fast-and-spermious-default-rtdb.europe-west1.firebasedatabase.app",
+    databaseURL: "https://fast-and-spermious-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "fast-and-spermious",
+    storageBucket: "fast-and-spermious.appspot.com",
+    messagingSenderId: "977624754717",
+    appId: "1:977624754717:web:a30466f297977c570432a1"
+  };
+
+  try {
+    if (!firebase.apps || firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+      console.log("?? Firebase INIT OK");
+    } else {
+      console.log("?? Firebase déjà initialisé");
+    }
+  } catch (e) {
+    console.error("ERREUR INIT FIREBASE", e);
+    return;
+  }
+
+  const db = firebase.database();
+  window.firebaseDB = db; // export global au cas où
+
+  // --------------------------------------------------------
+  //  Sauvegarde d'un score
+  //  level = 15 / 30 / 60  => chemin "scores/15s"
+  // --------------------------------------------------------
+  async function firebaseSaveScore(scoreObj, level) {
+    try {
+      if (!db) throw new Error("Firebase non initialisé");
+
+      const lvl = Number(level) || 0;
+      if (![15, 30, 60].includes(lvl)) {
+        throw new Error("Niveau invalide pour saveScore: " + level);
+      }
+
+      const path = "scores/" + lvl + "s";
+      await db.ref(path).push(scoreObj);
+
+      return { ok: true };
+    } catch (err) {
+      console.error("Erreur Firebase saveScore:", err);
+      return { ok: false, err: err.message };
+    }
+  }
+
+  // --------------------------------------------------------
+  //  Chargement du classement pour un niveau
+  //  level = 15 / 30 / 60  => lit "scores/15s"
+  // --------------------------------------------------------
+  async function firebaseLoadTop(level) {
+    try {
+      if (!db) throw new Error("Firebase non initialisé");
+
+      const lvl = Number(level) || 0;
+      if (![15, 30, 60].includes(lvl)) {
+        throw new Error("Niveau invalide pour loadTop: " + level);
+      }
+
+      const path = "scores/" + lvl + "s";
+
+      const snap = await db.ref(path).once("value");
+      const raw = snap.val() || {};
+
+      const list = Object.values(raw).map(v => ({
+        name: v.name || "?",
+        score: Number(v.score || 0),
+        ts: v.ts || 0
+      }));
+
+      list.sort((a, b) => b.score - a.score);
+
+      return list.slice(0, 20);
+    } catch (err) {
+      console.error("Erreur Firebase loadTop:", err);
+      return [];
+    }
+  }
+
+  // exposer les fonctions globalement
+  window.firebaseSaveScore = firebaseSaveScore;
+  window.firebaseLoadTop  = firebaseLoadTop;
+})();

@@ -1,9 +1,0 @@
-﻿{
-    "name_fr":  "Or",
-    "name_en":  "Gold",
-    "name_es":  "Oro",
-    "type":  "always",
-    "requiredScore":  0,
-    "frames":  6,
-    "frameSize":  256
-}

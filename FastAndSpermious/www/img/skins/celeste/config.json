@@ -1,9 +1,0 @@
-﻿{
-    "name_fr":  "Céleste",
-    "name_en":  "Celestial",
-    "name_es":  "Celeste",
-    "type":  "always",
-    "requiredScore":  0,
-    "frames":  6,
-    "frameSize":  256
-}
