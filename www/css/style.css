@@ -38,7 +38,7 @@ h1 {
     gap: 18px;
 }
 
-/* Boutons principaux (roses) */
+/* Boutons principaux */
 .menu-btn {
     padding: 15px 25px;
     font-size: 20px;
@@ -46,7 +46,6 @@ h1 {
     background: #ff4ca3;
     border-radius: 25px;
     border: none;
-    width: fit-content;
     max-width: 80%;
     white-space: nowrap;
     transition: 0.25s ease-out;
@@ -138,7 +137,7 @@ h1 {
 }
 
 /* =============================== */
-/*     LEADERBOARD TABS (ROSES)    */
+/*       LEADERBOARD TABS          */
 /* =============================== */
 
 .leaderboard-tabs {
@@ -172,20 +171,53 @@ h1 {
     transform: scale(1.10);
 }
 
+/* Correction des tabs dans leaderbord */
+.menu-btn.tab-btn {
+    background: #ff4ca3 !important;
+    color: #fff !important;
+    border-radius: 25px !important;
+    padding: 10px 20px !important;
+    font-size: 18px !important;
+}
+
+.menu-btn.tab-btn:hover {
+    background: #ff74c5 !important;
+    box-shadow: 0 0 14px #ff4ca3 !important;
+    transform: scale(1.06) !important;
+}
+
+.menu-btn.tab-btn.active {
+    background: #ff74c5 !important;
+    transform: scale(1.10) !important;
+}
+
 /* =============================== */
-/*              SHOP               */
+/*         BOUTIQUE SKINS          */
 /* =============================== */
 
 .shop-item {
-    margin: 12px;
-    padding: 10px;
-    border-bottom: 1px solid #444;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #111;
+    padding: 12px;
+    border-radius: 12px;
+    margin: 10px auto;
+    width: 85%;
 }
 
-.shop-item button {
-    padding: 8px 14px;
-    margin-top: 5px;
-    border-radius: 18px;
+.skin-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    border: 2px solid #444;
+    background: #000;
+    object-fit: contain;
+}
+
+.shop-text {
+    flex: 1;
+    text-align: left;
 }
 
 /* =============================== */
@@ -232,31 +264,4 @@ h1 {
     padding: 4px;
     font-size: 12px;
     z-index: 999;
-}
-/* ========================================= */
-/*   FORCE STYLE DES BOUTONS DU LEADERBOARD  */
-/* ========================================= */
-
-.menu-btn.tab-btn {
-    background: #ff4ca3 !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 25px !important;
-    padding: 10px 20px !important;
-    font-size: 18px !important;
-    min-width: 80px !important;
-    transition: 0.25s ease-out !important;
-}
-
-.menu-btn.tab-btn:hover {
-    background: #ff74c5 !important;
-    box-shadow: 0 0 14px #ff4ca3 !important;
-    transform: scale(1.06) !important;
-    cursor: pointer !important;
-}
-
-.menu-btn.tab-btn.active {
-    background: #ff74c5 !important;
-    box-shadow: 0 0 14px #ff4ca3 !important;
-    transform: scale(1.10) !important;
 }
