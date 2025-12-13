@@ -129,10 +129,16 @@ async function loadSkins() {
       dbg("?? Chargement skins depuis navigateur:", url);
     }
 
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("HTTP " + res.status);
+    //XMLHttpRequest au lieu de fetch
+    const httpRequest = new XMLHttpRequest();
+    httpRequest.open('GET', url, false); // a quoi sert l'insynchrone ici ?
+    httpRequest.send();
+    
+    if (httpRequest.status !== 200 && httpRequest.status !== 0) {
+      throw new Error("HTTP " + httpRequest.status);
+    }
 
-    SKINS = await res.json();
+    SKINS = JSON.parse(httpRequest.responseText);
     skinsLoaded = true;
 
     SKINS.forEach(s => {
@@ -160,7 +166,15 @@ function updateSkin(){
   const skin = SKINS.find(s => s.id === equippedSkin) || SKINS[0];
 
   if (!spermImg) spermImg = new Image();
-  spermImg.src = skin.img;
+  
+  // Construire le chemin absolu pour Cordova
+  let imagePath = skin.img;
+  if (window.cordova && cordova.file && cordova.file.applicationDirectory) {
+    // Dans Cordova Android, on ajoute le préfixe pour avoir le chemin absolu dans l'app
+    imagePath = cordova.file.applicationDirectory + "www/" + skin.img;
+  }
+  
+  spermImg.src = imagePath;
 
   frameW = skin.frameSize || 256;
   frameH = skin.frameSize || 256;
