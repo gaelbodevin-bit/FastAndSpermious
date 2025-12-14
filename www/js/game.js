@@ -445,17 +445,19 @@ function refreshShopUI(){
   let html="";
   SKINS.forEach(s=>{
     const owned = ownedSkins.includes(s.id) || s.type==="always";
-    let status="", btn="";
+
+    let statusText = "";
+    let btnHtml = "";
 
     if (!owned && s.type==="score") {
-      status = t("shopUnlockAt").replace("{score}", s.requiredScore);
+      statusText = t("shopUnlockAt").replace("{score}", s.requiredScore);
     }
     else if (!owned && s.type==="premium") {
-      status = t("shopComingSoon");
+      statusText = t("shopComingSoon");
     }
     else if (owned) {
-      status = t("shopOwned");
-      btn = (equippedSkin===s.id)
+      statusText = t("shopOwned");
+      btnHtml = (equippedSkin===s.id)
         ? `<button disabled>${t("shopEquipped")}</button>`
         : `<button onclick="equipSkin('${s.id}')">${t("shopEquip")}</button>`;
     }
@@ -464,14 +466,19 @@ function refreshShopUI(){
 
     html += `
       <div class="shop-item">
-        <strong>${name}</strong><br>
-        <span>${status}</span><br>
-        ${btn}
-      </div>`;
+        <img src="${s.preview}" class="skin-preview" alt="${name}">
+        <div class="shop-text">
+          <strong>${name}</strong><br>
+          <span>${statusText}</span><br>
+          ${btnHtml}
+        </div>
+      </div>
+    `;
   });
 
   listEl.innerHTML = html;
 }
+
 
 /* ===========================================================
    ======================     INIT APP     =====================
