@@ -1,0 +1,107 @@
+/* ===========================================================
+   CONFIG - Langues, Constantes, Configuration
+   =========================================================== */
+
+const LANG = {
+  fr: {
+    menuTitle: "Fast and Spermious",
+    play15: "Niveau 15s",
+    play30: "Niveau 30s",
+    play60: "Niveau 60s",
+    leaderboard: "Classement",
+    shop: "Boutique",
+    send: "Envoyer",
+    distance: "Distance : ",
+    gameOver: "Fin du niveau",
+    menu: "Menu",
+    leaderboardTitle: "Classement niveau",
+    close: "Fermer",
+    shopTitle: "Boutique de skins",
+    shopTotalScore: "Score total :",
+    shopOwned: "Déjà débloqué",
+    shopEquip: "Équiper",
+    shopEquipped: "Équipé",
+    shopComingSoon: "Disponible prochainement",
+    shopUnlockAt: "Débloqué dès {score} points",
+    leaderboardSelectTitle: "Classement par niveaux",
+    leaderboardSelectInstruction: "Choisissez un niveau.",
+    back: "Retour"
+  },
+  en: {
+    menuTitle: "Fast and Spermious",
+    play15: "15s Mode",
+    play30: "30s Mode",
+    play60: "60s Mode",
+    leaderboard: "Leaderboard",
+    shop: "Shop",
+    send: "Send",
+    distance: "Distance: ",
+    gameOver: "End of level",
+    menu: "Menu",
+    leaderboardTitle: "Leaderboard",
+    close: "Close",
+    shopTitle: "Skin Shop",
+    shopTotalScore: "Total score:",
+    shopOwned: "Already unlocked",
+    shopEquip: "Equip",
+    shopEquipped: "Equipped",
+    shopComingSoon: "Coming soon",
+    shopUnlockAt: "Unlocked at {score} points",
+    leaderboardSelectTitle: "Leaderboard by level",
+    leaderboardSelectInstruction: "Choose a level.",
+    back: "Back"
+  },
+  es: {
+    menuTitle: "Fast and Spermious",
+    play15: "Nivel 15s",
+    play30: "Nivel 30s",
+    play60: "Nivel 60s",
+    leaderboard: "Clasificación",
+    shop: "Tienda",
+    send: "Enviar",
+    distance: "Distancia: ",
+    gameOver: "Fin del nivel",
+    menu: "Menú",
+    leaderboardTitle: "Clasificación nivel",
+    close: "Cerrar",
+    shopTitle: "Tienda de skins",
+    shopTotalScore: "Puntuación total:",
+    shopOwned: "Ya desbloqueado",
+    shopEquip: "Equipar",
+    shopEquipped: "Equipado",
+    shopComingSoon: "Próximamente",
+    shopUnlockAt: "Se desbloquea con {score} puntos",
+    leaderboardSelectTitle: "Clasificación por niveles",
+    leaderboardSelectInstruction: "Elige un nivel.",
+    back: "Volver"
+  }
+};
+
+let currentLang = localStorage.getItem("lang") || "fr";
+
+function t(key) {
+  if (LANG[currentLang] && key in LANG[currentLang]) return LANG[currentLang][key];
+  if (LANG["fr"] && key in LANG["fr"]) return LANG["fr"][key];
+  return key;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem("lang", lang);
+  applyLang();
+  if (typeof refreshShopUI === 'function') refreshShopUI();
+}
+
+// Constantes de jeu
+const GAME_CONFIG = {
+  VERSION: "2025.12.15",
+  FRAME_SIZE: 256,
+  DEFAULT_FRAMES: 6,
+  SHAKE_THRESHOLD: 20,
+  SPERM_AMPLITUDE: 30,
+  SPERM_WAVE_SPEED: 0.1,
+  VELOCITY_DAMPING: 0.97,
+  FRAME_ANIMATION_SPEED: 0.18
+};
+
+dbg("? config.js chargé");
