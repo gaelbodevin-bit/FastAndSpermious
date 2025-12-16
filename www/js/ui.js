@@ -129,40 +129,53 @@ function equipSkin(skinId) {
 
 function refreshShopUI() {
   if (!window.game) return;
-  
+
   const statsEl = document.getElementById("shopStats");
-  const listEl = document.getElementById("shopList");
-  
+  const listEl  = document.getElementById("shopList");
   if (!statsEl || !listEl) return;
 
   statsEl.innerText = t("shopTotalScore") + " " + window.game.playerState.totalScore;
 
-  const availableSkins = window.game.skinManager.getAvailableSkins();
-  
+  const skins = window.game.skinManager.getAvailableSkins();
+
   let html = "";
-  availableSkins.forEach(skin => {
+  skins.forEach(skin => {
     let statusText = "";
     let btnHtml = "";
 
     if (!skin.owned && skin.type === "score") {
-      statusText = t("shopUnlockAt").replace("{score}", skin.requiredScore);
+      statusText = t("shopUnlockAt").replace("{score}", skin.requiredScore || 0);
     } else if (!skin.owned && skin.type === "premium") {
       statusText = t("shopComingSoon");
-    } else if (skin.owned) {
+    } else {
       statusText = t("shopOwned");
       btnHtml = skin.equipped
         ? `<button disabled>${t("shopEquipped")}</button>`
         : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
     }
 
-    const name = skin["name_" + currentLang] || skin.name_fr || skin.name_en || skin.id;
+    const name =
+      skin["name_" + currentLang] ||
+      skin.name_fr ||
+      skin.name_en ||
+      skin.id;
+
+    // ? IMPORTANT: si preview = sprite, on force l’affichage de la frame 0
+    const isSprite = (skin.preview === skin.img);
+    const extraStyle = isSprite
+      ? `style="object-fit:none; object-position:0px 0px; width:64px; height:64px;"`
+      : `style="object-fit:cover; width:64px; height:64px;"`;
 
     html += `
       <div class="shop-item">
-        <strong>${name}</strong><br>
-        <span>${statusText}</span><br>
-        ${btnHtml}
-      </div>`;
+        <img class="skin-preview" src="${skin.preview}" alt="${name}" ${extraStyle}>
+        <div class="shop-text">
+          <strong>${name}</strong><br>
+          <span>${statusText}</span><br>
+          ${btnHtml}
+        </div>
+      </div>
+    `;
   });
 
   listEl.innerHTML = html;
