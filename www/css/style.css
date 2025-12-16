@@ -125,8 +125,15 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
+
     background: #000;
     padding-top: 60px;
+    padding-bottom: 120px; /* IMPORTANT pour éviter bouton coupé */
+
+    overflow-y: auto;      /* ✅ SCROLL VERTICAL */
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch; /* ✅ fluide sur mobile */
     z-index: 20;
 }
 
@@ -136,6 +143,13 @@ h1 {
     line-height: 28px;
 }
 
+/* =============================== */
+/*   Bouton retour toujours visible */
+/* =============================== */
+
+.panel > .menu-btn:last-child {
+    margin-bottom: 40px;
+}
 /* =============================== */
 /*       LEADERBOARD TABS          */
 /* =============================== */

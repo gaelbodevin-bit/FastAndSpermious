@@ -1,204 +1,22 @@
 ﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fast and Spermious</title>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fast and Spermious</title>
 
-<style>
-/* =============================== */
-/*            GLOBAL               */
-/* =============================== */
+  <!-- =============================== -->
+  <!--            CSS UNIQUE           -->
+  <!-- =============================== -->
+  <link rel="stylesheet" href="css/style.css">
 
-body {
-    margin: 0;
-    padding: 0;
-    background: #000;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    text-align: center;
-}
-
-/* =============================== */
-/*            MENU                 */
-/* =============================== */
-
-#menu {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 40px;
-    gap: 22px;
-    width: 100%;
-    z-index: 50;
-}
-
-h1 {
-    font-size: 38px;
-    margin-bottom: 10px;
-}
-
-/* ===== Boutons du menu principal ===== */
-
-.menu-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    width: 100%;
-}
-
-.menu-btn {
-    padding: 15px 25px;
-    font-size: 20px;
-    color: white;
-    background: #ff4ca3;
-    border-radius: 25px;
-    border: none;
-    width: fit-content;
-    max-width: 80%;
-    white-space: nowrap;
-    transition: 0.25s ease-out;
-}
-
-.menu-btn:hover {
-    background: #ff74c5;
-    box-shadow: 0 0 14px #ff4ca3;
-    transform: scale(1.06);
-    cursor: pointer;
-}
-
-
-/* =============================== */
-/*            LANGUES              */
-/* =============================== */
-
-.lang-select {
-    display: flex;
-    gap: 26px;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.lang-btn {
-    width: 95px;
-    height: 55px;
-    border-radius: 28px;
-    border: 2px solid #333;
-    padding: 0;
-    margin: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: 0.25s ease-in-out;
-}
-
-.lang-btn span {
-    position: absolute;
-    font-size: 18px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 4px #000;
-    pointer-events: none;
-}
-
-.lang-btn:hover {
-    border-color: #ff4ca3;
-    box-shadow: 0 0 12px #ff4ca3;
-    transform: scale(1.08);
-    cursor: pointer;
-}
-
-/* =============================== */
-/*             PANELS              */
-/* =============================== */
-
-#gameCanvas,
-#leaderboard,
-#gameover,
-#shop {
-    position: absolute;
-    top: 0; 
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    background: #000;
-    padding-top: 60px;
-    z-index: 10;
-}
-
-#scores {
-    margin-top: 20px;
-    font-size: 20px;
-    line-height: 28px;
-}
-
-/* =============================== */
-/*           VERSION TAG           */
-/* =============================== */
-
-#versionTag {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    color: #3cf;
-    opacity: 0.9;
-    font-size: 14px;
-    z-index: 9999;
-}
-
-/* =============================== */
-/*            DEBUG PANEL          */
-/* =============================== */
-
-#debugToggle {
-    position: fixed;
-    bottom: 110px;
-    left: 0;
-    width: 100%;
-    color: #3cf;
-    background: #111;
-    padding: 5px;
-    text-align: center;
-    border-top: 1px solid #333;
-    z-index: 9999;
-}
-
-#debugConsole {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 110px;
-    background: rgba(0,0,0,0.85);
-    color: #0f0;
-    overflow-y: auto;
-    border-top: 1px solid #333;
-    padding: 4px;
-    font-size: 12px;
-    z-index: 9999;
-}
-</style>
-
-
-<!-- ====================================================== -->
-<!--                FIREBASE SDK *OBLIGATOIRE*              -->
-<!-- ====================================================== -->
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+  <!-- =============================== -->
+  <!--          FIREBASE SDK           -->
+  <!-- =============================== -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-
-
 
 <body>
 
@@ -207,38 +25,28 @@ h1 {
 <!-- =============================== -->
 
 <div id="menu">
+  <h1 id="menuTitle">Fast and Spermious</h1>
 
-    <h1>Fast and Spermious</h1>
+  <div class="menu-buttons">
+    <button class="menu-btn" id="btn15" onclick="startGame(15)">Niveau 15s</button>
+    <button class="menu-btn" id="btn30" onclick="startGame(30)">Niveau 30s</button>
+    <button class="menu-btn" id="btn60" onclick="startGame(60)">Niveau 60s</button>
+    <button class="menu-btn" id="btnLeaderboard" onclick="openLeaderboardSelect()">Classement</button>
+    <button class="menu-btn" id="btnShop" onclick="openShop()">Boutique</button>
+  </div>
 
-    <div class="menu-buttons">
-        <button class="menu-btn" id="btn15" onclick="startGame(15)">Niveau 15s</button>
-        <button class="menu-btn" id="btn30" onclick="startGame(30)">Niveau 30s</button>
-        <button class="menu-btn" id="btn60" onclick="startGame(60)">Niveau 60s</button>
-        <button class="menu-btn" id="btnLeaderboard" onclick="openLeaderboardSelect()">Classement</button>
-        <button class="menu-btn" id="btnShop" onclick="openShop()">Boutique</button>
-        
-    </div>
-
-    <!-- ===== DRAPEAUX ===== -->
-    <div class="lang-select">
-
-        <button class="lang-btn" onclick="setLang('fr')"
-            style="background-image: url('img/flags/fr.png');">
-            <span>FR</span>
-        </button>
-
-        <button class="lang-btn" onclick="setLang('en')"
-            style="background-image: url('img/flags/en.png');">
-            <span>EN</span>
-        </button>
-
-        <button class="lang-btn" onclick="setLang('es')"
-            style="background-image: url('img/flags/es.png');">
-            <span>ES</span>
-        </button>
-
-    </div>
-
+  <!-- ===== LANGUES ===== -->
+  <div class="lang-select">
+    <button class="lang-btn" onclick="setLang('fr')" style="background-image:url('img/flags/fr.png')">
+      <span>FR</span>
+    </button>
+    <button class="lang-btn" onclick="setLang('en')" style="background-image:url('img/flags/en.png')">
+      <span>EN</span>
+    </button>
+    <button class="lang-btn" onclick="setLang('es')" style="background-image:url('img/flags/es.png')">
+      <span>ES</span>
+    </button>
+  </div>
 </div>
 
 <!-- =============================== -->
@@ -248,66 +56,65 @@ h1 {
 <canvas id="gameCanvas"></canvas>
 
 <!-- =============================== -->
+<!--     CLASSEMENT : SÉLECTION      -->
+<!-- =============================== -->
+
+<div id="leaderboardSelect" class="panel">
+  <h2 id="leaderboardSelectTitle"></h2>
+  <p id="leaderboardSelectInstruction"></p>
+
+  <div class="leaderboard-tabs">
+    <button class="menu-btn" onclick="switchLeaderboard(15)">15s</button>
+    <button class="menu-btn" onclick="switchLeaderboard(30)">30s</button>
+    <button class="menu-btn" onclick="switchLeaderboard(60)">60s</button>
+  </div>
+
+  <button id="backBtn" class="menu-btn" onclick="backToMenu()">Retour</button>
+</div>
+
+<!-- =============================== -->
 <!--           LEADERBOARD           -->
 <!-- =============================== -->
-<!-- =============================== -->
-<!--   ÉCRAN : CHOIX DU CLASSEMENT   -->
-<!-- =============================== -->
-
-<div id="leaderboardSelect" class="panel" style="display:none;">
-    <h2 id="leaderboardSelectTitle"></h2>
-    <p id="leaderboardSelectInstruction"></p>
-
-    <div class="leaderboard-tabs">
-        <button class="menu-btn" onclick="switchLeaderboard(15)">15s</button>
-        <button class="menu-btn" onclick="switchLeaderboard(30)">30s</button>
-        <button class="menu-btn" onclick="switchLeaderboard(60)">60s</button>
-    </div>
-
-    <button id="backBtn" class="menu-btn" onclick="backToMenu()"></button>
-</div>
 
 <div id="leaderboard" class="panel">
-    <h2 id="lbTitle">Classement</h2>
+  <h2 id="lbTitle">Classement</h2>
 
-    <div class="leaderboard-tabs">
-        <button class="menu-btn tab-btn" id="tab15" onclick="switchLeaderboard(15)">15s</button>
-        <button class="menu-btn tab-btn" id="tab30" onclick="switchLeaderboard(30)">30s</button>
-        <button class="menu-btn tab-btn" id="tab60" onclick="switchLeaderboard(60)">60s</button>
-    </div>
+  <div class="leaderboard-tabs">
+    <button class="menu-btn tab-btn" onclick="switchLeaderboard(15)">15s</button>
+    <button class="menu-btn tab-btn" onclick="switchLeaderboard(30)">30s</button>
+    <button class="menu-btn tab-btn" onclick="switchLeaderboard(60)">60s</button>
+  </div>
 
-    <div id="scores"></div>
+  <div id="scores"></div>
 
-    <button class="menu-btn" onclick="closeLeaderboard()">Retour</button>
+  <button class="menu-btn" onclick="closeLeaderboard()">Retour</button>
 </div>
-
 
 <!-- =============================== -->
 <!--            GAME OVER            -->
 <!-- =============================== -->
 
-<div id="gameover">
-    <h2 id="gameoverTitle"></h2>
-    <p id="finalStats"></p>
+<div id="gameover" class="panel">
+  <h2 id="gameoverTitle"></h2>
+  <p id="finalStats"></p>
 
-    <input id="playerName" placeholder="Name" 
-           style="padding:10px; width:70%; max-width:300px;">
+  <input id="playerName" placeholder="Name">
 
-    <p id="errorMsg" style="color:red; display:none;"></p>
+  <p id="errorMsg"></p>
 
-    <button id="submitBtn" class="menu-btn" onclick="submitScore()">Send</button>
-    <button id="menuFromGameBtn" class="menu-btn" onclick="backToMenu()">Menu</button>
+  <button id="submitBtn" class="menu-btn" onclick="submitScore()">Send</button>
+  <button id="menuFromGameBtn" class="menu-btn" onclick="backToMenu()">Menu</button>
 </div>
 
 <!-- =============================== -->
 <!--               SHOP              -->
 <!-- =============================== -->
 
-<div id="shop">
-    <h2 id="shopTitle"></h2>
-    <p id="shopStats"></p>
-    <div id="shopList"></div>
-    <button id="shopCloseBtn" class="menu-btn" onclick="closeShop()">Close</button>
+<div id="shop" class="panel">
+  <h2 id="shopTitle"></h2>
+  <p id="shopStats"></p>
+  <div id="shopList"></div>
+  <button id="shopCloseBtn" class="menu-btn" onclick="closeShop()">Close</button>
 </div>
 
 <!-- =============================== -->
@@ -319,48 +126,34 @@ h1 {
 
 <script>
 function dbg() {
-    const box = document.getElementById("debugConsole");
-    if (!box) return;
-    const msg = Array.from(arguments).join(" ");
-    box.innerHTML += msg + "<br>";
-    box.scrollTop = box.scrollHeight;
-    console.log(msg);
+  const box = document.getElementById("debugConsole");
+  if (!box) return;
+  const msg = Array.from(arguments).join(" ");
+  box.innerHTML += msg + "<br>";
+  box.scrollTop = box.scrollHeight;
+  console.log(msg);
 }
 
-function toggleDebug(){
-    const c = document.getElementById("debugConsole");
-    if (!c) return;
-    c.style.display = (c.style.display === "block" ? "none" : "block");
+function toggleDebug() {
+  const c = document.getElementById("debugConsole");
+  if (!c) return;
+  c.style.display = (c.style.display === "block" ? "none" : "block");
 }
 </script>
 
-<!-- ====================================================== -->
-<!--             FIREBASE CONFIG + GAME SCRIPTS             -->
-<!-- ====================================================== -->
+<!-- =============================== -->
+<!--           SCRIPTS JS            -->
+<!-- =============================== -->
 
-<!-- Firebase -->
 <script src="js/firebase.js"></script>
-
-<!-- Configuration -->
 <script src="js/config.js"></script>
-
-<!-- Modèles -->
 <script src="js/models.js"></script>
-
-<!-- Managers -->
 <script src="js/managers/SkinManager.js"></script>
 <script src="js/managers/LeaderboardManager.js"></script>
 <script src="js/managers/InputManager.js"></script>
-
-<!-- Renderer -->
 <script src="js/renderer.js"></script>
-
-<!-- UI -->
 <script src="js/ui.js"></script>
-
-<!-- Game (point d'entrée principal) -->
 <script src="js/game.js"></script>
 
 </body>
 </html>
-
