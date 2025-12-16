@@ -94,7 +94,7 @@ function setLang(lang) {
 
 // Constantes de jeu
 const GAME_CONFIG = {
-  VERSION: "2025.12.15",
+  VERSION: "2025.12.16",
   FRAME_SIZE: 256,
   DEFAULT_FRAMES: 6,
   SHAKE_THRESHOLD: 20,
