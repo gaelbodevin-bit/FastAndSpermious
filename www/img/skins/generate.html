@@ -1,95 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Sprite Generator – Rotation + Mirror</title>
+<title>Sprite Generator – Fast & Spermious</title>
 <style>
-    body {
-        background: #1a1a2e;
-        color: #fff;
-        text-align: center;
-        font-family: Arial;
-        padding: 40px;
-    }
-    canvas {
-        image-rendering: pixelated;
-        margin-top: 20px;
-        background: transparent;
-    }
+body {
+  background: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+canvas {
+  border: 1px solid #555;
+  margin-top: 20px;
+}
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
 </style>
 </head>
+
 <body>
 
-<h1>Sprite Sheet – Rotation + Miroir</h1>
-<p>Charge ton skin 256×256 PNG sans fond :</p>
+<h1>Sprite Generator</h1>
 
-<input type="file" id="fileInput" accept="image/png">
-<canvas id="preview" width="1536" height="256"></canvas>
-<br>
-<button id="downloadBtn" style="display:none;">Télécharger</button>
+<input type="file" id="fileInput" accept="image/png"><br>
+
+<canvas id="canvas" width="1536" height="256"></canvas><br>
+
+<button id="downloadBtn">Download sprite</button>
 
 <script>
-// Taille frame
-const SIZE = 256;
-
-// 6 frames avec variations rotation + miroir
-const FRAMES = [
-    { angle: -6, mirror: false },
-    { angle: -3, mirror: true  },
-    { angle:  0, mirror: false },
-    { angle:  3, mirror: true  },
-    { angle:  6, mirror: false },
-    { angle:  3, mirror: true  },
-];
-
-const fileInput = document.getElementById("fileInput");
-const canvas = document.getElementById("preview");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const input = document.getElementById("fileInput");
 const downloadBtn = document.getElementById("downloadBtn");
 
-fileInput.addEventListener("change", async (e) => {
-    const img = await loadImg(URL.createObjectURL(e.target.files[0]));
-    generate(img);
-    downloadBtn.style.display = "block";
-});
+const FRAME_SIZE = 256;
+const FRAMES = 6;
 
-function loadImg(src) {
-    return new Promise(res => {
-        const img = new Image();
-        img.onload = () => res(img);
-        img.src = src;
-    });
-}
+input.addEventListener("change", () => {
+  const file = input.files[0];
+  if (!file) return;
 
-function generate(img) {
+  const img = new Image();
+  img.onload = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    FRAMES.forEach((frame, i) => {
-        const offX = i * SIZE;
+    for (let i = 0; i < FRAMES; i++) {
+      ctx.save();
+      ctx.translate(i * FRAME_SIZE + FRAME_SIZE / 2, FRAME_SIZE / 2);
 
-        ctx.save();
+      // rotation légère uniquement (PAS de miroir)
+      const angle = (i - (FRAMES - 1) / 2) * 0.12;
+      ctx.rotate(angle);
 
-        // aller au centre de la frame
-        ctx.translate(offX + SIZE / 2, SIZE / 2);
+      ctx.drawImage(
+        img,
+        -FRAME_SIZE / 2,
+        -FRAME_SIZE / 2,
+        FRAME_SIZE,
+        FRAME_SIZE
+      );
 
-        // miroir horizontal si demandé
-        if (frame.mirror) ctx.scale(-1, 1);
+      ctx.restore();
+    }
+  };
 
-        // rotation
-        ctx.rotate(frame.angle * Math.PI / 180);
-
-        // dessiner l’image centrée
-        ctx.drawImage(img, -SIZE / 2, -SIZE / 2, SIZE, SIZE);
-
-        ctx.restore();
-    });
-}
+  img.src = URL.createObjectURL(file);
+});
 
 downloadBtn.addEventListener("click", () => {
-    const link = document.createElement("a");
-    link.download = "sprite_mirror_rotate.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+  const a = document.createElement("a");
+  a.download = "sprite.png";
+  a.href = canvas.toDataURL("image/png");
+  a.click();
 });
 </script>
 

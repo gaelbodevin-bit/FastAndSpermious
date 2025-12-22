@@ -1,5 +1,7 @@
+dbg("? models.js chargÈ");
+
 /* ===========================================================
-   MODELS - √âtats du jeu et du joueur
+   MODELS - …tats du jeu et du joueur
    =========================================================== */
 
 class PlayerState {
@@ -31,16 +33,16 @@ class PlayerState {
     this.save();
   }
 
-  ownSkin(skinId) {
-    if (!this.ownedSkins.includes(skinId)) {
-      this.ownedSkins.push(skinId);
+  ownSkin(id) {
+    if (!this.ownedSkins.includes(id)) {
+      this.ownedSkins.push(id);
       this.save();
     }
   }
 
-  equipSkin(skinId) {
-    if (this.ownedSkins.includes(skinId)) {
-      this.equippedSkin = skinId;
+  equipSkin(id) {
+    if (this.ownedSkins.includes(id)) {
+      this.equippedSkin = id;
       this.save();
       return true;
     }
@@ -48,35 +50,42 @@ class PlayerState {
   }
 }
 
+/* ===========================================================
+   GAME STATE
+   =========================================================== */
+
 class GameState {
   constructor(canvas, spermImage) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.spermImg = spermImage;
-    
-    // Propri√©t√©s du sprite
+
+    // Sprite
     this.frameW = GAME_CONFIG.FRAME_SIZE;
     this.frameH = GAME_CONFIG.FRAME_SIZE;
     this.frames = GAME_CONFIG.DEFAULT_FRAMES;
     this.frame = 0;
-    
-    // √âtat du jeu
+
+    // Jeu
     this.run = false;
     this.timeLeft = 0;
     this.timer = null;
     this.shakeForce = 0;
     this.lastLevelPlayed = 15;
-    
-    // Position et mouvement du sperm
+
+    // …tat fin de course
+    this.reachedTop = false;
+
+    // SpermatozoÔde
     this.sperm = {
-      x: 180,
-      y: 500,
+      x: 0,
+      y: 0,
       angle: 0,
       amp: GAME_CONFIG.SPERM_AMPLITUDE,
       vy: 0,
       dist: 0
     };
-    
+
     this.resize();
   }
 
@@ -85,7 +94,7 @@ class GameState {
     this.canvas.height = window.innerHeight;
     this.W = this.canvas.width;
     this.H = this.canvas.height;
-    
+
     if (!this.run) {
       this.sperm.x = this.W / 2;
       this.sperm.y = this.H * 0.75;
@@ -94,17 +103,25 @@ class GameState {
 
   reset(duration) {
     this.lastLevelPlayed = duration;
-    this.sperm.y = this.H * 0.75;
+
     this.sperm.x = this.W / 2;
-    this.sperm.dist = 0;
+    this.sperm.y = this.H * 0.75;
     this.sperm.vy = 0;
+    this.sperm.dist = 0;
+    this.sperm.angle = 0;
+    this.sperm.amp = GAME_CONFIG.SPERM_AMPLITUDE;
+
+    this.reachedTop = false;
+
     this.timeLeft = duration;
     this.run = true;
-    
+
     if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => {
       this.timeLeft--;
-      if (this.timeLeft <= 0 && window.game) window.game.stop();
+      if (this.timeLeft <= 0 && window.game) {
+        window.game.stop();
+      }
     }, 1000);
   }
 
@@ -115,29 +132,64 @@ class GameState {
 
   update() {
     if (!this.run) return;
-    
-    // Physique du shake
+
+    const halfH = this.frameH / 2;
+
+    /* -----------------------------
+       PHYSIQUE DU SHAKE
+       ----------------------------- */
     if (this.shakeForce > 0) {
       this.sperm.vy = Math.min(this.shakeForce / 10, 10);
       this.shakeForce = 0;
     } else {
       this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
     }
-    
-    // Mouvement vertical
-    this.sperm.y -= this.sperm.vy;
-    this.sperm.dist += this.sperm.vy;
-    
-    // Mouvement sinuso√Ødal horizontal
-    this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED;
-    this.sperm.x = this.W / 2 + Math.sin(this.sperm.angle) * this.sperm.amp;
-    
-    // Contraintes de position
-    if (this.sperm.y < this.frameH / 2) this.sperm.y = this.frameH / 2;
-    if (this.sperm.y > this.H - this.frameH / 2) this.sperm.y = this.H - this.frameH / 2;
-    
-    // Animation du sprite
-    this.frame = (this.frame + GAME_CONFIG.FRAME_ANIMATION_SPEED) % Math.max(this.frames, 1);
+
+    /* -----------------------------
+       MOUVEMENT VERTICAL
+       ----------------------------- */
+    if (!this.reachedTop) {
+      this.sperm.y -= this.sperm.vy;
+      this.sperm.dist += Math.max(0, this.sperm.vy);
+    }
+
+    if (this.sperm.y <= halfH) {
+      this.sperm.y = halfH;
+      this.sperm.vy = 0;
+      this.reachedTop = true;
+    }
+
+    /* -----------------------------
+       ONDULATION HORIZONTALE
+       ----------------------------- */
+    if (!this.reachedTop) {
+      this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED;
+    } else {
+      // amortissement doux ‡ la fin
+      this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED * 0.25;
+      this.sperm.amp *= 0.92;
+
+      if (this.sperm.amp < 0.5) {
+        this.sperm.amp = 0;
+      }
+    }
+
+    this.sperm.x =
+      this.W / 2 + Math.sin(this.sperm.angle) * this.sperm.amp;
+
+    /* -----------------------------
+       LIMITES BAS
+       ----------------------------- */
+    if (this.sperm.y > this.H - halfH) {
+      this.sperm.y = this.H - halfH;
+    }
+
+    /* -----------------------------
+       ANIMATION SPRITE
+       ----------------------------- */
+    this.frame =
+      (this.frame + GAME_CONFIG.FRAME_ANIMATION_SPEED) %
+      Math.max(this.frames, 1);
   }
 
   updateSpriteProperties(frameW, frameH, frames) {
@@ -150,5 +202,3 @@ class GameState {
     return Math.round(this.sperm.dist);
   }
 }
-
-dbg("? models.js charg√©");
