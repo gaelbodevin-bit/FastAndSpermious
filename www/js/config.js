@@ -1,6 +1,12 @@
+dbg("? config.js chargé");
+
 /* ===========================================================
    CONFIG - Langues, Constantes, Configuration
    =========================================================== */
+
+/* =======================
+   LANGUES
+   ======================= */
 
 const LANG = {
   fr: {
@@ -18,15 +24,16 @@ const LANG = {
     close: "Fermer",
     shopTitle: "Boutique de skins",
     shopTotalScore: "Score total :",
-    shopOwned: "DÃ©jÃ  dÃ©bloquÃ©",
-    shopEquip: "Ã‰quiper",
-    shopEquipped: "Ã‰quipÃ©",
+    shopOwned: "Déjà débloqué",
+    shopEquip: "Équiper",
+    shopEquipped: "Équipé",
     shopComingSoon: "Disponible prochainement",
-    shopUnlockAt: "DÃ©bloquÃ© dÃ¨s {score} points",
+    shopUnlockAt: "Débloqué dès {score} points",
     leaderboardSelectTitle: "Classement par niveaux",
     leaderboardSelectInstruction: "Choisissez un niveau.",
     back: "Retour"
   },
+
   en: {
     menuTitle: "Fast and Spermious",
     play15: "15s Mode",
@@ -51,57 +58,78 @@ const LANG = {
     leaderboardSelectInstruction: "Choose a level.",
     back: "Back"
   },
+
   es: {
     menuTitle: "Fast and Spermious",
     play15: "Nivel 15s",
     play30: "Nivel 30s",
     play60: "Nivel 60s",
-    leaderboard: "ClasificaciÃ³n",
+    leaderboard: "Clasificación",
     shop: "Tienda",
     send: "Enviar",
     distance: "Distancia: ",
     gameOver: "Fin del nivel",
-    menu: "MenÃº",
-    leaderboardTitle: "ClasificaciÃ³n nivel",
+    menu: "Menú",
+    leaderboardTitle: "Clasificación nivel",
     close: "Cerrar",
     shopTitle: "Tienda de skins",
-    shopTotalScore: "PuntuaciÃ³n total:",
+    shopTotalScore: "Puntuación total:",
     shopOwned: "Ya desbloqueado",
     shopEquip: "Equipar",
     shopEquipped: "Equipado",
-    shopComingSoon: "PrÃ³ximamente",
+    shopComingSoon: "Próximamente",
     shopUnlockAt: "Se desbloquea con {score} puntos",
-    leaderboardSelectTitle: "ClasificaciÃ³n por niveles",
+    leaderboardSelectTitle: "Clasificación por niveles",
     leaderboardSelectInstruction: "Elige un nivel.",
     back: "Volver"
   }
 };
 
+/* =======================
+   LANG HELPERS
+   ======================= */
+
 let currentLang = localStorage.getItem("lang") || "fr";
 
 function t(key) {
-  if (LANG[currentLang] && key in LANG[currentLang]) return LANG[currentLang][key];
-  if (LANG["fr"] && key in LANG["fr"]) return LANG["fr"][key];
+  if (LANG[currentLang] && key in LANG[currentLang]) {
+    return LANG[currentLang][key];
+  }
+  if (LANG.fr && key in LANG.fr) {
+    return LANG.fr[key];
+  }
   return key;
 }
 
 function setLang(lang) {
+  if (!LANG[lang]) return;
   currentLang = lang;
   localStorage.setItem("lang", lang);
-  applyLang();
-  if (typeof refreshShopUI === 'function') refreshShopUI();
+
+  if (typeof applyLang === "function") applyLang();
+  if (typeof refreshShopUI === "function") refreshShopUI();
 }
 
-// Constantes de jeu
+/* =======================
+   GAME CONSTANTS
+   ======================= */
+
 const GAME_CONFIG = {
-  VERSION: "2025.12.22",
+  VERSION: "2025.12.23",
+
+  // Sprite
   FRAME_SIZE: 256,
   DEFAULT_FRAMES: 6,
+  SPRITE_SCALE: 0.6,        // ?? 60% de la taille originale
+
+  // Physique
   SHAKE_THRESHOLD: 20,
+  VELOCITY_DAMPING: 0.92,
+
+  // Mouvement
   SPERM_AMPLITUDE: 30,
   SPERM_WAVE_SPEED: 0.04,
-  VELOCITY_DAMPING: 0.92,
-  FRAME_ANIMATION_SPEED: 0.12
-};
 
-dbg("? config.js chargÃ©");
+  // Animation
+  FRAME_ANIMATION_SPEED: 0.08
+};

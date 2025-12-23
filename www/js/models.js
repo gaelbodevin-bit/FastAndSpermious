@@ -4,6 +4,10 @@ dbg("? models.js chargé");
    MODELS - États du jeu et du joueur
    =========================================================== */
 
+/* =======================
+   PLAYER STATE
+   ======================= */
+
 class PlayerState {
   constructor() {
     try {
@@ -50,9 +54,9 @@ class PlayerState {
   }
 }
 
-/* ===========================================================
+/* =======================
    GAME STATE
-   =========================================================== */
+   ======================= */
 
 class GameState {
   constructor(canvas, spermImage) {
@@ -60,38 +64,43 @@ class GameState {
     this.ctx = canvas.getContext("2d");
     this.spermImg = spermImage;
 
-    // Sprite
+    /* ---------- SPRITE ---------- */
     this.frameW = GAME_CONFIG.FRAME_SIZE;
     this.frameH = GAME_CONFIG.FRAME_SIZE;
     this.frames = GAME_CONFIG.DEFAULT_FRAMES;
     this.frame = 0;
 
-    // Jeu
+    /* ---------- GAME ---------- */
     this.run = false;
     this.timeLeft = 0;
     this.timer = null;
     this.shakeForce = 0;
     this.lastLevelPlayed = 15;
 
-    // État fin de course
+    /* ---------- FIN DE COURSE ---------- */
     this.reachedTop = false;
 
-    // Spermatozoïde
+    /* ---------- SPERM ---------- */
     this.sperm = {
       x: 0,
       y: 0,
-      angle: 0,
-      amp: GAME_CONFIG.SPERM_AMPLITUDE,
       vy: 0,
-      dist: 0
+      dist: 0,
+      angle: 0,
+      amp: GAME_CONFIG.SPERM_AMPLITUDE
     };
 
     this.resize();
   }
 
+  /* =======================
+     RESIZE
+     ======================= */
+
   resize() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+
     this.W = this.canvas.width;
     this.H = this.canvas.height;
 
@@ -100,6 +109,10 @@ class GameState {
       this.sperm.y = this.H * 0.75;
     }
   }
+
+  /* =======================
+     RESET / START
+     ======================= */
 
   reset(duration) {
     this.lastLevelPlayed = duration;
@@ -130,24 +143,24 @@ class GameState {
     if (this.timer) clearInterval(this.timer);
   }
 
+  /* =======================
+     UPDATE
+     ======================= */
+
   update() {
     if (!this.run) return;
 
     const halfH = this.frameH / 2;
 
-    /* -----------------------------
-       PHYSIQUE DU SHAKE
-       ----------------------------- */
+    /* ---------- SHAKE / POUSSÉE ---------- */
     if (this.shakeForce > 0) {
-      this.sperm.vy = Math.min(this.shakeForce / 10, 10);
+      this.sperm.vy += Math.min(this.shakeForce * 0.08, 8);
       this.shakeForce = 0;
     } else {
       this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
     }
 
-    /* -----------------------------
-       MOUVEMENT VERTICAL
-       ----------------------------- */
+    /* ---------- MOUVEMENT VERTICAL ---------- */
     if (!this.reachedTop) {
       this.sperm.y -= this.sperm.vy;
       this.sperm.dist += Math.max(0, this.sperm.vy);
@@ -159,17 +172,15 @@ class GameState {
       this.reachedTop = true;
     }
 
-    /* -----------------------------
-       ONDULATION HORIZONTALE
-       ----------------------------- */
+    /* ---------- ONDULATION HORIZONTALE ---------- */
     if (!this.reachedTop) {
       this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED;
     } else {
-      // amortissement doux à la fin
-      this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED * 0.25;
-      this.sperm.amp *= 0.92;
+      // amortissement doux ? évite le gros zigzag final
+      this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED * 0.15;
+      this.sperm.amp *= 0.9;
 
-      if (this.sperm.amp < 0.5) {
+      if (this.sperm.amp < 0.3) {
         this.sperm.amp = 0;
       }
     }
@@ -177,20 +188,20 @@ class GameState {
     this.sperm.x =
       this.W / 2 + Math.sin(this.sperm.angle) * this.sperm.amp;
 
-    /* -----------------------------
-       LIMITES BAS
-       ----------------------------- */
+    /* ---------- LIMITE BAS ---------- */
     if (this.sperm.y > this.H - halfH) {
       this.sperm.y = this.H - halfH;
     }
 
-    /* -----------------------------
-       ANIMATION SPRITE
-       ----------------------------- */
+    /* ---------- ANIMATION SPRITE ---------- */
     this.frame =
       (this.frame + GAME_CONFIG.FRAME_ANIMATION_SPEED) %
       Math.max(this.frames, 1);
   }
+
+  /* =======================
+     SPRITE SETTINGS
+     ======================= */
 
   updateSpriteProperties(frameW, frameH, frames) {
     this.frameW = frameW || GAME_CONFIG.FRAME_SIZE;

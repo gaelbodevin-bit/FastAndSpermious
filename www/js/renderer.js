@@ -18,14 +18,19 @@ class Renderer {
 
     const sourceX = Math.floor(frame) * frameW;
     const sourceY = 0;
-    const destX = sperm.x - frameW / 2;
-    const destY = sperm.y - frameH / 2;
+    const scale = GAME_CONFIG.SPRITE_SCALE;
 
-    ctx.drawImage(
-      spermImg,
-      sourceX, sourceY, frameW, frameH,
-      destX, destY, frameW, frameH
-    );
+const drawW = frameW * scale;
+const drawH = frameH * scale;
+
+const destX = sperm.x - drawW / 2;
+const destY = sperm.y - drawH / 2;
+
+ctx.drawImage(
+  spermImg,
+  sourceX, sourceY, frameW, frameH,
+  destX, destY, drawW, drawH
+);
   }
 
   drawHUD() {
