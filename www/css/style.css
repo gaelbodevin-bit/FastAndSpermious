@@ -151,6 +151,12 @@ h1 {
     font-size: 20px;
     line-height: 28px;
 }
+.skin-requirement {
+    font-size: 14px;
+    color: #ffcc66;
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
 
 /* =============================== */
 /*   Bouton retour toujours visible */

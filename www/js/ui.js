@@ -142,6 +142,7 @@ function refreshShopUI() {
   skins.forEach(skin => {
     let statusText = "";
     let btnHtml = "";
+    let requirementText = "";
 
     if (!skin.owned && skin.type === "score") {
       statusText = t("shopUnlockAt").replace("{score}", skin.requiredScore || 0);
@@ -151,8 +152,14 @@ function refreshShopUI() {
       statusText = t("shopOwned");
       btnHtml = skin.equipped
         ? `<button disabled>${t("shopEquipped")}</button>`
-        : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
-    }
+        : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;  
+      requirementText = `
+    <div class="skin-requirement">
+      ?? ${t("shopUnlockAt").replace("{score}", skin.requiredScore)}
+    </div>
+      `;
+    
+      }
 
     const name =
       skin["name_" + currentLang] ||
@@ -167,15 +174,16 @@ function refreshShopUI() {
       : `style="object-fit:cover; width:64px; height:64px;"`;
 
     html += `
-      <div class="shop-item">
-        <img class="skin-preview" src="${skin.preview}" alt="${name}" ${extraStyle}>
-        <div class="shop-text">
-          <strong>${name}</strong><br>
-          <span>${statusText}</span><br>
-          ${btnHtml}
-        </div>
-      </div>
-    `;
+  <div class="shop-item">
+    ${skin.preview ? `<img src="${skin.preview}" class="skin-preview">` : ""}
+    <div class="shop-text">
+      <strong>${name}</strong><br>
+      ${requirementText}
+      <span>${statusText}</span><br>
+      ${btnHtml}
+    </div>
+  </div>
+`;
   });
 
   listEl.innerHTML = html;
