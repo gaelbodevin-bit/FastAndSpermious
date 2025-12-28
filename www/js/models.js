@@ -152,25 +152,33 @@ class GameState {
 
     const halfH = this.frameH / 2;
 
-    /* ---------- SHAKE / POUSSÉE ---------- */
-    if (this.shakeForce > 0) {
-      this.sperm.vy += Math.min(this.shakeForce * 0.08, 8);
-      this.shakeForce = 0;
-    } else {
-      this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
-    }
+    /* -----------------------------
+   PHYSIQUE DU SHAKE
+   ----------------------------- */
+if (this.shakeForce > 0) {
+  this.sperm.vy = Math.min(this.shakeForce / 12, 8);
+  this.shakeForce = 0;
+} else {
+  this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
+}
 
-    /* ---------- MOUVEMENT VERTICAL ---------- */
-    if (!this.reachedTop) {
-      this.sperm.y -= this.sperm.vy;
-      this.sperm.dist += Math.max(0, this.sperm.vy);
-    }
+/* -----------------------------
+   SCORE (indépendant de Y)
+   ----------------------------- */
+if (this.sperm.vy > 0) {
+  this.sperm.dist += this.sperm.vy;
+}
 
-    if (this.sperm.y <= halfH) {
-      this.sperm.y = halfH;
-      this.sperm.vy = 0;
-      this.reachedTop = true;
-    }
+/* -----------------------------
+   MOUVEMENT VISUEL VERTICAL
+   ----------------------------- */
+this.sperm.y -= this.sperm.vy;
+
+// Clamp visuel uniquement (ne bloque plus le score)
+const topLimit = this.frameH / 2;
+if (this.sperm.y < topLimit) {
+  this.sperm.y = topLimit;
+}
 
     /* ---------- ONDULATION HORIZONTALE ---------- */
     if (!this.reachedTop) {
