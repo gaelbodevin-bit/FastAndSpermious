@@ -7,9 +7,10 @@
   <title>Fast and Spermious</title>
 
   <!-- =============================== -->
-  <!--            CSS UNIQUE           -->
+  <!--            CSS                 -->
   <!-- =============================== -->
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/intro.css">
 
   <!-- =============================== -->
   <!--          FIREBASE SDK           -->
@@ -21,9 +22,16 @@
 <body>
 
 <!-- =============================== -->
+<!--        INTRO ONE CELL STUDIO    -->
+<!-- =============================== -->
+<div id="studio-intro">
+  <div id="studio-text">ONE CELL STUDIO</div>
+</div>
+
+
+<!-- =============================== -->
 <!--          MENU PRINCIPAL         -->
 <!-- =============================== -->
-
 <div id="menu">
   <h1 id="menuTitle">Fast and Spermious</h1>
 
@@ -52,13 +60,11 @@
 <!-- =============================== -->
 <!--             CANVAS              -->
 <!-- =============================== -->
-
 <canvas id="gameCanvas"></canvas>
 
 <!-- =============================== -->
 <!--     CLASSEMENT : SÉLECTION      -->
 <!-- =============================== -->
-
 <div id="leaderboardSelect" class="panel">
   <h2 id="leaderboardSelectTitle"></h2>
   <p id="leaderboardSelectInstruction"></p>
@@ -75,7 +81,6 @@
 <!-- =============================== -->
 <!--           LEADERBOARD           -->
 <!-- =============================== -->
-
 <div id="leaderboard" class="panel">
   <h2 id="lbTitle">Classement</h2>
 
@@ -93,13 +98,11 @@
 <!-- =============================== -->
 <!--            GAME OVER            -->
 <!-- =============================== -->
-
 <div id="gameover" class="panel">
   <h2 id="gameoverTitle"></h2>
   <p id="finalStats"></p>
 
   <input id="playerName" placeholder="Name">
-
   <p id="errorMsg"></p>
 
   <button id="submitBtn" class="menu-btn" onclick="submitScore()">Send</button>
@@ -109,7 +112,6 @@
 <!-- =============================== -->
 <!--               SHOP              -->
 <!-- =============================== -->
-
 <div id="shop" class="panel">
   <h2 id="shopTitle"></h2>
   <p id="shopStats"></p>
@@ -120,7 +122,6 @@
 <!-- =============================== -->
 <!--               DEBUG             -->
 <!-- =============================== -->
-
 <div id="debugToggle" onclick="toggleDebug()">Debug</div>
 <div id="debugConsole"></div>
 
@@ -144,7 +145,6 @@ function toggleDebug() {
 <!-- =============================== -->
 <!--           SCRIPTS JS            -->
 <!-- =============================== -->
-
 <script src="js/firebase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/models.js"></script>
@@ -154,6 +154,9 @@ function toggleDebug() {
 <script src="js/renderer.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
+
+<!-- INTRO STUDIO (TOUJOURS EN DERNIER) -->
+<script src="js/intro.js"></script>
 
 </body>
 </html>

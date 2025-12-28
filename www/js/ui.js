@@ -232,3 +232,5 @@ async function submitScore() {
 }
 
 dbg("? ui.js chargé");
+console.log("UI READY");
+

@@ -1,18 +1,96 @@
-<?xml version='1.0' encoding='utf-8'?>
-<widget id="com.fast.spermious" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-<allow-navigation href="*" />
-<access origin="*" />
-<preference name="AndroidInsecureFileModeEnabled" value="true" />
+<?xml version="1.0" encoding="utf-8"?>
+<widget
+    id="com.fast.spermious"
+    version="1.0.0"
+    xmlns="http://www.w3.org/ns/widgets"
+    xmlns:cdv="http://cordova.apache.org/ns/1.0">
+
+    <!-- =============================== -->
+    <!--           APP INFO              -->
+    <!-- =============================== -->
     <name>Fast and Spermious</name>
-    <description>Sample Apache Cordova App</description>
-    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
-        Apache Cordova Team
+
+    <description>
+        Fast and Spermious - arcade reflex game.
+    </description>
+
+    <author email="contact@onecellstudio.com">
+        One Cell Studio
     </author>
+
     <content src="index.html" />
+
+    <!-- =============================== -->
+    <!--        NAVIGATION / ACCESS      -->
+    <!-- =============================== -->
+    <allow-navigation href="*" />
+    <access origin="*" />
+
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
-  <preference name="AndroidWebViewDebuggingEnabled" value="true" />
-  <preference name="AndroidInsecureFileModeEnabled" value="true" />
-  <preference name="AndroidWebViewDebuggingEnabled" value="true" />
-  <preference name="AndroidInsecureFileModeEnabled" value="true" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+
+    <!-- =============================== -->
+    <!--      ANDROID SDK (FORCÉ)        -->
+    <!-- =============================== -->
+    <preference name="android-minSdkVersion" value="22" />
+    <preference name="android-targetSdkVersion" value="34" />
+    <preference name="android-compileSdkVersion" value="34" />
+
+    <!-- =============================== -->
+    <!--          GLOBAL PREFS           -->
+    <!-- =============================== -->
+    <preference name="Fullscreen" value="true" />
+    <preference name="Orientation" value="portrait" />
+    <preference name="DisallowOverscroll" value="true" />
+
+    <!-- DEV ONLY (mettre false en release) -->
+    <preference name="AndroidWebViewDebuggingEnabled" value="true" />
+    <preference name="AndroidInsecureFileModeEnabled" value="true" />
+
+    <!-- =============================== -->
+    <!--            ANDROID              -->
+    <!-- =============================== -->
+    <platform name="android">
+
+        <!-- Icône app (launcher) -->
+        <icon src="www/assets/studio/logo_cell.png" />
+
+        <!-- ================================================= -->
+        <!-- ANDROID 12+ SPLASH : NEUTRALISÉ VOLONTAIREMENT    -->
+        <!-- ================================================= -->
+        <!--
+          IMPORTANT :
+          Le splash Android affichait ta cellule en taille fixe
+          AVANT ton intro HTML. On le rend donc transparent.
+        -->
+
+        <preference name="AndroidWindowSplashScreenAnimatedIcon"
+                    value="www/assets/studio/splash_icon_transparent.png" />
+
+        <preference name="AndroidWindowSplashScreenBackground"
+                    value="#0B0F10" />
+
+        <!-- Animation système désactivée -->
+        <preference name="AndroidWindowSplashScreenAnimationDuration"
+                    value="0" />
+
+    </platform>
+
+    <!-- =============================== -->
+    <!--              iOS                -->
+    <!-- =============================== -->
+    <platform name="ios">
+
+        <icon src="www/assets/studio/logo_cell.png" />
+
+        <preference name="StatusBarOverlaysWebView" value="true" />
+        <preference name="StatusBarStyle" value="lightcontent" />
+        <preference name="Orientation" value="portrait" />
+
+    </platform>
+
 </widget>
