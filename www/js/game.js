@@ -6,21 +6,21 @@ class Game {
   constructor() {
     dbg("? Game constructor");
     dbg("?? VERSION BUILD :", GAME_CONFIG.VERSION);
-    
+
     // États
     this.playerState = new PlayerState();
     this.state = null;
     this.renderer = null;
-    
+
     // Managers
     this.skinManager = new SkinManager(this.playerState);
     this.leaderboardManager = new LeaderboardManager();
     this.inputManager = null;
-    
+
     // Canvas et image
     this.canvas = null;
     this.spermImg = new Image();
-    
+
     // Boucle de jeu
     this.animationFrameId = null;
   }
@@ -54,7 +54,7 @@ class Game {
     // UI
     applyLang();
     refreshShopUI();
-    
+
     dbg("? Game initialisé");
     return true;
   }
@@ -131,15 +131,18 @@ function startGame(duration) {
 
 window.onload = async () => {
   dbg("? window.onload");
-  
+
   window.game = new Game();
   const initialized = await window.game.init();
-  
+
   if (!initialized) {
     dbg("? Échec initialisation du jeu");
     return;
   }
-  
+
+  // ✅ Affichage initial du menu + croix
+  backToMenu();
+
   dbg("? Jeu prêt");
 };
 

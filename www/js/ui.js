@@ -1,16 +1,44 @@
+dbg("? ui.js chargé");
+
 /* ===========================================================
-   UI - Gestion des interfaces utilisateur (panneaux, menus)
+   UI - Gestion des interfaces utilisateur
    =========================================================== */
 
+/* =======================
+   HELPERS
+   ======================= */
+
 function hidePanels() {
-  ["menu", "leaderboard", "leaderboardSelect", "gameover", "shop"].forEach(id => {
+  [
+    "menu",
+    "leaderboard",
+    "leaderboardSelect",
+    "gameover",
+    "shop"
+  ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";
   });
+
+  hideQuitBtn();
 }
 
+function showQuitBtn() {
+  const btn = document.getElementById("quitBtn");
+  if (btn) btn.style.display = "block";
+}
+
+function hideQuitBtn() {
+  const btn = document.getElementById("quitBtn");
+  if (btn) btn.style.display = "none";
+}
+
+/* =======================
+   LANG
+   ======================= */
+
 function applyLang() {
-  const elementTranslations = {
+  const map = {
     menuTitle: "menuTitle",
     btn15: "play15",
     btn30: "play30",
@@ -20,7 +48,6 @@ function applyLang() {
     submitBtn: "send",
     gameoverTitle: "gameOver",
     menuFromGameBtn: "menu",
-    lbCloseBtn: "close",
     shopTitle: "shopTitle",
     shopCloseBtn: "close",
     leaderboardSelectTitle: "leaderboardSelectTitle",
@@ -28,36 +55,67 @@ function applyLang() {
     backBtn: "back"
   };
 
-  for (const elementId in elementTranslations) {
-    const element = document.getElementById(elementId);
-    if (element) element.innerText = t(elementTranslations[elementId]);
-  }
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = t(map[id]);
+  });
 }
+
+/* =======================
+   MENU
+   ======================= */
 
 function backToMenu() {
   hidePanels();
-  document.getElementById("menu").style.display = "block";
+
+  const menu = document.getElementById("menu");
+  if (menu) menu.style.display = "block";
+
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
+
+  showQuitBtn(); // ? la croix apparaît UNIQUEMENT ici
+}
+
+/* =======================
+   QUITTER L’APP
+   ======================= */
+
+function quitApp() {
+  dbg("? Quit app demandé");
+
+  // Cordova / Android
+  if (window.cordova && navigator.app && navigator.app.exitApp) {
+    navigator.app.exitApp();
+    return;
+  }
+
+  // Navigateur (ne fermera pas toujours, normal)
+  alert("Quitter l’application n’est possible que sur mobile.");
 }
 
 /* ===========================================================
-   LEADERBOARD UI
+   LEADERBOARD
    =========================================================== */
 
 function openLeaderboardSelect() {
   hidePanels();
+
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
+
   document.getElementById("leaderboardSelect").style.display = "block";
   applyLang();
 }
 
 function openLeaderboard() {
   if (!window.game) return;
+
   hidePanels();
+
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
+
   document.getElementById("leaderboard").style.display = "block";
   loadLeaderboardForLevel(window.game.state.lastLevelPlayed);
 }
@@ -65,21 +123,17 @@ function openLeaderboard() {
 function switchLeaderboard(level) {
   if (!window.game) return;
   window.game.state.lastLevelPlayed = level;
-  hidePanels();
-  const canvas = document.getElementById("gameCanvas");
-  if (canvas) canvas.style.display = "none";
-  document.getElementById("leaderboard").style.display = "block";
-  loadLeaderboardForLevel(level);
+  openLeaderboard();
 }
 
 function loadLeaderboardForLevel(level) {
   if (!window.game) return;
-  
-  const lbTitle = document.getElementById("lbTitle");
-  if (lbTitle) lbTitle.innerText = t("leaderboardTitle") + " " + level + "s";
+
+  const title = document.getElementById("lbTitle");
+  if (title) title.innerText = `${t("leaderboardTitle")} ${level}s`;
 
   const scoresDiv = document.getElementById("scores");
-  scoresDiv.innerText = "Chargementâ€¦";
+  scoresDiv.innerText = "Chargement…";
 
   window.game.leaderboardManager.loadTopScores(level).then(list => {
     if (!list || list.length === 0) {
@@ -87,41 +141,38 @@ function loadLeaderboardForLevel(level) {
       return;
     }
 
-    let html = "";
-    list.forEach((score, index) => {
-      html += `<p>${index + 1}. ${score.name || "?"} â€” ${score.score}</p>`;
-    });
-
-    scoresDiv.innerHTML = html;
+    scoresDiv.innerHTML = list
+      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} — ${s.score}</p>`)
+      .join("");
   });
 }
 
 function closeLeaderboard() {
-  hidePanels();
-  document.getElementById("menu").style.display = "block";
+  backToMenu();
 }
 
 /* ===========================================================
-   SHOP UI
+   SHOP
    =========================================================== */
 
 function openShop() {
   hidePanels();
+
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
+
   document.getElementById("shop").style.display = "block";
   refreshShopUI();
 }
 
 function closeShop() {
-  hidePanels();
-  document.getElementById("menu").style.display = "block";
+  backToMenu();
 }
 
-function equipSkin(skinId) {
+function equipSkin(id) {
   if (!window.game) return;
-  
-  if (window.game.skinManager.equipSkin(skinId)) {
+
+  if (window.game.skinManager.equipSkin(id)) {
     window.game.updateCurrentSkin();
     refreshShopUI();
   }
@@ -132,105 +183,102 @@ function refreshShopUI() {
 
   const statsEl = document.getElementById("shopStats");
   const listEl  = document.getElementById("shopList");
+
   if (!statsEl || !listEl) return;
 
-  statsEl.innerText = t("shopTotalScore") + " " + window.game.playerState.totalScore;
+  statsEl.innerText =
+    `${t("shopTotalScore")} ${window.game.playerState.totalScore}`;
 
   const skins = window.game.skinManager.getAvailableSkins();
-
   let html = "";
+
   skins.forEach(skin => {
-    let statusText = "";
-    let btnHtml = "";
-    let requirementText = "";
-
-    if (!skin.owned && skin.type === "score") {
-      statusText = t("shopUnlockAt").replace("{score}", skin.requiredScore || 0);
-    } else if (!skin.owned && skin.type === "premium") {
-      statusText = t("shopComingSoon");
-    } else {
-      statusText = t("shopOwned");
-      btnHtml = skin.equipped
-        ? `<button disabled>${t("shopEquipped")}</button>`
-        : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;  
-      requirementText = `
-    <div class="skin-requirement">
-      ?? ${t("shopUnlockAt").replace("{score}", skin.requiredScore)}
-    </div>
-      `;
-    
-      }
-
     const name =
-      skin["name_" + currentLang] ||
+      skin[`name_${currentLang}`] ||
       skin.name_fr ||
       skin.name_en ||
       skin.id;
 
-    // ? IMPORTANT: si preview = sprite, on force l’affichage de la frame 0
-    const isSprite = (skin.preview === skin.img);
-    const extraStyle = isSprite
-      ? `style="object-fit:none; object-position:0px 0px; width:64px; height:64px;"`
-      : `style="object-fit:cover; width:64px; height:64px;"`;
+    let status = "";
+    let button = "";
+    let requirement = "";
+
+    if (!skin.owned && skin.type === "score") {
+      status = t("shopUnlockAt").replace("{score}", skin.requiredScore);
+      requirement = `<div class="skin-requirement">?? ${status}</div>`;
+    } else {
+      status = t("shopOwned");
+      button = skin.equipped
+        ? `<button disabled>${t("shopEquipped")}</button>`
+        : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
+    }
 
     html += `
-  <div class="shop-item">
-    ${skin.preview ? `<img src="${skin.preview}" class="skin-preview">` : ""}
-    <div class="shop-text">
-      <strong>${name}</strong><br>
-      ${requirementText}
-      <span>${statusText}</span><br>
-      ${btnHtml}
-    </div>
-  </div>
-`;
+      <div class="shop-item">
+        ${skin.preview ? `<img src="${skin.preview}" class="skin-preview">` : ""}
+        <div class="shop-text">
+          <strong>${name}</strong>
+          ${requirement}
+          <div>${status}</div>
+          ${button}
+        </div>
+      </div>
+    `;
   });
 
   listEl.innerHTML = html;
 }
 
 /* ===========================================================
-   GAME OVER UI
+   GAME OVER
    =========================================================== */
 
 function showGameOver(finalScore) {
   hidePanels();
+
   const stats = document.getElementById("finalStats");
   if (stats) stats.innerText = t("distance") + finalScore;
-  
-  document.getElementById("errorMsg").style.display = "none";
-  document.getElementById("submitBtn").disabled = false;
-  document.getElementById("submitBtn").innerText = t("send");
+
+  const err = document.getElementById("errorMsg");
+  if (err) err.style.display = "none";
+
+  const btn = document.getElementById("submitBtn");
+  if (btn) {
+    btn.disabled = false;
+    btn.innerText = t("send");
+  }
+
   document.getElementById("gameover").style.display = "block";
 }
 
 async function submitScore() {
   if (!window.game) return;
-  
-  let btn = document.getElementById("submitBtn");
-  let err = document.getElementById("errorMsg");
-  
-  btn.innerText = t("send") + "â€¦";
+
+  const btn = document.getElementById("submitBtn");
+  const err = document.getElementById("errorMsg");
+
+  btn.innerText = t("send") + "…";
   btn.disabled = true;
   err.style.display = "none";
 
-  const playerName = (document.getElementById("playerName").value || "Anonyme").trim();
+  const name =
+    (document.getElementById("playerName").value || "Anonyme").trim();
+
   const score = window.game.state.getFinalScore();
   const level = window.game.state.lastLevelPlayed;
 
-  const result = await window.game.leaderboardManager.saveScore(playerName, score, level);
-  
-  if (!result.ok) {
-    err.innerText = "Erreur Firebase: " + (result.err || "?");
+  const res =
+    await window.game.leaderboardManager.saveScore(name, score, level);
+
+  if (!res.ok) {
+    err.innerText = res.err || "Erreur Firebase";
     err.style.display = "block";
-    btn.innerText = t("send");
     btn.disabled = false;
+    btn.innerText = t("send");
     return;
   }
 
   openLeaderboard();
 }
 
-dbg("? ui.js chargÃ©");
-console.log("UI READY");
-
+console.log("? UI READY");
