@@ -11,11 +11,32 @@ dbg("? models.js chargé");
 class PlayerState {
   constructor() {
     try {
-      this.totalScore = parseInt(localStorage.getItem("totalScore") || "0", 10);
-      this.ownedSkins = JSON.parse(localStorage.getItem("ownedSkins") || "[]");
-      this.equippedSkin = localStorage.getItem("equippedSkin") || "base";
+      // ?? ID joueur unique (persistant)
+      this.playerId =
+        localStorage.getItem("playerId") ||
+        (crypto.randomUUID
+          ? crypto.randomUUID()
+          : "pid_" + Date.now() + "_" + Math.random().toString(36).slice(2));
+
+      localStorage.setItem("playerId", this.playerId);
+
+      // ?? Progression joueur
+      this.totalScore = parseInt(
+        localStorage.getItem("totalScore") || "0",
+        10
+      );
+
+      this.ownedSkins = JSON.parse(
+        localStorage.getItem("ownedSkins") || "[]"
+      );
+
+      this.equippedSkin =
+        localStorage.getItem("equippedSkin") || "base";
+
     } catch (e) {
       dbg("? Erreur chargement PlayerState:", e);
+
+      this.playerId = "pid_fallback_" + Date.now();
       this.totalScore = 0;
       this.ownedSkins = [];
       this.equippedSkin = "base";
@@ -24,6 +45,7 @@ class PlayerState {
 
   save() {
     try {
+      localStorage.setItem("playerId", this.playerId);
       localStorage.setItem("totalScore", String(this.totalScore));
       localStorage.setItem("ownedSkins", JSON.stringify(this.ownedSkins));
       localStorage.setItem("equippedSkin", this.equippedSkin);
@@ -77,9 +99,6 @@ class GameState {
     this.shakeForce = 0;
     this.lastLevelPlayed = 15;
 
-    /* ---------- FIN DE COURSE ---------- */
-    this.reachedTop = false;
-
     /* ---------- SPERM ---------- */
     this.sperm = {
       x: 0,
@@ -124,8 +143,6 @@ class GameState {
     this.sperm.angle = 0;
     this.sperm.amp = GAME_CONFIG.SPERM_AMPLITUDE;
 
-    this.reachedTop = false;
-
     this.timeLeft = duration;
     this.run = true;
 
@@ -144,7 +161,7 @@ class GameState {
   }
 
   /* =======================
-     UPDATE
+     UPDATE (PHYSIQUE + SCORE)
      ======================= */
 
   update() {
@@ -152,54 +169,37 @@ class GameState {
 
     const halfH = this.frameH / 2;
 
-    /* -----------------------------
-   PHYSIQUE DU SHAKE
-   ----------------------------- */
-if (this.shakeForce > 0) {
-  this.sperm.vy = Math.min(this.shakeForce / 12, 8);
-  this.shakeForce = 0;
-} else {
-  this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
-}
-
-/* -----------------------------
-   SCORE (indépendant de Y)
-   ----------------------------- */
-if (this.sperm.vy > 0) {
-  this.sperm.dist += this.sperm.vy;
-}
-
-/* -----------------------------
-   MOUVEMENT VISUEL VERTICAL
-   ----------------------------- */
-this.sperm.y -= this.sperm.vy;
-
-// Clamp visuel uniquement (ne bloque plus le score)
-const topLimit = this.frameH / 2;
-if (this.sperm.y < topLimit) {
-  this.sperm.y = topLimit;
-}
-
-    /* ---------- ONDULATION HORIZONTALE ---------- */
-    if (!this.reachedTop) {
-      this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED;
+    /* ---------- SHAKE / VITESSE ---------- */
+    if (this.shakeForce > 0) {
+      this.sperm.vy = Math.min(this.shakeForce / 12, 8);
+      this.shakeForce = 0;
     } else {
-      // amortissement doux ? évite le gros zigzag final
-      this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED * 0.15;
-      this.sperm.amp *= 0.9;
-
-      if (this.sperm.amp < 0.3) {
-        this.sperm.amp = 0;
-      }
+      this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
     }
 
-    this.sperm.x =
-      this.W / 2 + Math.sin(this.sperm.angle) * this.sperm.amp;
+    /* ---------- SCORE (INDÉPENDANT DU Y) ---------- */
+    if (this.sperm.vy > 0) {
+      this.sperm.dist += this.sperm.vy;
+    }
 
-    /* ---------- LIMITE BAS ---------- */
+    /* ---------- MOUVEMENT VERTICAL VISUEL ---------- */
+    this.sperm.y -= this.sperm.vy;
+
+    // Clamp visuel uniquement
+    if (this.sperm.y < halfH) {
+      this.sperm.y = halfH;
+    }
+
     if (this.sperm.y > this.H - halfH) {
       this.sperm.y = this.H - halfH;
     }
+
+    /* ---------- ONDULATION HORIZONTALE ---------- */
+    this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED;
+    this.sperm.amp *= 0.995; // micro amortissement continu
+
+    this.sperm.x =
+      this.W / 2 + Math.sin(this.sperm.angle) * this.sperm.amp;
 
     /* ---------- ANIMATION SPRITE ---------- */
     this.frame =
