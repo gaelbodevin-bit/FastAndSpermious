@@ -1,8 +1,32 @@
-dbg("? ui.js chargé");
+(typeof dbg === "function" ? dbg : console.log)("?? ui.js chargé");
 
 /* ===========================================================
    UI - Gestion des interfaces utilisateur
    =========================================================== */
+
+/* =======================
+   MODAL INFO SKINS
+   ======================= */
+
+function initSkinsInfoModal() {
+  const modal = document.getElementById("skinsInfoModal");
+  const closeBtn = document.getElementById("closeSkinsInfo");
+  const checkbox = document.getElementById("dontShowSkinsInfo");
+
+  if (!modal || !closeBtn || !checkbox) return;
+
+  // Affiche seulement si pas désactivée
+  if (localStorage.getItem("hideSkinsInfo") !== "true") {
+    modal.classList.remove("hidden");
+  }
+
+  closeBtn.addEventListener("click", () => {
+    if (checkbox.checked) {
+      localStorage.setItem("hideSkinsInfo", "true");
+    }
+    modal.classList.add("hidden");
+  });
+}
 
 /* =======================
    HELPERS
@@ -74,7 +98,7 @@ function backToMenu() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  showQuitBtn(); // ? la croix apparaît UNIQUEMENT ici
+  showQuitBtn(); // la croix apparaît UNIQUEMENT ici
 }
 
 /* =======================
@@ -281,4 +305,11 @@ async function submitScore() {
   openLeaderboard();
 }
 
-console.log("? UI READY");
+/* =======================
+   INIT
+   ======================= */
+
+window.addEventListener("load", () => {
+  initSkinsInfoModal();
+  console.log("? UI READY");
+});

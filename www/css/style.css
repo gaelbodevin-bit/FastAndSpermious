@@ -315,3 +315,118 @@ h1 {
 #quitBtn:hover {
   background: rgba(255,255,255,0.2);
 }
+/* =============================== */
+/*        MODAL INFO SKINS         */
+/* =============================== */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+
+    /* animation douce */
+    animation: modalFadeIn 0.25s ease-out;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #0d0d0d;
+    color: #fff;
+    width: 86%;
+    max-width: 360px;
+    padding: 22px 20px;
+    border-radius: 18px;
+
+    border: 2px solid #ff4ca3;
+    box-shadow:
+        0 0 18px rgba(255, 76, 163, 0.6),
+        inset 0 0 10px rgba(255, 76, 163, 0.15);
+
+    text-align: center;
+    animation: modalPop 0.25s ease-out;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 22px;
+    color: #ff74c5;
+    text-shadow: 0 0 6px rgba(255, 76, 163, 0.8);
+}
+
+.modal-content p {
+    font-size: 15px;
+    line-height: 22px;
+    opacity: 0.95;
+}
+
+/* Checkbox */
+.dont-show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    margin-top: 14px;
+    font-size: 14px;
+    color: #ffccdd;
+    opacity: 0.9;
+}
+
+.dont-show input {
+    accent-color: #ff4ca3;
+    transform: scale(1.1);
+}
+
+/* Bouton fermer */
+#closeSkinsInfo {
+    margin-top: 18px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+
+    background: #ff4ca3;
+    color: #fff;
+    border: none;
+    border-radius: 22px;
+
+    cursor: pointer;
+    transition: 0.25s ease-out;
+}
+
+#closeSkinsInfo:hover {
+    background: #ff74c5;
+    box-shadow: 0 0 14px #ff4ca3;
+    transform: scale(1.06);
+}
+
+#closeSkinsInfo:active {
+    transform: scale(0.95);
+}
+
+/* =============================== */
+/*           ANIMATIONS            */
+/* =============================== */
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes modalPop {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
