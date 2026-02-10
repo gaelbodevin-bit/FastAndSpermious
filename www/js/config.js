@@ -1,4 +1,4 @@
-dbg("? config.js chargé");
+dbg("? config.js chargÃ©");
 
 /* ===========================================================
    CONFIG - Langues, Constantes, Configuration
@@ -24,14 +24,21 @@ const LANG = {
     close: "Fermer",
     shopTitle: "Boutique de skins",
     shopTotalScore: "Score total :",
-    shopOwned: "Déjà débloqué",
-    shopEquip: "Équiper",
-    shopEquipped: "Équipé",
+    shopOwned: "DÃ©jÃ  dÃ©bloquÃ©",
+    shopEquip: "Ã‰quiper",
+    shopEquipped: "Ã‰quipÃ©",
     shopComingSoon: "Disponible prochainement",
-    shopUnlockAt: "Débloqué dès {score} points",
+    shopUnlockAt: "DÃ©bloquÃ© dÃ¨s {score} points",
     leaderboardSelectTitle: "Classement par niveaux",
     leaderboardSelectInstruction: "Choisissez un niveau.",
-    back: "Retour"
+    back: "Retour",
+
+    // MODAL INFO SKINS
+    skinsInfoTitle: "ðŸ”“ DÃ©bloquer des skins",
+    skinsInfoBody:
+      "Les skins se dÃ©bloquent en atteignant des scores Ã  atteindre ou via des achats.",
+    skinsInfoDontShow: "Ne plus afficher",
+    skinsInfoOk: "Compris"
   },
 
   en: {
@@ -56,7 +63,14 @@ const LANG = {
     shopUnlockAt: "Unlocked at {score} points",
     leaderboardSelectTitle: "Leaderboard by level",
     leaderboardSelectInstruction: "Choose a level.",
-    back: "Back"
+    back: "Back",
+
+    // MODAL INFO SKINS
+    skinsInfoTitle: "ðŸ”“ Unlock skins",
+    skinsInfoBody:
+      "Skins are unlocked by reaching target scores or through purchases.",
+    skinsInfoDontShow: "Don't show again",
+    skinsInfoOk: "Got it"
   },
 
   es: {
@@ -64,24 +78,31 @@ const LANG = {
     play15: "Nivel 15s",
     play30: "Nivel 30s",
     play60: "Nivel 60s",
-    leaderboard: "Clasificación",
+    leaderboard: "ClasificaciÃ³n",
     shop: "Tienda",
     send: "Enviar",
     distance: "Distancia: ",
     gameOver: "Fin del nivel",
-    menu: "Menú",
-    leaderboardTitle: "Clasificación nivel",
+    menu: "MenÃº",
+    leaderboardTitle: "ClasificaciÃ³n nivel",
     close: "Cerrar",
     shopTitle: "Tienda de skins",
-    shopTotalScore: "Puntuación total:",
+    shopTotalScore: "PuntuaciÃ³n total:",
     shopOwned: "Ya desbloqueado",
     shopEquip: "Equipar",
     shopEquipped: "Equipado",
-    shopComingSoon: "Próximamente",
+    shopComingSoon: "PrÃ³ximamente",
     shopUnlockAt: "Se desbloquea con {score} puntos",
-    leaderboardSelectTitle: "Clasificación por niveles",
+    leaderboardSelectTitle: "ClasificaciÃ³n por niveles",
     leaderboardSelectInstruction: "Elige un nivel.",
-    back: "Volver"
+    back: "Volver",
+
+    // MODAL INFO SKINS
+    skinsInfoTitle: "ðŸ”“ Desbloquear skins",
+    skinsInfoBody:
+      "Los skins se desbloquean al alcanzar puntuaciones objetivo o mediante compras.",
+    skinsInfoDontShow: "No volver a mostrar",
+    skinsInfoOk: "Entendido"
   }
 };
 
@@ -115,12 +136,12 @@ function setLang(lang) {
    ======================= */
 
 const GAME_CONFIG = {
-  VERSION: "2026.02.09",
+  VERSION: "2026.02.10",
 
   // Sprite
   FRAME_SIZE: 256,
   DEFAULT_FRAMES: 6,
-  SPRITE_SCALE: 0.6,        // ?? 60% de la taille originale
+  SPRITE_SCALE: 0.6,
 
   // Physique
   SHAKE_THRESHOLD: 20,

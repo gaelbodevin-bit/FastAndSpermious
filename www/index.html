@@ -21,169 +21,169 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<div id="skinsInfoModal" class="modal hidden">
-  <div class="modal-content">
-    <h2>🔓 Débloquer des skins</h2>
-    <p>
-      Les skins se débloquent en réalisant des performances spécifiques :
-      <br>• atteindre certains scores
-      <br>• survivre un temps donné
-      <br>• accomplir des défis cachés
-    </p>
-
-    <label class="dont-show">
-      <input type="checkbox" id="dontShowSkinsInfo">
-      Ne plus afficher
-    </label>
-
-    <button id="closeSkinsInfo">Compris</button>
-  </div>
-</div>
 
 <body>
 
-<!-- =============================== -->
-<!--        BOUTON QUITTER (MENU)     -->
-<!-- =============================== -->
-<div id="quitBtn" onclick="quitApp()" aria-label="Quitter">
-  ✕
-</div>
+  <!-- =============================== -->
+  <!--      MODAL INFO SKINS (UI)      -->
+  <!-- =============================== -->
+  <div id="skinsInfoModal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="skinsInfoTitle"></h2>
 
-<!-- =============================== -->
-<!--        INTRO ONE CELL STUDIO    -->
-<!-- =============================== -->
-<div id="studio-intro">
-  <div id="studio-text">ONE CELL STUDIO</div>
-</div>
+      <p id="skinsInfoBody"></p>
 
-<!-- =============================== -->
-<!--          MENU PRINCIPAL         -->
-<!-- =============================== -->
-<div id="menu">
-  <h1 id="menuTitle">Fast and Spermious</h1>
+      <label class="dont-show">
+        <input type="checkbox" id="dontShowSkinsInfo">
+        <span id="skinsInfoDontShow"></span>
+      </label>
 
-  <div class="menu-buttons">
-    <button class="menu-btn" id="btn15" onclick="startGame(15)">Niveau 15s</button>
-    <button class="menu-btn" id="btn30" onclick="startGame(30)">Niveau 30s</button>
-    <button class="menu-btn" id="btn60" onclick="startGame(60)">Niveau 60s</button>
-    <button class="menu-btn" id="btnLeaderboard" onclick="openLeaderboardSelect()">Classement</button>
-    <button class="menu-btn" id="btnShop" onclick="openShop()">Boutique</button>
+      <button id="closeSkinsInfo"></button>
+    </div>
   </div>
 
-  <!-- ===== LANGUES ===== -->
-  <div class="lang-select">
-    <button class="lang-btn" onclick="setLang('fr')" style="background-image:url('img/flags/fr.png')">
-      <span>FR</span>
-    </button>
-    <button class="lang-btn" onclick="setLang('en')" style="background-image:url('img/flags/en.png')">
-      <span>EN</span>
-    </button>
-    <button class="lang-btn" onclick="setLang('es')" style="background-image:url('img/flags/es.png')">
-      <span>ES</span>
-    </button>
-  </div>
-</div>
-
-<!-- =============================== -->
-<!--             CANVAS              -->
-<!-- =============================== -->
-<canvas id="gameCanvas"></canvas>
-
-<!-- =============================== -->
-<!--     CLASSEMENT : SÉLECTION      -->
-<!-- =============================== -->
-<div id="leaderboardSelect" class="panel">
-  <h2 id="leaderboardSelectTitle"></h2>
-  <p id="leaderboardSelectInstruction"></p>
-
-  <div class="leaderboard-tabs">
-    <button class="menu-btn" onclick="switchLeaderboard(15)">15s</button>
-    <button class="menu-btn" onclick="switchLeaderboard(30)">30s</button>
-    <button class="menu-btn" onclick="switchLeaderboard(60)">60s</button>
+  <!-- =============================== -->
+  <!--        BOUTON QUITTER (MENU)     -->
+  <!-- =============================== -->
+  <div id="quitBtn" onclick="quitApp()" aria-label="Quitter">
+    ✕
   </div>
 
-  <button id="backBtn" class="menu-btn" onclick="backToMenu()">Retour</button>
-</div>
-
-<!-- =============================== -->
-<!--           LEADERBOARD           -->
-<!-- =============================== -->
-<div id="leaderboard" class="panel">
-  <h2 id="lbTitle">Classement</h2>
-
-  <div class="leaderboard-tabs">
-    <button class="menu-btn tab-btn" onclick="switchLeaderboard(15)">15s</button>
-    <button class="menu-btn tab-btn" onclick="switchLeaderboard(30)">30s</button>
-    <button class="menu-btn tab-btn" onclick="switchLeaderboard(60)">60s</button>
+  <!-- =============================== -->
+  <!--        INTRO ONE CELL STUDIO    -->
+  <!-- =============================== -->
+  <div id="studio-intro">
+    <div id="studio-text">ONE CELL STUDIO</div>
   </div>
 
-  <div id="scores"></div>
+  <!-- =============================== -->
+  <!--          MENU PRINCIPAL         -->
+  <!-- =============================== -->
+  <div id="menu">
+    <h1 id="menuTitle">Fast and Spermious</h1>
 
-  <button class="menu-btn" onclick="closeLeaderboard()">Retour</button>
-</div>
+    <div class="menu-buttons">
+      <button class="menu-btn" id="btn15" onclick="startGame(15)">Niveau 15s</button>
+      <button class="menu-btn" id="btn30" onclick="startGame(30)">Niveau 30s</button>
+      <button class="menu-btn" id="btn60" onclick="startGame(60)">Niveau 60s</button>
+      <button class="menu-btn" id="btnLeaderboard" onclick="openLeaderboardSelect()">Classement</button>
+      <button class="menu-btn" id="btnShop" onclick="openShop()">Boutique</button>
+    </div>
 
-<!-- =============================== -->
-<!--            GAME OVER            -->
-<!-- =============================== -->
-<div id="gameover" class="panel">
-  <h2 id="gameoverTitle"></h2>
-  <p id="finalStats"></p>
+    <!-- ===== LANGUES ===== -->
+    <div class="lang-select">
+      <button class="lang-btn" onclick="setLang('fr')" style="background-image:url('img/flags/fr.png')">
+        <span>FR</span>
+      </button>
+      <button class="lang-btn" onclick="setLang('en')" style="background-image:url('img/flags/en.png')">
+        <span>EN</span>
+      </button>
+      <button class="lang-btn" onclick="setLang('es')" style="background-image:url('img/flags/es.png')">
+        <span>ES</span>
+      </button>
+    </div>
+  </div>
 
-  <input id="playerName" placeholder="Name">
-  <p id="errorMsg"></p>
+  <!-- =============================== -->
+  <!--             CANVAS              -->
+  <!-- =============================== -->
+  <canvas id="gameCanvas"></canvas>
 
-  <button id="submitBtn" class="menu-btn" onclick="submitScore()">Send</button>
-  <button id="menuFromGameBtn" class="menu-btn" onclick="backToMenu()">Menu</button>
-</div>
+  <!-- =============================== -->
+  <!--     CLASSEMENT : SÉLECTION      -->
+  <!-- =============================== -->
+  <div id="leaderboardSelect" class="panel">
+    <h2 id="leaderboardSelectTitle"></h2>
+    <p id="leaderboardSelectInstruction"></p>
 
-<!-- =============================== -->
-<!--               SHOP              -->
-<!-- =============================== -->
-<div id="shop" class="panel">
-  <h2 id="shopTitle"></h2>
-  <p id="shopStats"></p>
-  <div id="shopList"></div>
-  <button id="shopCloseBtn" class="menu-btn" onclick="closeShop()">Close</button>
-</div>
+    <div class="leaderboard-tabs">
+      <button class="menu-btn" onclick="switchLeaderboard(15)">15s</button>
+      <button class="menu-btn" onclick="switchLeaderboard(30)">30s</button>
+      <button class="menu-btn" onclick="switchLeaderboard(60)">60s</button>
+    </div>
 
-<!-- =============================== -->
-<!--               DEBUG             -->
-<!-- =============================== -->
-<div id="debugToggle" onclick="toggleDebug()">Debug</div>
-<div id="debugConsole"></div>
+    <button id="backBtn" class="menu-btn" onclick="backToMenu()">Retour</button>
+  </div>
 
-<script>
-function dbg() {
-  const box = document.getElementById("debugConsole");
-  if (!box) return;
-  const msg = Array.from(arguments).join(" ");
-  box.innerHTML += msg + "<br>";
-  box.scrollTop = box.scrollHeight;
-  console.log(msg);
-}
+  <!-- =============================== -->
+  <!--           LEADERBOARD           -->
+  <!-- =============================== -->
+  <div id="leaderboard" class="panel">
+    <h2 id="lbTitle">Classement</h2>
 
-function toggleDebug() {
-  const c = document.getElementById("debugConsole");
-  if (!c) return;
-  c.style.display = (c.style.display === "block" ? "none" : "block");
-}
-</script>
+    <div class="leaderboard-tabs">
+      <button class="menu-btn tab-btn" onclick="switchLeaderboard(15)">15s</button>
+      <button class="menu-btn tab-btn" onclick="switchLeaderboard(30)">30s</button>
+      <button class="menu-btn tab-btn" onclick="switchLeaderboard(60)">60s</button>
+    </div>
 
-<!-- =============================== -->
-<!--           SCRIPTS JS            -->
-<!-- =============================== -->
-<script src="js/firebase.js"></script>
-<script src="js/config.js"></script>
-<script src="js/models.js"></script>
-<script src="js/managers/SkinManager.js"></script>
-<script src="js/managers/LeaderboardManager.js"></script>
-<script src="js/managers/InputManager.js"></script>
-<script src="js/renderer.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/game.js"></script>
+    <div id="scores"></div>
 
-<!-- INTRO STUDIO (TOUJOURS EN DERNIER) -->
-<script src="js/intro.js"></script>
+    <button class="menu-btn" onclick="closeLeaderboard()">Retour</button>
+  </div>
+
+  <!-- =============================== -->
+  <!--            GAME OVER            -->
+  <!-- =============================== -->
+  <div id="gameover" class="panel">
+    <h2 id="gameoverTitle"></h2>
+    <p id="finalStats"></p>
+
+    <input id="playerName" placeholder="Name">
+    <p id="errorMsg"></p>
+
+    <button id="submitBtn" class="menu-btn" onclick="submitScore()">Send</button>
+    <button id="menuFromGameBtn" class="menu-btn" onclick="backToMenu()">Menu</button>
+  </div>
+
+  <!-- =============================== -->
+  <!--               SHOP              -->
+  <!-- =============================== -->
+  <div id="shop" class="panel">
+    <h2 id="shopTitle"></h2>
+    <p id="shopStats"></p>
+    <div id="shopList"></div>
+    <button id="shopCloseBtn" class="menu-btn" onclick="closeShop()">Close</button>
+  </div>
+
+  <!-- =============================== -->
+  <!--               DEBUG             -->
+  <!-- =============================== -->
+  <div id="debugToggle" onclick="toggleDebug()">Debug</div>
+  <div id="debugConsole"></div>
+
+  <script>
+    function dbg() {
+      const box = document.getElementById("debugConsole");
+      if (!box) return;
+      const msg = Array.from(arguments).join(" ");
+      box.innerHTML += msg + "<br>";
+      box.scrollTop = box.scrollHeight;
+      console.log(msg);
+    }
+
+    function toggleDebug() {
+      const c = document.getElementById("debugConsole");
+      if (!c) return;
+      c.style.display = (c.style.display === "block" ? "none" : "block");
+    }
+  </script>
+
+  <!-- =============================== -->
+  <!--           SCRIPTS JS            -->
+  <!-- =============================== -->
+  <script src="js/firebase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/managers/SkinManager.js"></script>
+  <script src="js/managers/LeaderboardManager.js"></script>
+  <script src="js/managers/InputManager.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+
+  <!-- INTRO STUDIO (TOUJOURS EN DERNIER) -->
+  <script src="js/intro.js"></script>
 
 </body>
 </html>

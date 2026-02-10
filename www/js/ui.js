@@ -83,6 +83,19 @@ function applyLang() {
     const el = document.getElementById(id);
     if (el) el.innerText = t(map[id]);
   });
+
+  // --- MODAL INFO SKINS ---
+  const sTitle = document.getElementById("skinsInfoTitle");
+  if (sTitle) sTitle.innerText = t("skinsInfoTitle");
+
+  const sBody = document.getElementById("skinsInfoBody");
+  if (sBody) sBody.innerHTML = t("skinsInfoBody"); // innerHTML car <br>
+
+  const sDont = document.getElementById("skinsInfoDontShow");
+  if (sDont) sDont.innerText = t("skinsInfoDontShow");
+
+  const sOk = document.getElementById("closeSkinsInfo");
+  if (sOk) sOk.innerText = t("skinsInfoOk");
 }
 
 /* =======================
@@ -114,8 +127,8 @@ function quitApp() {
     return;
   }
 
-  // Navigateur (ne fermera pas toujours, normal)
-  alert("Quitter l’application n’est possible que sur mobile.");
+  // Desktop / VM : on ne peut pas fermer une page web -> retour menu
+  backToMenu();
 }
 
 /* ===========================================================
@@ -206,7 +219,7 @@ function refreshShopUI() {
   if (!window.game) return;
 
   const statsEl = document.getElementById("shopStats");
-  const listEl  = document.getElementById("shopList");
+  const listEl = document.getElementById("shopList");
 
   if (!statsEl || !listEl) return;
 
@@ -310,6 +323,7 @@ async function submitScore() {
    ======================= */
 
 window.addEventListener("load", () => {
-  initSkinsInfoModal();
+  applyLang();          // ? traduit aussi la modal
+  initSkinsInfoModal(); // ? puis l'affiche si besoin
   console.log("? UI READY");
 });
