@@ -1,6 +1,6 @@
 ﻿// ==========================================================
 //  Firebase – Fast and Spermious
-//  Sécurisé : Auth anonyme + anti-spam (1 score / joueur / niveau)
+//  Sécurisé : Auth anonyme + anti-spam (1 meilleur score / joueur / niveau)
 //
 //  Arborescence :
 //  leaderboards/
@@ -11,16 +11,18 @@
 // ==========================================================
 
 (function () {
+  // dbg peut ne pas exister au moment où firebase.js charge
+  const log = (...a) => (typeof dbg === "function" ? dbg(...a) : console.log(...a));
+  const errlog = (...a) => console.error(...a);
 
   if (typeof firebase === "undefined") {
-    console.error("❌ Firebase SDK non chargé");
+    errlog("❌ Firebase SDK non chargé");
     return;
   }
 
   /* =========================
      CONFIG
      ========================= */
-
   const firebaseConfig = {
     apiKey: "AIzaSyCeHwyUe32aOlCNjPZQxekfr9M6AxaJC-0",
     authDomain: "fast-and-spermious.firebaseapp.com",
@@ -34,54 +36,89 @@
   /* =========================
      INIT FIREBASE
      ========================= */
-
   try {
-    if (!firebase.apps.length) {
+    if (!firebase.apps || firebase.apps.length === 0) {
       firebase.initializeApp(firebaseConfig);
-      dbg("✓ Firebase initialisé");
+      log("✓ Firebase initialisé");
+    } else {
+      log("✓ Firebase déjà initialisé");
     }
   } catch (e) {
-    console.error("❌ Erreur init Firebase:", e);
+    errlog("❌ Erreur init Firebase:", e);
     return;
   }
 
-  const db   = firebase.database();
-  const auth = firebase.auth();
+  const db = firebase.database();
 
+  // Auth peut ne pas être dispo si firebase-auth n'est pas chargé
+  if (!firebase.auth) {
+    errlog("❌ firebase-auth.js non chargé (firebase.auth indisponible)");
+    return;
+  }
+
+  const auth = firebase.auth();
   window.firebaseDB = db;
 
   /* =========================
      AUTH ANONYME ROBUSTE
      ========================= */
-
   let currentUser = null;
-  let authResolve;
 
-  const authReady = new Promise(resolve => {
+  // Promise résolue quand on a un user
+  let authResolve, authReject;
+  const authReady = new Promise((resolve, reject) => {
     authResolve = resolve;
+    authReject = reject;
   });
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      dbg("✓ Firebase auth OK | UID =", user.uid);
-      authResolve(user);
+  // On écoute l'état auth (résout la promise dès que user dispo)
+  const unsubscribe = auth.onAuthStateChanged(
+    (user) => {
+      if (user) {
+        currentUser = user;
+        log("✓ Firebase auth OK | UID =", user.uid);
+        authResolve(user);
+        if (typeof unsubscribe === "function") unsubscribe(); // stop listener
+      }
+    },
+    (e) => {
+      errlog("❌ Auth state error:", e);
+      authReject(e);
     }
+  );
+
+  // Démarre l'auth anonyme si pas déjà authentifié
+  // (getFirebaseUser gère aussi ce cas)
+  auth.signInAnonymously().catch((e) => {
+    errlog("❌ Auth anonyme impossible:", e);
+    // on ne reject pas forcément ici, car on peut être déjà connecté
   });
 
-  auth.signInAnonymously().catch(err => {
-    console.error("❌ Auth anonyme impossible:", err);
-  });
-
-  async function getFirebaseUser() {
+  async function getFirebaseUser(timeoutMs = 8000) {
     if (currentUser) return currentUser;
-    return await authReady;
+
+    // Si pas connecté, on tente à nouveau
+    if (!auth.currentUser) {
+      try {
+        await auth.signInAnonymously();
+      } catch (e) {
+        // si ça échoue, on laisse authReady tenter de se résoudre via onAuthStateChanged
+      }
+    }
+
+    // Attente avec timeout pour éviter un await infini
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout auth Firebase")), timeoutMs)
+    );
+
+    const user = await Promise.race([authReady, timeout]);
+    currentUser = user;
+    return user;
   }
 
   /* =========================
      SAVE SCORE (ANTI-SPAM)
      ========================= */
-
   async function firebaseSaveScore(scoreObj, level) {
     try {
       if (!scoreObj || typeof scoreObj.score === "undefined") {
@@ -94,39 +131,45 @@
       }
 
       const user = await getFirebaseUser();
-      if (!user) {
+      if (!user || !user.uid) {
         throw new Error("Utilisateur non authentifié");
       }
 
       const uid = user.uid;
+
+      const score = Number(scoreObj.score) || 0;
+      const name = (scoreObj.name || "Anonyme").trim();
+
       const ref = db.ref(`leaderboards/${lvl}/${uid}`);
       const snap = await ref.once("value");
 
+      const existing = snap.val();
+      const existingScore = existing ? Number(existing.score || 0) : -Infinity;
+
       // ⛔ Anti-spam : on conserve uniquement le MEILLEUR score
-      if (snap.exists() && snap.val().score >= scoreObj.score) {
-        dbg("↪ Score ignoré (moins bon)");
+      if (snap.exists() && existingScore >= score) {
+        log("↪ Score ignoré (moins bon)", score, "<=", existingScore);
         return { ok: true, skipped: true };
       }
 
       await ref.set({
-        name: scoreObj.name || "Anonyme",
-        score: Number(scoreObj.score) || 0,
+        name,
+        score,
         ts: Date.now()
       });
 
-      dbg("✓ Score sauvegardé |", lvl, "s |", scoreObj.score);
+      log("✓ Score sauvegardé |", lvl, "s |", score);
       return { ok: true };
 
-    } catch (err) {
-      console.error("❌ Firebase saveScore:", err);
-      return { ok: false, err: err.message || err };
+    } catch (e) {
+      errlog("❌ Firebase saveScore:", e);
+      return { ok: false, err: e.message || String(e) };
     }
   }
 
   /* =========================
-     LOAD LEADERBOARD (TOP 20)
+     LOAD LEADERBOARD (TOP 10)
      ========================= */
-
   async function firebaseLoadTop(level) {
     try {
       const lvl = Number(level);
@@ -134,24 +177,27 @@
         throw new Error("Niveau invalide: " + level);
       }
 
+      // (optionnel) s'assurer d'être auth pour les rules auth != null
+      await getFirebaseUser().catch(() => {});
+
       const snap = await db
         .ref(`leaderboards/${lvl}`)
         .orderByChild("score")
-        .limitToLast(20)
+        .limitToLast(10)
         .once("value");
 
       const raw = snap.val() || {};
 
       return Object.values(raw)
-        .map(v => ({
+        .map((v) => ({
           name: v.name || "?",
           score: Number(v.score || 0),
           ts: v.ts || 0
         }))
         .sort((a, b) => b.score - a.score);
 
-    } catch (err) {
-      console.error("❌ Firebase loadTop:", err);
+    } catch (e) {
+      errlog("❌ Firebase loadTop:", e);
       return [];
     }
   }
@@ -159,10 +205,9 @@
   /* =========================
      EXPORT GLOBAL
      ========================= */
-
   window.firebaseSaveScore = firebaseSaveScore;
-  window.firebaseLoadTop  = firebaseLoadTop;
+  window.firebaseLoadTop = firebaseLoadTop;
+  window.getFirebaseUser = getFirebaseUser; // utile pour debug si besoin
 
-  dbg("✓ firebase.js chargé");
-
+  log("✓ firebase.js chargé");
 })();

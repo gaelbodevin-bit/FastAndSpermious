@@ -15,17 +15,17 @@ function initSkinsInfoModal() {
 
   if (!modal || !closeBtn || !checkbox) return;
 
-  // Affiche seulement si pas désactivée
-  if (localStorage.getItem("hideSkinsInfo") !== "true") {
-    modal.classList.remove("hidden");
-  }
+  // Si l'utilisateur a choisi de ne plus afficher
+  if (localStorage.getItem("hideSkinsInfo") === "true") return;
 
-  closeBtn.addEventListener("click", () => {
+  modal.classList.remove("hidden");
+
+  closeBtn.onclick = () => {
     if (checkbox.checked) {
       localStorage.setItem("hideSkinsInfo", "true");
     }
     modal.classList.add("hidden");
-  });
+  };
 }
 
 /* =======================
@@ -199,7 +199,11 @@ function openShop() {
   if (canvas) canvas.style.display = "none";
 
   document.getElementById("shop").style.display = "block";
+
   refreshShopUI();
+
+  // ?? Affiche la notification UNIQUEMENT à l'ouverture de la boutique
+  initSkinsInfoModal();
 }
 
 function closeShop() {
@@ -323,7 +327,7 @@ async function submitScore() {
    ======================= */
 
 window.addEventListener("load", () => {
-  applyLang();          // ? traduit aussi la modal
-  initSkinsInfoModal(); // ? puis l'affiche si besoin
+  applyLang();
   console.log("? UI READY");
 });
+
