@@ -1,5 +1,5 @@
 ﻿/* ===========================================================
-   GAME - Point d'entrée principal et boucle de jeu
+   GAME - Point d'entrÃ©e principal et boucle de jeu
    =========================================================== */
 
 class Game {
@@ -7,7 +7,7 @@ class Game {
     dbg("? Game constructor");
     dbg("?? VERSION BUILD :", GAME_CONFIG.VERSION);
 
-    // États
+    // Ã‰tats
     this.playerState = new PlayerState();
     this.state = null;
     this.renderer = null;
@@ -28,19 +28,19 @@ class Game {
   async init() {
     dbg("? Game init");
     
-    // Récupérer le canvas
+    // RÃ©cupÃ©rer le canvas
     this.canvas = document.getElementById("gameCanvas");
     if (!this.canvas) {
-      dbg("? Erreur: canvas non trouvé");
+      dbg("? Erreur: canvas non trouvÃ©");
       return false;
     }
 
-    // Initialiser l'état du jeu
+    // Initialiser l'Ã©tat du jeu
     this.state = new GameState(this.canvas, this.spermImg);
     this.renderer = new Renderer(this.state);
     this.inputManager = new InputManager(this.state);
     
-    // Événements
+    // Ã‰vÃ©nements
     window.addEventListener("resize", () => this.state.resize());
     this.state.resize();
     
@@ -55,7 +55,7 @@ class Game {
     applyLang();
     refreshShopUI();
 
-    dbg("? Game initialisé");
+    dbg("? Game initialisÃ©");
     return true;
   }
 
@@ -75,23 +75,153 @@ class Game {
     );
   }
 
-  async start(duration) {
-  dbg("?? START", duration);
+  start(duration) {
+    dbg("âœ… START", duration);
 
-  // Débloque l'audio (important mobile)
-  this.ensureAudioUnlocked();
+    // ðŸ”Š DÃ©bloque l'audio immÃ©diatement (reste dans le geste utilisateur)
+    this.ensureAudioUnlocked();
 
-  hidePanels();
-  this.canvas.style.display = "block";
+    hidePanels();
+    this.canvas.style.display = "block";
 
-  this.state.run = false;
-  await this.startCountdown(3, 600);
+    // On bloque la boucle pendant le countdown
+    this.state.run = false;
 
-  this.state.reset(duration);
-  this.state.run = true;
-  this.loop();
+    this.startCountdown(3, 600).then(() => {
+      this.state.reset(duration);
+      this.state.run = true;
+      this.loop();
+    });
+  }
+
+  // ==============================
+  // COUNTDOWN + AUDIO + VIBRATION
+  // ==============================
+  ensureAudioUnlocked() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) {
+        dbg("â�Œ AudioContext non supportÃ©");
+        return;
+      }
+      if (!this.audioCtx) this.audioCtx = new Ctx();
+
+      if (this.audioCtx.state === "suspended") {
+        this.audioCtx.resume().then(() => {
+          dbg("ðŸ”Š AudioContext resumed");
+        }).catch((e) => {
+          dbg("â�Œ Audio resume failed:", e?.message || e);
+        });
+      }
+    } catch (e) {
+      dbg("â�Œ ensureAudioUnlocked error:", e?.message || e);
+    }
+  }
+
+  beep(freq = 880, durationMs = 90, type = "square", volume = 0.08) {
+    if (!this.audioCtx) return;
+
+    const ctx = this.audioCtx;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+
+    // Enveloppe (attaque/relÃ¢che) pour Ã©viter les "clics"
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + durationMs / 1000 + 0.02);
+  }
+
+  playCountdownTick(n) {
+  const map = { 3: 800, 2: 700, 1: 600 };
+  this.beep(map[n], 90, "square", 0.15);
+  playEndRoundFx() {
+  if (!this.audioCtx) return;
+
+  const ctx = this.audioCtx;
+  const now = ctx.currentTime;
+
+  // 🎵 petite montée musicale
+  const notes = [600, 800, 1000];
+
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, now + i * 0.08);
+
+    gain.gain.setValueAtTime(0.001, now + i * 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.15, now + i * 0.08 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.15);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now + i * 0.08);
+    osc.stop(now + i * 0.08 + 0.18);
+  });
+
+  // 📳 vibration légère finale
+  navigator.vibrate?.([40, 60]);
 }
 
+playGoFx() {
+  this.beep(150, 80, "sawtooth", 0.25); // grave impact
+  setTimeout(() => this.beep(1000, 120, "square", 0.15), 40);
+  navigator.vibrate?.([60]);
+  }
+
+  startCountdown(seconds = 3, stepMs = 600) {
+    return new Promise((resolve) => {
+      const el = document.getElementById("countdown");
+      if (!el) { resolve(); return; }
+
+      el.style.display = "grid";
+      let t = seconds;
+
+      const render = (txt) => {
+        el.textContent = txt;
+        el.classList.remove("pop");
+        void el.offsetWidth;
+        el.classList.add("pop");
+      };
+
+      render(t);
+      this.playCountdownTick(t);
+
+      const interval = setInterval(() => {
+        t--;
+
+        if (t > 0) {
+          render(t);
+          this.playCountdownTick(t);
+          return;
+        }
+
+        if (t === 0) {
+          render("GO!");
+          this.playGoFx();
+          clearInterval(interval);
+
+          setTimeout(() => {
+            el.style.display = "none";
+            resolve();
+          }, 350);
+        }
+      }, stepMs);
+    });
+  }
 
 
   loop() {
@@ -104,13 +234,16 @@ class Game {
   }
 
   stop() {
-    this.state.stop();
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-    this.onGameOver();
+  this.state.stop();
+  if (this.animationFrameId) {
+    cancelAnimationFrame(this.animationFrameId);
+    this.animationFrameId = null;
   }
+
+  this.playEndRoundFx(); // 🔔 AJOUT ICI
+
+  this.onGameOver();
+}
 
   onGameOver() {
     const finalScore = this.state.getFinalScore();
@@ -119,112 +252,39 @@ class Game {
     this.playerState.addScore(finalScore);
     refreshShopUI();
     
-    // Afficher l'écran game over
+    // Afficher l'Ã©cran game over
     showGameOver(finalScore);
   }
-  startCountdown(seconds = 3, stepMs = 600) {
-  return new Promise((resolve) => {
-    const el = document.getElementById("countdown");
-    if (!el) {
-      resolve();
-      return;
-    }
-
-    el.style.display = "grid";
-    let t = seconds;
-
-    const render = (txt) => {
-      el.textContent = txt;
-      el.classList.remove("pop");
-      void el.offsetWidth;
-      el.classList.add("pop");
-    };
-
-    render(t);
-
-    const interval = setInterval(() => {
-      t--;
-
-      if (t > 0) {
-        render(t);
-        return;
-      }
-
-      if (t === 0) {
-        render("GO!");
-        clearInterval(interval);
-
-        setTimeout(() => {
-          el.style.display = "none";
-          resolve();
-        }, 350);
-      }
-    }, stepMs);
-  });
-}
-// ==============================
-// AUDIO (beeps) + VIBRATION
-// ==============================
-ensureAudioUnlocked() {
-  try {
-    if (!this.audioCtx) {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
-      this.audioCtx = new Ctx();
-    }
-    // Sur mobile, l'AudioContext peut être "suspended" tant qu'il n'y a pas eu interaction
-    if (this.audioCtx.state === "suspended") {
-      this.audioCtx.resume().catch(() => {});
-    }
-  } catch (e) {}
 }
 
-beep(freq = 880, durationMs = 90, type = "square", volume = 0.08) {
-  if (!this.audioCtx) return;
 
-  const ctx = this.audioCtx;
-  const now = ctx.currentTime;
 
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+/* ===========================================================
+   AUDIO UNLOCK GLOBAL (anti-autoplay, VM / live-server friendly)
+   - Le 1er clic/tap/clavier dÃ©bloque l'audio pour WebAudio.
+   =========================================================== */
+function setupGlobalAudioUnlock(gameInstanceGetter) {
+  const unlock = () => {
+    const g = gameInstanceGetter && gameInstanceGetter();
+    if (!g) return;
 
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, now);
+    g.ensureAudioUnlocked && g.ensureAudioUnlocked();
 
-  // Enveloppe (attaque/relâche) pour éviter les "clics"
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(volume, now + 0.005);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
+    // Petit bip de test (trÃ¨s court) pour valider que l'audio est bien dÃ©bloquÃ©
+    g.beep && g.beep(1200, 25, "square", 0.03);
 
-  osc.connect(gain);
-  gain.connect(ctx.destination);
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("touchstart", unlock);
+    window.removeEventListener("keydown", unlock);
+  };
 
-  osc.start(now);
-  osc.stop(now + durationMs / 1000 + 0.02);
-}
-
-playCountdownTick(n) {
-  // 3,2,1 : un peu plus grave en descendant
-  // (tu peux changer les fréquences si tu veux)
-  const map = { 3: 900, 2: 780, 1: 660 };
-  this.beep(map[n] || 800, 95, "square", 0.08);
-}
-
-playGoFx() {
-  // GO : double beep + plus punchy
-  this.beep(520, 110, "sawtooth", 0.10);
-  setTimeout(() => this.beep(1040, 90, "square", 0.09), 90);
-
-  // Vibration (si dispo)
-  if (navigator.vibrate) {
-    navigator.vibrate([40, 30, 60]); // petit pattern “impact”
-  }
-}
-
+  window.addEventListener("pointerdown", unlock, { once: true });
+  window.addEventListener("touchstart", unlock, { once: true });
+  window.addEventListener("keydown", unlock, { once: true });
 }
 
 /* ===========================================================
-   FONCTIONS GLOBALES (appelées depuis index.html)
+   FONCTIONS GLOBALES (appelÃ©es depuis index.html)
    =========================================================== */
 
 function startGame(duration) {
@@ -241,17 +301,19 @@ window.onload = async () => {
   dbg("? window.onload");
 
   window.game = new Game();
-  const initialized = await window.game.init();
+  
+  setupGlobalAudioUnlock(() => window.game);
+const initialized = await window.game.init();
 
   if (!initialized) {
-    dbg("? Échec initialisation du jeu");
+    dbg("? Ã‰chec initialisation du jeu");
     return;
   }
 
-  // ✅ Affichage initial du menu + croix
+  // âœ… Affichage initial du menu + croix
   backToMenu();
 
-  dbg("? Jeu prêt");
+  dbg("? Jeu prÃªt");
 };
 
-dbg("? game.js chargé");
+dbg("? game.js chargÃ©");
