@@ -36,7 +36,7 @@ const LANG = {
     // MODAL INFO SKINS
     skinsInfoTitle: "🔓 Débloquer des skins",
     skinsInfoBody:
-      "Les skins se débloquent en atteignant des scores à atteindre ou via des achats.",
+      "Les skins se débloquent en atteignant certains scores ou via des achats.",
     skinsInfoDontShow: "Ne plus afficher",
     skinsInfoOk: "Compris"
   },
@@ -68,7 +68,7 @@ const LANG = {
     // MODAL INFO SKINS
     skinsInfoTitle: "🔓 Unlock skins",
     skinsInfoBody:
-      "Skins are unlocked by reaching target scores or through purchases.",
+      "Skins unlock by reaching certain scores or through purchases.",
     skinsInfoDontShow: "Don't show again",
     skinsInfoOk: "Got it"
   },
@@ -100,7 +100,7 @@ const LANG = {
     // MODAL INFO SKINS
     skinsInfoTitle: "🔓 Desbloquear skins",
     skinsInfoBody:
-      "Los skins se desbloquean al alcanzar puntuaciones objetivo o mediante compras.",
+      "Las skins se desbloquean al alcanzar ciertas puntuaciones o mediante compras.",
     skinsInfoDontShow: "No volver a mostrar",
     skinsInfoOk: "Entendido"
   }
