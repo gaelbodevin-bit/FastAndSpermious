@@ -430,3 +430,29 @@ h1 {
         opacity: 1;
     }
 }
+/* =============================== */
+/*            COUNTDOWN            */
+/* =============================== */
+
+.countdown {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: Arial, sans-serif;
+    font-weight: 900;
+    font-size: min(22vw, 160px);
+    color: #ffffff;
+    text-shadow: 0 8px 0 rgba(0,0,0,.35);
+    pointer-events: none;
+    z-index: 9998;
+}
+
+.countdown.pop {
+    animation: popCountdown 0.22s ease-out;
+}
+
+@keyframes popCountdown {
+    0%   { transform: scale(0.7); opacity: 0.2; }
+    100% { transform: scale(1);   opacity: 1; }
+}
