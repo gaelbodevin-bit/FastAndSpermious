@@ -136,7 +136,7 @@ function setLang(lang) {
    ======================= */
 
 const GAME_CONFIG = {
-  VERSION: "2026.02.18",
+  VERSION: "2026.02.10",
 
   // Sprite
   FRAME_SIZE: 256,
