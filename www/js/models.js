@@ -8,8 +8,8 @@ class PlayerState {
       this.totalScore = parseInt(localStorage.getItem("totalScore") || "0", 10);
       this.ownedSkins = JSON.parse(localStorage.getItem("ownedSkins") || "[]");
       this.equippedSkin = localStorage.getItem("equippedSkin") || "base";
-    } catch (e) {
-      dbg("? Erreur chargement PlayerState:", e);
+    } catch (error) {
+      dbg("❌ Error loading PlayerState:", error);
       this.totalScore = 0;
       this.ownedSkins = [];
       this.equippedSkin = "base";
@@ -21,8 +21,8 @@ class PlayerState {
       localStorage.setItem("totalScore", String(this.totalScore));
       localStorage.setItem("ownedSkins", JSON.stringify(this.ownedSkins));
       localStorage.setItem("equippedSkin", this.equippedSkin);
-    } catch (e) {
-      dbg("? Erreur sauvegarde PlayerState:", e);
+    } catch (error) {
+      dbg("❌ Error saving PlayerState:", error);
     }
   }
 
@@ -54,27 +54,27 @@ class GameState {
     this.ctx = canvas.getContext("2d");
     this.spermImg = spermImage;
     
-    // Propriétés du sprite
-    this.frameW = GAME_CONFIG.FRAME_SIZE;
-    this.frameH = GAME_CONFIG.FRAME_SIZE;
-    this.frames = GAME_CONFIG.DEFAULT_FRAMES;
-    this.frame = 0;
+    // Sprite properties
+    this.frameWidth = GAME_CONFIG.FRAME_SIZE;
+    this.frameHeight = GAME_CONFIG.FRAME_SIZE;
+    this.totalFrames = GAME_CONFIG.DEFAULT_FRAMES;
+    this.currentFrame = 0;
     
-    // État du jeu
-    this.run = false;
+    // Game state
+    this.isRunning = false;
     this.timeLeft = 0;
     this.timer = null;
     this.shakeForce = 0;
     this.lastLevelPlayed = 15;
     
-    // Position et mouvement du sperm
+    // Sperm position and movement
     this.sperm = {
       x: 180,
       y: 500,
       angle: 0,
-      amp: GAME_CONFIG.SPERM_AMPLITUDE,
-      vy: 0,
-      dist: 0
+      amplitude: GAME_CONFIG.SPERM_AMPLITUDE,
+      velocityY: 0,
+      distance: 0
     };
     
     this.resize();
@@ -83,23 +83,23 @@ class GameState {
   resize() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
-    this.W = this.canvas.width;
-    this.H = this.canvas.height;
+    this.canvasWidth = this.canvas.width;
+    this.canvasHeight = this.canvas.height;
     
-    if (!this.run) {
-      this.sperm.x = this.W / 2;
-      this.sperm.y = this.H * 0.75;
+    if (!this.isRunning) {
+      this.sperm.x = this.canvasWidth / 2;
+      this.sperm.y = this.canvasHeight * 0.75;
     }
   }
 
   reset(duration) {
     this.lastLevelPlayed = duration;
-    this.sperm.y = this.H * 0.75;
-    this.sperm.x = this.W / 2;
-    this.sperm.dist = 0;
-    this.sperm.vy = 0;
+    this.sperm.y = this.canvasHeight * 0.75;
+    this.sperm.x = this.canvasWidth / 2;
+    this.sperm.distance = 0;
+    this.sperm.velocityY = 0;
     this.timeLeft = duration;
-    this.run = true;
+    this.isRunning = true;
     
     if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => {
@@ -109,46 +109,46 @@ class GameState {
   }
 
   stop() {
-    this.run = false;
+    this.isRunning = false;
     if (this.timer) clearInterval(this.timer);
   }
 
   update() {
-    if (!this.run) return;
+    if (!this.isRunning) return;
     
-    // Physique du shake
+    // Shake physics
     if (this.shakeForce > 0) {
-      this.sperm.vy = Math.min(this.shakeForce / 10, 10);
+      this.sperm.velocityY = Math.min(this.shakeForce / 10, 10);
       this.shakeForce = 0;
     } else {
-      this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
+      this.sperm.velocityY *= GAME_CONFIG.VELOCITY_DAMPING;
     }
     
-    // Mouvement vertical
-    this.sperm.y -= this.sperm.vy;
-    this.sperm.dist += this.sperm.vy;
+    // Vertical movement
+    this.sperm.y -= this.sperm.velocityY;
+    this.sperm.distance += this.sperm.velocityY;
     
-    // Mouvement sinusoïdal horizontal
+    // Horizontal sinusoidal movement
     this.sperm.angle += GAME_CONFIG.SPERM_WAVE_SPEED;
-    this.sperm.x = this.W / 2 + Math.sin(this.sperm.angle) * this.sperm.amp;
+    this.sperm.x = this.canvasWidth / 2 + Math.sin(this.sperm.angle) * this.sperm.amplitude;
     
-    // Contraintes de position
-    if (this.sperm.y < this.frameH / 2) this.sperm.y = this.frameH / 2;
-    if (this.sperm.y > this.H - this.frameH / 2) this.sperm.y = this.H - this.frameH / 2;
+    // Position constraints
+    if (this.sperm.y < this.frameHeight / 2) this.sperm.y = this.frameHeight / 2;
+    if (this.sperm.y > this.canvasHeight - this.frameHeight / 2) this.sperm.y = this.canvasHeight - this.frameHeight / 2;
     
-    // Animation du sprite
-    this.frame = (this.frame + GAME_CONFIG.FRAME_ANIMATION_SPEED) % Math.max(this.frames, 1);
+    // Sprite animation
+    this.currentFrame = (this.currentFrame + GAME_CONFIG.FRAME_ANIMATION_SPEED) % Math.max(this.totalFrames, 1);
   }
 
-  updateSpriteProperties(frameW, frameH, frames) {
-    this.frameW = frameW || GAME_CONFIG.FRAME_SIZE;
-    this.frameH = frameH || GAME_CONFIG.FRAME_SIZE;
-    this.frames = frames || GAME_CONFIG.DEFAULT_FRAMES;
+  updateSpriteProperties(frameWidth, frameHeight, totalFrames) {
+    this.frameWidth = frameWidth || GAME_CONFIG.FRAME_SIZE;
+    this.frameHeight = frameHeight || GAME_CONFIG.FRAME_SIZE;
+    this.totalFrames = totalFrames || GAME_CONFIG.DEFAULT_FRAMES;
   }
 
   getFinalScore() {
-    return Math.round(this.sperm.dist);
+    return Math.round(this.sperm.distance);
   }
 }
 
-dbg("? models.js chargé");
+dbg("✅ models.js loaded");

@@ -8,23 +8,23 @@ class Renderer {
   }
 
   clear() {
-    this.gameState.ctx.clearRect(0, 0, this.gameState.W, this.gameState.H);
+    this.gameState.ctx.clearRect(0, 0, this.gameState.canvasWidth, this.gameState.canvasHeight);
   }
 
   drawSprite() {
-    const { ctx, spermImg, frameW, frameH, frame, sperm } = this.gameState;
+    const { ctx, spermImg, frameWidth, frameHeight, currentFrame, sperm } = this.gameState;
     
     if (!spermImg || !spermImg.complete) return;
 
-    const sourceX = Math.floor(frame) * frameW;
+    const sourceX = Math.floor(currentFrame) * frameWidth;
     const sourceY = 0;
-    const destX = sperm.x - frameW / 2;
-    const destY = sperm.y - frameH / 2;
+    const destX = sperm.x - frameWidth / 2;
+    const destY = sperm.y - frameHeight / 2;
 
     ctx.drawImage(
       spermImg,
-      sourceX, sourceY, frameW, frameH,
-      destX, destY, frameW, frameH
+      sourceX, sourceY, frameWidth, frameHeight,
+      destX, destY, frameWidth, frameHeight
     );
   }
 
@@ -34,7 +34,7 @@ class Renderer {
     ctx.fillStyle = "#fff";
     ctx.font = "18px sans-serif";
     ctx.fillText(timeLeft + "s", 10, 24);
-    ctx.fillText("Score: " + Math.round(sperm.dist), 10, 48);
+    ctx.fillText("Score: " + Math.round(sperm.distance), 10, 48);
   }
 
   render() {
@@ -44,4 +44,4 @@ class Renderer {
   }
 }
 
-dbg("? renderer.js chargé");
+dbg("✅ renderer.js loaded");

@@ -5,17 +5,17 @@
 class InputManager {
   constructor(gameState) {
     this.gameState = gameState;
-    this.enabled = false;
+    this.isActive = false;
   }
 
   init() {
     if (window.DeviceMotionEvent) {
       window.addEventListener("devicemotion", this.handleMotion.bind(this), true);
-      this.enabled = true;
-      dbg("? Shake actif");
+      this.isActive = true;
+      dbg("📱 Shake active");
       return true;
     }
-    dbg("? DeviceMotion non disponible");
+    dbg("⚠️ DeviceMotion not available");
     return false;
   }
 
@@ -23,14 +23,14 @@ class InputManager {
     const acceleration = event.accelerationIncludingGravity;
     if (!acceleration) return;
     
-    const magnitude = Math.abs(acceleration.x) + 
-                     Math.abs(acceleration.y) + 
-                     Math.abs(acceleration.z);
+    const shakeIntensity = Math.abs(acceleration.x) + 
+                           Math.abs(acceleration.y) + 
+                           Math.abs(acceleration.z);
     
-    if (magnitude > GAME_CONFIG.SHAKE_THRESHOLD) {
-      this.gameState.shakeForce = magnitude;
+    if (shakeIntensity > GAME_CONFIG.SHAKE_THRESHOLD) {
+      this.gameState.shakeForce = shakeIntensity;
     }
   }
 }
 
-dbg("? InputManager.js chargé");
+dbg("✅ InputManager.js loaded");

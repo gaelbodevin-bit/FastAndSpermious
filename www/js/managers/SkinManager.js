@@ -6,7 +6,7 @@ class SkinManager {
   constructor(playerState) {
     this.playerState = playerState;
     this.skins = [];
-    this.loaded = false;
+    this.isLoaded = false;
   }
 
   async load() {
@@ -15,10 +15,10 @@ class SkinManager {
       
       if (window.cordova && cordova.file && cordova.file.applicationDirectory) {
         url = cordova.file.applicationDirectory + "www/skins.json";
-        dbg("?? Chargement skins depuis APK:", url);
+        dbg("📱 Loading skins from APK:", url);
       } else {
         url = "skins.json?" + Date.now();
-        dbg("?? Chargement skins depuis navigateur:", url);
+        dbg("🌐 Loading skins from browser:", url);
       }
 
       // XMLHttpRequest pour compatibilité file://
@@ -31,7 +31,7 @@ class SkinManager {
       }
 
       this.skins = JSON.parse(httpRequest.responseText);
-      this.loaded = true;
+      this.isLoaded = true;
 
       // Déverrouiller les skins "always"
       this.skins.forEach(skin => {
@@ -46,17 +46,17 @@ class SkinManager {
         this.playerState.save();
       }
 
-      dbg("?? Skins chargés avec succès:", this.skins.length);
+      dbg("🎉 Skins loaded successfully:", this.skins.length);
       return true;
 
-    } catch (e) {
-      dbg("? Erreur loadSkins:", e);
+    } catch (error) {
+      dbg("❌ Error loading skins:", error);
       return false;
     }
   }
 
   getCurrentSkin() {
-    if (!this.loaded || this.skins.length === 0) return null;
+    if (!this.isLoaded || this.skins.length === 0) return null;
     return this.skins.find(s => s.id === this.playerState.equippedSkin) || this.skins[0];
   }
 
@@ -83,11 +83,11 @@ class SkinManager {
 
   equipSkin(skinId) {
     if (this.playerState.equipSkin(skinId)) {
-      dbg("?? Skin équipé:", skinId);
+      dbg("🎽 Skin equipped:", skinId);
       return true;
     }
     return false;
   }
 }
 
-dbg("? SkinManager.js chargé");
+dbg("✅ SkinManager.js loaded");

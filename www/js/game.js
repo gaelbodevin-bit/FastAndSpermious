@@ -4,8 +4,8 @@
 
 class Game {
   constructor() {
-    dbg("? Game constructor");
-    dbg("?? VERSION BUILD :", GAME_CONFIG.VERSION);
+    dbg("🎮 Game constructor");
+    dbg("📦 VERSION BUILD:", GAME_CONFIG.VERSION);
     
     // États
     this.playerState = new PlayerState();
@@ -26,12 +26,12 @@ class Game {
   }
 
   async init() {
-    dbg("? Game init");
+    dbg("🔧 Game init");
     
     // Récupérer le canvas
     this.canvas = document.getElementById("gameCanvas");
     if (!this.canvas) {
-      dbg("? Erreur: canvas non trouvé");
+      dbg("❌ Error: canvas not found");
       return false;
     }
 
@@ -55,7 +55,7 @@ class Game {
     applyLang();
     refreshShopUI();
     
-    dbg("? Game initialisé");
+    dbg("✅ Game initialized");
     return true;
   }
 
@@ -76,7 +76,7 @@ class Game {
   }
 
   start(duration) {
-    dbg("?? START", duration);
+    dbg("▶️ START", duration);
     
     hidePanels();
     this.canvas.style.display = "block";
@@ -86,7 +86,7 @@ class Game {
   }
 
   loop() {
-    if (!this.state.run) return;
+    if (!this.state.isRunning) return;
     
     this.state.update();
     this.renderer.render();
@@ -130,17 +130,17 @@ function startGame(duration) {
    =========================================================== */
 
 window.onload = async () => {
-  dbg("? window.onload");
+  dbg("🚀 window.onload");
   
   window.game = new Game();
   const initialized = await window.game.init();
   
   if (!initialized) {
-    dbg("? Échec initialisation du jeu");
+    dbg("❌ Game initialization failed");
     return;
   }
   
-  dbg("? Jeu prêt");
+  dbg("✅ Game ready");
 };
 
-dbg("? game.js chargé");
+dbg("✅ game.js loaded");

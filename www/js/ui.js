@@ -4,8 +4,8 @@
 
 function hidePanels() {
   ["menu", "leaderboard", "leaderboardSelect", "gameover", "shop"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = "none";
+    const element = document.getElementById(id);
+    if (element) element.style.display = "none";
   });
 }
 
@@ -75,8 +75,8 @@ function switchLeaderboard(level) {
 function loadLeaderboardForLevel(level) {
   if (!window.game) return;
   
-  const lbTitle = document.getElementById("lbTitle");
-  if (lbTitle) lbTitle.innerText = t("leaderboardTitle") + " " + level + "s";
+  const leaderboardTitle = document.getElementById("lbTitle");
+  if (leaderboardTitle) leaderboardTitle.innerText = t("leaderboardTitle") + " " + level + "s";
 
   const scoresDiv = document.getElementById("scores");
   scoresDiv.innerText = "Chargement…";
@@ -130,12 +130,12 @@ function equipSkin(skinId) {
 function refreshShopUI() {
   if (!window.game) return;
   
-  const statsEl = document.getElementById("shopStats");
-  const listEl = document.getElementById("shopList");
+  const statsElement = document.getElementById("shopStats");
+  const listElement = document.getElementById("shopList");
   
-  if (!statsEl || !listEl) return;
+  if (!statsElement || !listElement) return;
 
-  statsEl.innerText = t("shopTotalScore") + " " + window.game.playerState.totalScore;
+  statsElement.innerText = t("shopTotalScore") + " " + window.game.playerState.totalScore;
 
   const availableSkins = window.game.skinManager.getAvailableSkins();
   
@@ -165,7 +165,7 @@ function refreshShopUI() {
       </div>`;
   });
 
-  listEl.innerHTML = html;
+  listElement.innerHTML = html;
 }
 
 /* ===========================================================
@@ -186,12 +186,12 @@ function showGameOver(finalScore) {
 async function submitScore() {
   if (!window.game) return;
   
-  let btn = document.getElementById("submitBtn");
-  let err = document.getElementById("errorMsg");
+  let submitButton = document.getElementById("submitBtn");
+  let errorMessage = document.getElementById("errorMsg");
   
-  btn.innerText = t("send") + "…";
-  btn.disabled = true;
-  err.style.display = "none";
+  submitButton.innerText = t("send") + "…";
+  submitButton.disabled = true;
+  errorMessage.style.display = "none";
 
   const playerName = (document.getElementById("playerName").value || "Anonyme").trim();
   const score = window.game.state.getFinalScore();
@@ -200,14 +200,14 @@ async function submitScore() {
   const result = await window.game.leaderboardManager.saveScore(playerName, score, level);
   
   if (!result.ok) {
-    err.innerText = "Erreur Firebase: " + (result.err || "?");
-    err.style.display = "block";
-    btn.innerText = t("send");
-    btn.disabled = false;
+    errorMessage.innerText = "Erreur Firebase: " + (result.err || "?");
+    errorMessage.style.display = "block";
+    submitButton.innerText = t("send");
+    submitButton.disabled = false;
     return;
   }
 
   openLeaderboard();
 }
 
-dbg("? ui.js chargé");
+dbg("✅ ui.js loaded");
