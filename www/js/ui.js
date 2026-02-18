@@ -1,4 +1,4 @@
-(typeof dbg === "function" ? dbg : console.log)("?? ui.js chargÈ");
+(typeof dbg === "function" ? dbg : console.log)("?? ui.js chargù");
 
 /* ===========================================================
    UI - Gestion des interfaces utilisateur
@@ -111,15 +111,15 @@ function backToMenu() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  showQuitBtn(); // la croix apparaÓt UNIQUEMENT ici
+  showQuitBtn(); // la croix apparaùt UNIQUEMENT ici
 }
 
 /* =======================
-   QUITTER LíAPP
+   QUITTER LùAPP
    ======================= */
 
 function quitApp() {
-  dbg("? Quit app demandÈ");
+  dbg("? Quit app demandù");
 
   // Cordova / Android
   if (window.cordova && navigator.app && navigator.app.exitApp) {
@@ -170,7 +170,7 @@ function loadLeaderboardForLevel(level) {
   if (title) title.innerText = `${t("leaderboardTitle")} ${level}s`;
 
   const scoresDiv = document.getElementById("scores");
-  scoresDiv.innerText = "ChargementÖ";
+  scoresDiv.innerText = "Chargementù";
 
   window.game.leaderboardManager.loadTopScores(level).then(list => {
     if (!list || list.length === 0) {
@@ -179,7 +179,7 @@ function loadLeaderboardForLevel(level) {
     }
 
     scoresDiv.innerHTML = list
-      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} ó ${s.score}</p>`)
+      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} ù ${s.score}</p>`)
       .join("");
   });
 }
@@ -202,7 +202,7 @@ function openShop() {
 
   refreshShopUI();
 
-  // ?? Affiche la notification UNIQUEMENT ‡ l'ouverture de la boutique
+  // ?? Affiche la notification UNIQUEMENT ù l'ouverture de la boutique
   initSkinsInfoModal();
 }
 
@@ -298,7 +298,7 @@ async function submitScore() {
   const btn = document.getElementById("submitBtn");
   const err = document.getElementById("errorMsg");
 
-  btn.innerText = t("send") + "Ö";
+  btn.innerText = t("send") + "ù";
   btn.disabled = true;
   err.style.display = "none";
 
@@ -330,4 +330,3 @@ window.addEventListener("load", () => {
   applyLang();
   console.log("? UI READY");
 });
-
