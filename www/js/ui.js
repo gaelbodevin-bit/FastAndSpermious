@@ -111,23 +111,37 @@ function backToMenu() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  showQuitBtn(); // la croix apparat UNIQUEMENT ici
+  showQuitBtn();
+
+  // ? Relancer la musique du menu
+  window.game?.playMusic("menu");
 }
 
 /* =======================
    QUITTER LAPP
    ======================= */
 
-function quitApp() {
-  dbg("? Quit app demand");
+// ? Flag mis à true une fois Cordova prêt
+let _cordovaReady = false;
+document.addEventListener("deviceready", () => {
+  _cordovaReady = true;
+  dbg("? Cordova deviceready");
+}, false);
 
-  // Cordova / Android
-  if (window.cordova && navigator.app && navigator.app.exitApp) {
+function quitApp() {
+  dbg("?? Quit app demandé");
+
+  // ? Stopper le jeu si en cours
+  if (window.game?.state?.run) {
+    window.game.stop();
+  }
+
+  // ? Android Cordova (garanti après deviceready)
+  if (_cordovaReady && navigator.app?.exitApp) {
     navigator.app.exitApp();
     return;
   }
 
-  // Desktop / VM : on ne peut pas fermer une page web -> retour menu
   backToMenu();
 }
 

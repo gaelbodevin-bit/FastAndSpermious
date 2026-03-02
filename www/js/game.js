@@ -24,11 +24,12 @@ class Game {
     // Boucle de jeu
     this.animationFrameId = null;
 
-    // Audio
-    this.audioCtx = null;
-
-    // Countdown (protection contre les appels multiples)
+    // Countdown
     this._countdownInterval = null;
+
+    // Audio
+    this.sounds = {};
+    this._currentMusic = null; // musique en cours de lecture
   }
 
   /* -------------------------------------------------------
@@ -54,6 +55,9 @@ class Game {
 
     await this.skinManager.load();
     this.updateCurrentSkin();
+
+    // Charger tous les sons
+    this.loadSounds();
 
     applyLang();
     refreshShopUI();
@@ -85,8 +89,11 @@ class Game {
   start(duration) {
     dbg("▶️ START", duration);
 
-    this.ensureAudioUnlocked();
+    // Arrêter la musique du menu
+    this.stopMusic();
+
     hidePanels();
+    showQuitBtn();
     this.canvas.style.display = "block";
     this.state.run = false;
 
@@ -113,8 +120,7 @@ class Game {
       this.animationFrameId = null;
     }
 
-    this.ensureAudioUnlocked();
-    this.playEndRoundFx();
+    this.playSound("timeout");
     this.onGameOver();
   }
 
@@ -123,6 +129,9 @@ class Game {
     this.playerState.addScore(finalScore);
     refreshShopUI();
     showGameOver(finalScore);
+
+    // Relancer la musique du menu après le game over
+    this.playMusic("menu");
   }
 
   /* -------------------------------------------------------
@@ -139,7 +148,9 @@ class Game {
         this._countdownInterval = null;
       }
 
-      this.ensureAudioUnlocked();
+      // Jouer le fichier countdown complet dès le début
+      this.playSound("321");
+
       el.style.display = "grid";
       let t = seconds;
 
@@ -151,22 +162,21 @@ class Game {
       };
 
       render(t);
-      this.playCountdownTick(t);
 
       this._countdownInterval = setInterval(() => {
         t--;
 
         if (t > 0) {
           render(t);
-          this.playCountdownTick(t);
           return;
         }
 
         if (t === 0) {
           render("GO!");
-          this.playGoFx();
           clearInterval(this._countdownInterval);
           this._countdownInterval = null;
+
+          navigator.vibrate?.([30, 40, 80]);
 
           setTimeout(() => {
             el.style.display = "none";
@@ -178,132 +188,87 @@ class Game {
   }
 
   /* -------------------------------------------------------
-     AUDIO
+     AUDIO - Chargement
   ------------------------------------------------------- */
-  ensureAudioUnlocked() {
-    try {
-      const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) {
-        dbg("❌ AudioContext non supporté");
-        return;
-      }
+  loadSounds() {
+    const files = {
+      "321":     "sounds/321.mp3",
+      "menu":    "sounds/Bouclemenu1.mp3",
+      "intro":   "sounds/testintro.mp3",
+      "timeout": "sounds/Timeout.mp3",
+    };
 
-      if (!this.audioCtx) {
-        this.audioCtx = new Ctx();
-        dbg("🔊 AudioContext créé");
-      }
+    Object.entries(files).forEach(([key, src]) => {
+      const audio = new Audio(src);
+      audio.preload = "auto";
+      this.sounds[key] = audio;
+    });
 
-      if (this.audioCtx.state === "suspended") {
-        this.audioCtx.resume()
-          .then(() => dbg("🔊 AudioContext resumed"))
-          .catch((e) => dbg("❌ Audio resume failed:", e?.message || e));
-      }
-    } catch (e) {
-      dbg("❌ ensureAudioUnlocked error:", e?.message || e);
+    // Musiques en boucle
+    this.sounds["menu"].loop   = true;
+    this.sounds["menu"].volume = 0.6;
+
+    // Intro : pas de boucle
+    this.sounds["intro"].loop   = false;
+    this.sounds["intro"].volume = 0.8;
+
+    dbg("🎵 Sons chargés");
+  }
+
+  /* -------------------------------------------------------
+     AUDIO - Lecture
+  ------------------------------------------------------- */
+
+  // Joue un effet sonore one-shot
+  playSound(key) {
+    const snd = this.sounds[key];
+    if (!snd) return;
+    snd.currentTime = 0;
+    snd.play().catch(e => dbg("🔇 Sound error:", e?.message));
+  }
+
+  // Joue une musique (arrête la précédente)
+  playMusic(key) {
+    const snd = this.sounds[key];
+    if (!snd) return;
+
+    // Déjà en cours → ne rien faire
+    if (this._currentMusic === snd && !snd.paused) return;
+
+    this.stopMusic();
+    this._currentMusic = snd;
+    snd.currentTime = 0;
+    snd.play().catch(e => dbg("🔇 Music error:", e?.message));
+  }
+
+  // Arrête la musique en cours
+  stopMusic() {
+    if (this._currentMusic) {
+      this._currentMusic.pause();
+      this._currentMusic.currentTime = 0;
+      this._currentMusic = null;
     }
   }
 
-  beep(freq = 880, durationMs = 90, type = "square", volume = 0.08) {
-    if (!this.audioCtx) return;
-
-    const ctx  = this.audioCtx;
-    const now  = ctx.currentTime;
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, now);
-
-    // Enveloppe attaque/relâche pour éviter les "clics"
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(volume, now + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now);
-    osc.stop(now + durationMs / 1000 + 0.02);
+  pauseMusic() {
+    this._currentMusic?.pause();
   }
 
-  playCountdownTick(n) {
-    const freqMap = { 3: 900, 2: 780, 1: 660 };
-    this.beep(freqMap[n] || 800, 95, "square", 0.08);
-  }
-
-  playGoFx() {
-    if (!this.audioCtx) return;
-
-    const ctx = this.audioCtx;
-    const now = ctx.currentTime;
-
-    // 🔥 Montée rapide (whoosh)
-    const osc1  = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = "sawtooth";
-    osc1.frequency.setValueAtTime(200, now);
-    osc1.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
-    gain1.gain.setValueAtTime(0.001, now);
-    gain1.gain.exponentialRampToValueAtTime(0.25, now + 0.02);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.2);
-
-    // 💥 Impact grave
-    const osc2  = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = "square";
-    osc2.frequency.setValueAtTime(120, now + 0.05);
-    gain2.gain.setValueAtTime(0.3, now + 0.05);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(now + 0.05);
-    osc2.stop(now + 0.22);
-
-    // 📳 Vibration punch
-    navigator.vibrate?.([30, 40, 80]);
-  }
-
-  playEndRoundFx() {
-    if (!this.audioCtx) return;
-
-    const ctx = this.audioCtx;
-    const now = ctx.currentTime;
-
-    // 🎵 Mini jingle "fin de round"
-    [600, 800, 1000].forEach((freq, i) => {
-      const t    = now + i * 0.08;
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(freq, t);
-      gain.gain.setValueAtTime(0.001, t);
-      gain.gain.exponentialRampToValueAtTime(0.16, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(t);
-      osc.stop(t + 0.18);
-    });
-
-    navigator.vibrate?.([40, 60]);
+  resumeMusic() {
+    this._currentMusic?.play().catch(e => dbg("🔇 Resume error:", e?.message));
   }
 }
 
 /* ===========================================================
-   AUDIO UNLOCK (anti-autoplay) - 1er clic/tap
+   AUDIO UNLOCK (anti-autoplay Android) - 1er tap/clic
    =========================================================== */
 function setupGlobalAudioUnlock(gameInstanceGetter) {
   const unlock = () => {
     const g = gameInstanceGetter?.();
     if (!g) return;
-
-    g.ensureAudioUnlocked?.();
-    g.beep?.(1200, 30, "square", 0.03); // mini beep de validation
+    dbg("🔊 Audio unlocked");
+    // Démarre la musique du menu au 1er tap
+    g.playMusic("menu");
   };
 
   window.addEventListener("pointerdown", unlock, { once: true });
