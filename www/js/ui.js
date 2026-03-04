@@ -113,7 +113,7 @@ function backToMenu() {
 
   showQuitBtn();
 
-  // ? Relancer la musique du menu
+  // ? Musique menu uniquement au retour au menu
   window.game?.playMusic("menu");
 }
 
@@ -121,7 +121,7 @@ function backToMenu() {
    QUITTER LAPP
    ======================= */
 
-// ? Flag mis à true une fois Cordova prêt
+// ? Flag Cordova deviceready
 let _cordovaReady = false;
 document.addEventListener("deviceready", () => {
   _cordovaReady = true;
@@ -136,7 +136,7 @@ function quitApp() {
     window.game.stop();
   }
 
-  // ? Android Cordova (garanti après deviceready)
+  // ? Android Cordova
   if (_cordovaReady && navigator.app?.exitApp) {
     navigator.app.exitApp();
     return;

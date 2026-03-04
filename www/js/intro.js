@@ -3,6 +3,17 @@ window.addEventListener("load", () => {
   const text  = document.getElementById("studio-text");
   if (!intro || !text) return;
 
+  // ? Lancer la musique d'intro dès le début de la cinématique
+  // On attend que window.game soit prêt (chargé après intro.js)
+  const tryPlayIntro = () => {
+    if (window.game?.sounds?.["intro"]) {
+      window.game.playMusic("intro");
+    } else {
+      setTimeout(tryPlayIntro, 100); // réessaie si game pas encore prêt
+    }
+  };
+  tryPlayIntro();
+
   /* ===============================
      CRÉATION DE LA CELLULE
      =============================== */
@@ -13,7 +24,6 @@ window.addEventListener("load", () => {
   cell.style.opacity = "0";
   cell.style.transform = "scale(0.2)";
   cell.style.willChange = "transform, opacity";
-
   intro.insertBefore(cell, text);
 
   /* ===============================
@@ -34,75 +44,60 @@ window.addEventListener("load", () => {
   /* ===============================
      2) RESPIRATION ORGANIQUE
      =============================== */
- // Taille de départ après la naissance
-let baseScale = 1;
+  let baseScale       = 1;
+  const breathAmplitude  = 0.065;
+  const growthPerBreath  = 0.006;
+  const breathDuration   = 3400;
+  let breathCount        = 0;
+  const maxBreaths       = 6;
 
-// Respiration bien visible
-const breathAmplitude = 0.065;
+  function breathe() {
+    if (breathCount >= maxBreaths) return;
+    const minScale = baseScale;
+    const maxScale = baseScale + breathAmplitude;
 
-// Croissance lente mais perceptible sur plusieurs cycles
-const growthPerBreath = 0.006;
+    cell.animate(
+      [
+        { transform: `scale(${minScale})` },
+        { transform: `scale(${maxScale})` },
+        { transform: `scale(${minScale})` }
+      ],
+      {
+        duration: breathDuration,
+        easing: "ease-in-out",
+        fill: "forwards"
+      }
+    );
 
-// Respiration lente
-const breathDuration = 3400;
+    baseScale += growthPerBreath;
+    breathCount++;
+    setTimeout(breathe, breathDuration);
+  }
 
-// Nombre max de respirations (évite qu’elle devienne énorme)
-let breathCount = 0;
-const maxBreaths = 6;
-
-function breathe() {
-  if (breathCount >= maxBreaths) return;
-
-  const minScale = baseScale;
-  const maxScale = baseScale + breathAmplitude;
-
-  cell.animate(
-    [
-      { transform: `scale(${minScale})` },
-      { transform: `scale(${maxScale})` },
-      { transform: `scale(${minScale})` }
-    ],
-    {
-      duration: breathDuration,
-      easing: "ease-in-out",
-      fill: "forwards"
-    }
-  );
-
-  // ?? la taille moyenne augmente APRÈS une respiration complète
-  baseScale += growthPerBreath;
-  breathCount++;
-
-  setTimeout(breathe, breathDuration);
-}
-
-// Lancer la respiration juste après la naissance
-setTimeout(breathe, 1800);
+  // Lancer la respiration juste après la naissance
+  setTimeout(breathe, 1800);
 
   /* ===============================
      3) TEXTE (CALME, SYNCHRO)
      =============================== */
-setTimeout(() => {
-  text.animate(
-    [
-      { opacity: 0, transform: "translateY(-6px)" },
-      { opacity: 1, transform: "translateY(0)" }
-    ],
-    {
-      duration: 700,
-      easing: "ease-out",
-      fill: "forwards"
-    }
-  );
-}, 1800); // ? EXACTEMENT la fin de la naissance
-
+  setTimeout(() => {
+    text.animate(
+      [
+        { opacity: 0, transform: "translateY(-6px)" },
+        { opacity: 1, transform: "translateY(0)" }
+      ],
+      {
+        duration: 700,
+        easing: "ease-out",
+        fill: "forwards"
+      }
+    );
+  }, 1800);
 
   /* ===============================
      4) FIN INTRO (PROPRE)
      =============================== */
   setTimeout(() => {
-    breathing = false; // stop respiration
-
     intro.animate(
       [
         { opacity: 1 },
@@ -114,7 +109,10 @@ setTimeout(() => {
       }
     ).onfinish = () => {
       intro.remove();
-    };
 
-  }, 7000); // ?? laisse le temps de voir la respiration
+      // ? Musique intro terminée ? lancer la musique du menu
+      window.game?.stopMusic();
+      window.game?.playMusic("menu");
+    };
+  }, 7000);
 });

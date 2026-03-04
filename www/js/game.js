@@ -26,10 +26,11 @@ class Game {
 
     // Countdown
     this._countdownInterval = null;
+    this._previewFrameId = null;
 
     // Audio
     this.sounds = {};
-    this._currentMusic = null; // musique en cours de lecture
+    this._currentMusic = null;
   }
 
   /* -------------------------------------------------------
@@ -56,7 +57,6 @@ class Game {
     await this.skinManager.load();
     this.updateCurrentSkin();
 
-    // Charger tous les sons
     this.loadSounds();
 
     applyLang();
@@ -89,19 +89,45 @@ class Game {
   start(duration) {
     dbg("▶️ START", duration);
 
-    // Arrêter la musique du menu
     this.stopMusic();
-
     hidePanels();
     showQuitBtn();
     this.canvas.style.display = "block";
     this.state.run = false;
 
-    this.startCountdown(3, 600).then(() => {
-      this.state.reset(duration);
-      this.state.run = true;
-      this.loop();
-    });
+    // ✅ Positionner le perso au centre dès l'affichage
+    this.state.sperm.x = this.state.W / 2;
+    this.state.sperm.y = this.state.H * 0.75;
+    this.state.sperm.dist = 0;
+
+    // ✅ Lancer une preview (affiche le perso pendant délai + countdown)
+    this.startPreviewLoop();
+
+    // ✅ Délai 2 secondes avant le countdown
+    setTimeout(() => {
+      this.startCountdown(3, 1000).then(() => {
+        this.stopPreviewLoop();
+        this.state.reset(duration);
+        this.state.run = true;
+        this.loop();
+      });
+    }, 1000);
+  }
+
+  startPreviewLoop() {
+    if (this._previewFrameId) return;
+    const tick = () => {
+      this.renderer.render();
+      this._previewFrameId = requestAnimationFrame(tick);
+    };
+    this._previewFrameId = requestAnimationFrame(tick);
+  }
+
+  stopPreviewLoop() {
+    if (this._previewFrameId) {
+      cancelAnimationFrame(this._previewFrameId);
+      this._previewFrameId = null;
+    }
   }
 
   loop() {
@@ -129,15 +155,13 @@ class Game {
     this.playerState.addScore(finalScore);
     refreshShopUI();
     showGameOver(finalScore);
-
-    // Relancer la musique du menu après le game over
-    this.playMusic("menu");
+    // ✅ La musique menu se lance uniquement dans backToMenu()
   }
 
   /* -------------------------------------------------------
      COUNTDOWN
   ------------------------------------------------------- */
-  startCountdown(seconds = 3, stepMs = 600) {
+  startCountdown(seconds = 3, stepMs = 1000) {
     return new Promise((resolve) => {
       const el = document.getElementById("countdown");
       if (!el) { resolve(); return; }
@@ -148,7 +172,7 @@ class Game {
         this._countdownInterval = null;
       }
 
-      // Jouer le fichier countdown complet dès le début
+      // ✅ Jouer le fichier countdown complet dès le début
       this.playSound("321");
 
       el.style.display = "grid";
@@ -204,13 +228,19 @@ class Game {
       this.sounds[key] = audio;
     });
 
-    // Musiques en boucle
+    // 🎵 Musique menu — boucle
     this.sounds["menu"].loop   = true;
-    this.sounds["menu"].volume = 0.6;
+    this.sounds["menu"].volume = 0.2; // 👈 Ajuste ici (0.0 → 1.0)
 
-    // Intro : pas de boucle
+    // 🎬 Musique intro — pas de boucle
     this.sounds["intro"].loop   = false;
-    this.sounds["intro"].volume = 0.8;
+    this.sounds["intro"].volume = 0.8; // 👈 Ajuste ici (0.0 → 1.0)
+
+    // ⏱️ Countdown 3-2-1
+    this.sounds["321"].volume   = 0.7; // 👈 Ajuste ici (0.0 → 1.0)
+
+    // 🔔 Son de fin de niveau
+    this.sounds["timeout"].volume = 0.6; // 👈 Ajuste ici (0.0 → 1.0)
 
     dbg("🎵 Sons chargés");
   }
@@ -267,8 +297,7 @@ function setupGlobalAudioUnlock(gameInstanceGetter) {
     const g = gameInstanceGetter?.();
     if (!g) return;
     dbg("🔊 Audio unlocked");
-    // Démarre la musique du menu au 1er tap
-    g.playMusic("menu");
+    // ✅ On ne lance PAS la musique ici — c'est intro.js qui gère le séquençage audio
   };
 
   window.addEventListener("pointerdown", unlock, { once: true });
