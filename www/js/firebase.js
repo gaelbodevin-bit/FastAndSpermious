@@ -203,11 +203,60 @@
   }
 
   /* =========================
+     PLAYER DATA (score cumulé + skins)
+     ========================= */
+
+  async function savePlayerData(totalScore, ownedSkins) {
+    try {
+      const user = await getFirebaseUser();
+      if (!user) throw new Error("Non authentifié");
+
+      await db.ref(`players/${user.uid}`).set({
+        totalScore: Number(totalScore) || 0,
+        ownedSkins: ownedSkins || [],
+        ts: Date.now()
+      });
+
+      log("✓ PlayerData sauvegardé | score:", totalScore);
+      return { ok: true };
+    } catch (e) {
+      errlog("❌ savePlayerData:", e);
+      return { ok: false, err: e.message };
+    }
+  }
+
+  async function loadPlayerData() {
+    try {
+      const user = await getFirebaseUser();
+      if (!user) throw new Error("Non authentifié");
+
+      const snap = await db.ref(`players/${user.uid}`).once("value");
+      const data = snap.val();
+
+      if (!data) {
+        log("ℹ️ Aucune donnée joueur sur Firebase");
+        return null;
+      }
+
+      log("✓ PlayerData chargé | score:", data.totalScore);
+      return {
+        totalScore: Number(data.totalScore) || 0,
+        ownedSkins: data.ownedSkins || []
+      };
+    } catch (e) {
+      errlog("❌ loadPlayerData:", e);
+      return null;
+    }
+  }
+
+  /* =========================
      EXPORT GLOBAL
      ========================= */
   window.firebaseSaveScore = firebaseSaveScore;
-  window.firebaseLoadTop = firebaseLoadTop;
-  window.getFirebaseUser = getFirebaseUser; // utile pour debug si besoin
+  window.firebaseLoadTop   = firebaseLoadTop;
+  window.getFirebaseUser   = getFirebaseUser;
+  window.savePlayerData    = savePlayerData;
+  window.loadPlayerData    = loadPlayerData;
 
   log("✓ firebase.js chargé");
 })();

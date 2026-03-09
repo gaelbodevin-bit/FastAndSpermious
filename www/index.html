@@ -12,6 +12,12 @@
   <!--            CSS                 -->
   <!-- =============================== -->
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Fond particules derrière tout */
+    #bgCanvas { z-index: -1 !important; }
+    #menu, #quitBtn, #countdown, #studio-intro { position: relative; z-index: 10; }
+    /* .panel garde son position: fixed défini dans style.css */
+  </style>
   <link rel="stylesheet" href="css/intro.css">
 
   <!-- =============================== -->
@@ -45,7 +51,9 @@
   <!-- =============================== -->
   <!--        BOUTON QUITTER (MENU)     -->
   <!-- =============================== -->
- <button id="quitBtn" onclick="quitApp()" aria-label="Quitter">✕</button>
+  <div id="quitBtn" onclick="quitApp()" aria-label="Quitter">
+    ✕
+  </div>
 
   <!-- =============================== -->
   <!--        INTRO ONE CELL STUDIO    -->
@@ -150,31 +158,18 @@
   </div>
 
   <!-- =============================== -->
-  <!--               DEBUG             -->
+  <!--            VERSION              -->
   <!-- =============================== -->
-  <div id="debugToggle" onclick="toggleDebug()">Debug</div>
-  <div id="debugConsole"></div>
+  <div id="versionTag"></div>
 
   <script>
-    function dbg() {
-      const box = document.getElementById("debugConsole");
-      if (!box) return;
-      const msg = Array.from(arguments).join(" ");
-      box.innerHTML += msg + "<br>";
-      box.scrollTop = box.scrollHeight;
-      console.log(msg);
-    }
-
-    function toggleDebug() {
-      const c = document.getElementById("debugConsole");
-      if (!c) return;
-      c.style.display = (c.style.display === "block" ? "none" : "block");
-    }
+    function dbg() { console.log(...arguments); }
   </script>
 
   <!-- =============================== -->
   <!--           SCRIPTS JS            -->
   <!-- =============================== -->
+  <script src="js/background.js"></script>
   <script src="js/firebase.js"></script>
   <script src="js/config.js"></script>
   <script src="js/models.js"></script>

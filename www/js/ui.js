@@ -111,37 +111,23 @@ function backToMenu() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  showQuitBtn();
-
-  // ? Musique menu uniquement au retour au menu
-  window.game?.playMusic("menu");
+  showQuitBtn(); // la croix apparat UNIQUEMENT ici
 }
 
 /* =======================
    QUITTER LAPP
    ======================= */
 
-// ? Flag Cordova deviceready
-let _cordovaReady = false;
-document.addEventListener("deviceready", () => {
-  _cordovaReady = true;
-  dbg("? Cordova deviceready");
-}, false);
-
 function quitApp() {
-  dbg("?? Quit app demandé");
+  dbg("? Quit app demand");
 
-  // ? Stopper le jeu si en cours
-  if (window.game?.state?.run) {
-    window.game.stop();
-  }
-
-  // ? Android Cordova
-  if (_cordovaReady && navigator.app?.exitApp) {
+  // Cordova / Android
+  if (window.cordova && navigator.app && navigator.app.exitApp) {
     navigator.app.exitApp();
     return;
   }
 
+  // Desktop / VM : on ne peut pas fermer une page web -> retour menu
   backToMenu();
 }
 
@@ -226,10 +212,21 @@ function closeShop() {
 
 function equipSkin(id) {
   if (!window.game) return;
-
   if (window.game.skinManager.equipSkin(id)) {
     window.game.updateCurrentSkin();
     refreshShopUI();
+  }
+}
+
+// ? Débloquer un skin
+function unlockSkin(id) {
+  if (!window.game) return;
+  const result = window.game.skinManager.unlockSkin(id);
+  if (result.ok) {
+    dbg("? Skin débloqué:", id);
+    refreshShopUI();
+  } else {
+    dbg("? unlockSkin:", result.err);
   }
 }
 
@@ -261,6 +258,10 @@ function refreshShopUI() {
     if (!skin.owned && skin.type === "score") {
       status = t("shopUnlockAt").replace("{score}", skin.requiredScore);
       requirement = `<div class="skin-requirement">?? ${status}</div>`;
+      // ? Bouton Débloquer si score suffisant
+      if (skin.canUnlock) {
+        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'Débloquer'}</button>`;
+      }
     } else {
       status = t("shopOwned");
       button = skin.equipped

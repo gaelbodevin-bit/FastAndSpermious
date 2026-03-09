@@ -38,7 +38,8 @@ const LANG = {
     skinsInfoBody:
       "Les skins se débloquent en atteignant certains scores ou via des achats.",
     skinsInfoDontShow: "Ne plus afficher",
-    skinsInfoOk: "Compris"
+    skinsInfoOk: "Compris",
+    shopUnlock: "Débloquer"
   },
 
   en: {
@@ -70,7 +71,8 @@ const LANG = {
     skinsInfoBody:
       "Skins unlock by reaching certain scores or through purchases.",
     skinsInfoDontShow: "Don't show again",
-    skinsInfoOk: "Got it"
+    skinsInfoOk: "Got it",
+    shopUnlock: "Unlock"
   },
 
   es: {
@@ -102,7 +104,8 @@ const LANG = {
     skinsInfoBody:
       "Las skins se desbloquean al alcanzar ciertas puntuaciones o mediante compras.",
     skinsInfoDontShow: "No volver a mostrar",
-    skinsInfoOk: "Entendido"
+    skinsInfoOk: "Entendido",
+    shopUnlock: "Desbloquear"
   }
 };
 

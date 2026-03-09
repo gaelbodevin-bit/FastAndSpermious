@@ -1,7 +1,7 @@
-dbg("? models.js chargé");
+dbg("? models.js charg");
 
 /* ===========================================================
-   MODELS - États du jeu et du joueur
+   MODELS - tats du jeu et du joueur
    =========================================================== */
 
 /* =======================
@@ -43,14 +43,49 @@ class PlayerState {
     }
   }
 
+  // ? Sauvegarde locale + Firebase
   save() {
     try {
-      localStorage.setItem("playerId", this.playerId);
-      localStorage.setItem("totalScore", String(this.totalScore));
-      localStorage.setItem("ownedSkins", JSON.stringify(this.ownedSkins));
+      localStorage.setItem("playerId",    this.playerId);
+      localStorage.setItem("totalScore",  String(this.totalScore));
+      localStorage.setItem("ownedSkins",  JSON.stringify(this.ownedSkins));
       localStorage.setItem("equippedSkin", this.equippedSkin);
     } catch (e) {
-      dbg("? Erreur sauvegarde PlayerState:", e);
+      dbg("? Erreur sauvegarde locale PlayerState:", e);
+    }
+    // Sync Firebase
+    if (typeof savePlayerData === "function") {
+      savePlayerData(this.totalScore, this.ownedSkins)
+        .catch(e => dbg("? savePlayerData:", e));
+    }
+  }
+
+  // ? Sync depuis Firebase au démarrage
+  async syncFromFirebase() {
+    try {
+      if (typeof loadPlayerData !== "function") return;
+      const data = await loadPlayerData();
+      if (!data) return;
+      // On prend le MAX pour ne pas perdre de points
+      if (data.totalScore > this.totalScore) {
+        this.totalScore = data.totalScore;
+        localStorage.setItem("totalScore", String(this.totalScore));
+        dbg("? Score sync Firebase:", this.totalScore);
+      }
+      // Fusionner les skins
+      let changed = false;
+      (data.ownedSkins || []).forEach(id => {
+        if (!this.ownedSkins.includes(id)) {
+          this.ownedSkins.push(id);
+          changed = true;
+        }
+      });
+      if (changed) {
+        localStorage.setItem("ownedSkins", JSON.stringify(this.ownedSkins));
+        dbg("? Skins sync Firebase:", this.ownedSkins);
+      }
+    } catch (e) {
+      dbg("? syncFromFirebase:", e);
     }
   }
 
@@ -177,7 +212,7 @@ class GameState {
       this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
     }
 
-    /* ---------- SCORE (INDÉPENDANT DU Y) ---------- */
+    /* ---------- SCORE (INDPENDANT DU Y) ---------- */
     if (this.sperm.vy > 0) {
       this.sperm.dist += this.sperm.vy;
     }

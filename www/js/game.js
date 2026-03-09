@@ -349,6 +349,16 @@ window.onload = async () => {
     return;
   }
 
+  // ✅ Sync score et skins depuis Firebase
+  window.game.playerState.syncFromFirebase().then(() => {
+    refreshShopUI();
+    dbg("✅ Sync Firebase terminée");
+  });
+
+  // ✅ Affichage version
+  const vTag = document.getElementById("versionTag");
+  if (vTag) vTag.textContent = "v" + GAME_CONFIG.VERSION;
+
   backToMenu();
   dbg("✅ Jeu prêt");
 };
