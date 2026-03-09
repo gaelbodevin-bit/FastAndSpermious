@@ -62,6 +62,28 @@ class Game {
     applyLang();
     refreshShopUI();
 
+    // ✅ Pause/reprise musique quand l'app passe en arrière-plan
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        this.pauseMusic();
+        dbg("⏸️ Musique en pause (app masquée)");
+      } else {
+        this.resumeMusic();
+        dbg("▶️ Musique reprise (app visible)");
+      }
+    });
+
+    // ✅ Cordova : événements pause/resume natifs Android
+    document.addEventListener("pause",  () => {
+      this.pauseMusic();
+      dbg("⏸️ Cordova pause");
+    }, false);
+
+    document.addEventListener("resume", () => {
+      this.resumeMusic();
+      dbg("▶️ Cordova resume");
+    }, false);
+
     dbg("✅ Game initialisé");
     return true;
   }
@@ -111,7 +133,7 @@ class Game {
         this.state.run = true;
         this.loop();
       });
-    }, 1000);
+    }, 2000);
   }
 
   startPreviewLoop() {
