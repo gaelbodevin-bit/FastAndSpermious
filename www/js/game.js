@@ -49,7 +49,10 @@ class Game {
     this.renderer = new Renderer(this.state);
     this.inputManager = new InputManager(this.state);
 
-    window.addEventListener("resize", () => this.state.resize());
+    // ✅ Resize uniquement hors partie pour éviter reset du contexte 2D
+    window.addEventListener("resize", () => {
+      if (!this.state.run) this.state.resize();
+    });
     this.state.resize();
 
     this.inputManager.init();
@@ -122,6 +125,12 @@ class Game {
     this.state.sperm.y = this.state.H * 0.75;
     this.state.sperm.dist = 0;
 
+    // ✅ Forcer la taille du canvas (évite reset contexte 2D)
+    this.canvas.width  = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    this.state.W = this.canvas.width;
+    this.state.H = this.canvas.height;
+
     // ✅ Lancer une preview (affiche le perso pendant délai + countdown)
     this.startPreviewLoop();
 
@@ -153,7 +162,10 @@ class Game {
   }
 
   loop() {
-    if (!this.state.run) return;
+    if (!this.state.run) {
+      this.animationFrameId = null;
+      return;
+    }
 
     this.state.update();
     this.renderer.render();
@@ -161,13 +173,13 @@ class Game {
   }
 
   stop() {
-    this.state.stop();
-
+    // ✅ Arrêter la boucle RAF en premier pour éviter les appels multiples
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
 
+    this.state.stop();
     this.playSound("timeout");
     this.onGameOver();
   }

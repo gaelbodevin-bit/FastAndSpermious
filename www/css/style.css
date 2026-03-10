@@ -121,7 +121,7 @@ h1 {
     height: 100%;
     display: none;
     background: #000;
-    z-index: 50; /* ✅ au-dessus des panels et du fond */
+    z-index: 40;
 }
 
 /* =============================== */

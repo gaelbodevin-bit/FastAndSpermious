@@ -60,7 +60,7 @@ class PlayerState {
     }
   }
 
-  // ? Sync depuis Firebase au démarrage
+  // ? Sync depuis Firebase au dmarrage
   async syncFromFirebase() {
     try {
       if (typeof loadPlayerData !== "function") return;
@@ -184,8 +184,11 @@ class GameState {
     if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => {
       this.timeLeft--;
-      if (this.timeLeft <= 0 && window.game) {
-        window.game.stop();
+      if (this.timeLeft <= 0) {
+        // ? Nettoyer le timer AVANT d'appeler stop()
+        clearInterval(this.timer);
+        this.timer = null;
+        if (window.game) window.game.stop();
       }
     }, 1000);
   }

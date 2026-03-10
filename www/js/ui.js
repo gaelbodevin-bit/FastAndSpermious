@@ -218,12 +218,12 @@ function equipSkin(id) {
   }
 }
 
-// ? DÈbloquer un skin
+// ? Dùbloquer un skin
 function unlockSkin(id) {
   if (!window.game) return;
   const result = window.game.skinManager.unlockSkin(id);
   if (result.ok) {
-    dbg("? Skin dÈbloquÈ:", id);
+    dbg("? Skin dùbloquù:", id);
     refreshShopUI();
   } else {
     dbg("? unlockSkin:", result.err);
@@ -258,9 +258,9 @@ function refreshShopUI() {
     if (!skin.owned && skin.type === "score") {
       status = t("shopUnlockAt").replace("{score}", skin.requiredScore);
       requirement = `<div class="skin-requirement">?? ${status}</div>`;
-      // ? Bouton DÈbloquer si score suffisant
+      // ? Bouton Dùbloquer si score suffisant
       if (skin.canUnlock) {
-        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'DÈbloquer'}</button>`;
+        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'Dùbloquer'}</button>`;
       }
     } else {
       status = t("shopOwned");
@@ -291,6 +291,10 @@ function refreshShopUI() {
 
 function showGameOver(finalScore) {
   hidePanels();
+
+  // ? Cacher le canvas de jeu (z-index 40 cachait le panel gameover z-index 20)
+  const canvas = document.getElementById("gameCanvas");
+  if (canvas) canvas.style.display = "none";
 
   const stats = document.getElementById("finalStats");
   if (stats) stats.innerText = t("distance") + finalScore;
