@@ -1,5 +1,5 @@
 /* ===========================================================
-   SKIN MANAGER - Gestion des skins (chargement, équipement)
+   SKIN MANAGER - Gestion des skins (chargement, quipement)
    =========================================================== */
 
 class SkinManager {
@@ -21,7 +21,7 @@ class SkinManager {
         dbg("?? Chargement skins depuis navigateur:", url);
       }
 
-      // XMLHttpRequest pour compatibilité file://
+      // XMLHttpRequest pour compatibilit file://
       const httpRequest = new XMLHttpRequest();
       httpRequest.open('GET', url, false);
       httpRequest.send();
@@ -33,20 +33,27 @@ class SkinManager {
       this.skins = JSON.parse(httpRequest.responseText);
       this.loaded = true;
 
-      // Déverrouiller les skins "always"
+      // ?? DEBUG : déverrouiller tous les skins pour les tests — mettre false en prod !
+      const DEBUG_UNLOCK_ALL = true;
+
       this.skins.forEach(skin => {
-        if (skin.type === "always" && !this.playerState.ownedSkins.includes(skin.id)) {
-          this.playerState.ownSkin(skin.id);
+        if (
+          skin.type === "always" ||
+          DEBUG_UNLOCK_ALL
+        ) {
+          if (!this.playerState.ownedSkins.includes(skin.id)) {
+            this.playerState.ownSkin(skin.id);
+          }
         }
       });
 
-      // Vérifier que le skin équipé est valide
+      // Vrifier que le skin quip est valide
       if (!this.playerState.ownedSkins.includes(this.playerState.equippedSkin)) {
         this.playerState.equippedSkin = "base";
         this.playerState.save();
       }
 
-      dbg("?? Skins chargés avec succès:", this.skins.length);
+      dbg("?? Skins chargs avec succs:", this.skins.length);
       return true;
 
     } catch (e) {
@@ -81,13 +88,13 @@ class SkinManager {
     }));
   }
 
-  // ? Débloquer un skin si le score est suffisant
+  // ? Dbloquer un skin si le score est suffisant
   unlockSkin(skinId) {
     const skin = this.skins.find(s => s.id === skinId);
     if (!skin) return { ok: false, err: "Skin introuvable" };
 
     if (this.playerState.ownedSkins.includes(skinId)) {
-      return { ok: false, err: "Déjà débloqué" };
+      return { ok: false, err: "Dj dbloqu" };
     }
 
     if (skin.type === "score") {
@@ -95,20 +102,20 @@ class SkinManager {
         return { ok: false, err: "Score insuffisant" };
       }
       this.playerState.ownSkin(skinId);
-      dbg("? Skin débloqué:", skinId);
+      dbg("? Skin dbloqu:", skinId);
       return { ok: true };
     }
 
-    return { ok: false, err: "Type non débloquable" };
+    return { ok: false, err: "Type non dbloquable" };
   }
 
   equipSkin(skinId) {
     if (this.playerState.equipSkin(skinId)) {
-      dbg("? Skin équipé:", skinId);
+      dbg("? Skin quip:", skinId);
       return true;
     }
     return false;
   }
 }
 
-dbg("? SkinManager.js chargé");
+dbg("? SkinManager.js charg");
