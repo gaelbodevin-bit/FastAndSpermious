@@ -113,7 +113,26 @@ const LANG = {
    LANG HELPERS
    ======================= */
 
-let currentLang = localStorage.getItem("lang") || "fr";
+// Détecter la langue du navigateur du téléphone
+
+function detectDeviceLanguage() {
+  const deviceLang = navigator.language || navigator.userLanguage;
+  const langCode = deviceLang.split('-')[0].toLowerCase();
+  
+  // Langues supportées : fr, en, es
+  const supportedLangs = ['fr', 'en', 'es'];
+  
+  if (supportedLangs.includes(langCode)) {
+    dbg("Langue détectée1:", langCode);
+    return langCode;
+  }
+  
+  // Langue par défaut si non supportée
+  return "fr";
+}
+
+let currentLang = detectDeviceLanguage();
+
 
 function t(key) {
   if (LANG[currentLang] && key in LANG[currentLang]) {
