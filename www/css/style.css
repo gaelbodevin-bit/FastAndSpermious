@@ -31,10 +31,22 @@ h1 {
     align-items: center;
     z-index: 10;
     box-sizing: border-box;
-    padding: 40px 0 20px 0;
+    padding: 0;
 }
 
 /* Corps du menu (boutons + langues) centré dans l'espace restant */
+.menu-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    padding-bottom: 80px;
+    box-sizing: border-box;
+}
+
 .menu-body {
     flex: 1;
     display: flex;
@@ -51,7 +63,7 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
 }
 
 /* Boutons principaux */
