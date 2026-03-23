@@ -35,17 +35,7 @@ h1 {
 }
 
 /* Corps du menu (boutons + langues) centré dans l'espace restant */
-.menu-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    width: 100%;
-    padding-bottom: 80px;
-    box-sizing: border-box;
-}
+
 
 .menu-body {
     flex: 1;
@@ -53,8 +43,8 @@ h1 {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding-top: 60px;
-    padding-bottom: 120px;
+    padding-top: 10%px;
+    padding-bottom: 25%;
     width: 100%;
     box-sizing: border-box;
 }
@@ -85,6 +75,7 @@ h1 {
     line-height: 1;
     box-sizing: border-box;
     transition: 0.25s ease-out;
+    width: 300px;
 }
 
 /* Desktop */
