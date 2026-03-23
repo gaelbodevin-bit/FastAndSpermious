@@ -226,17 +226,6 @@
     "frameSize": 256,
     "img": "img/skins/demon/sprite.png",
     "preview": "img/skins/demon/preview.png"
-  },
-  {
-    "id": "godmode2",
-    "name_fr": "God Mode II",
-    "name_en": "God Mode II",
-    "name_es": "Modo Dios II",
-    "type": "paid",
-    "price": 1.99,
-    "frames": 6,
-    "frameSize": 256,
-    "img": "img/skins/godmode2/sprite.png",
-    "preview": "img/skins/godmode2/preview.png"
   }
-]
+
+] 
