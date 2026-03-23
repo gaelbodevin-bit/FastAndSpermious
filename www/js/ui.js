@@ -106,7 +106,7 @@ function backToMenu() {
   hidePanels();
 
   const menu = document.getElementById("menu");
-  if (menu) menu.style.display = "block";
+  if (menu) menu.style.display = "flex";
 
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
