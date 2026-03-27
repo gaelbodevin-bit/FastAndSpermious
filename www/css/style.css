@@ -43,8 +43,8 @@ h1 {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding-top: 10%px;
-    padding-bottom: 25%;
+    padding-top: 90px;
+    padding-bottom: 160px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -307,27 +307,7 @@ h1 {
 /* =============================== */
 /*            VERSION TAG          */
 /* =============================== */
-#quitBtn {
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  border: none;
-  font-size: 22px;
-  line-height: 36px;
-  text-align: center;
-  z-index: 9999;
-  cursor: pointer;
-  display: none; /* cachée par défaut */
-}
-
-#quitBtn:hover {
-  background: rgba(255,255,255,0.2);
-}
+#quitBtn { display: none !important; }
 /* =============================== */
 /*        MODAL INFO SKINS         */
 /* =============================== */
@@ -468,4 +448,49 @@ h1 {
 @keyframes popCountdown {
     0%   { transform: scale(0.7); opacity: 0.2; }
     100% { transform: scale(1);   opacity: 1; }
+}
+/* =============================== */
+/*       SKIN PREVIEW MODAL        */
+/* =============================== */
+
+.skin-preview-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+.skin-preview-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background: #0d0d0d;
+    border: 2px solid #ff4ca3;
+    border-radius: 20px;
+    padding: 30px 24px;
+    width: 80%;
+    max-width: 320px;
+    box-shadow: 0 0 30px rgba(255, 76, 163, 0.5);
+    animation: modalPop 0.2s ease-out;
+}
+
+.skin-preview-content img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #111;
+    border: 2px solid #333;
+}
+
+#skinPreviewName {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ff74c5;
+    text-shadow: 0 0 6px rgba(255, 76, 163, 0.8);
 }

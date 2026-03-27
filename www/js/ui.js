@@ -256,11 +256,10 @@ function refreshShopUI() {
     let requirement = "";
 
     if (!skin.owned && skin.type === "score") {
-      status = t("shopUnlockAt").replace("{score}", skin.requiredScore);
-      requirement = `<div class="skin-requirement">?? ${status}</div>`;
-      // ? Bouton Dùbloquer si score suffisant
+      status = "";
+      requirement = `<div class="skin-requirement">?? ${t("shopUnlockAt").replace("{score}", skin.requiredScore)}</div>`;
       if (skin.canUnlock) {
-        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'Dùbloquer'}</button>`;
+        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'DÈbloquer'}</button>`;
       }
     } else {
       status = t("shopOwned");
@@ -270,7 +269,7 @@ function refreshShopUI() {
     }
 
     html += `
-      <div class="shop-item">
+      <div class="shop-item" onclick="openSkinPreview('${skin.id}')" style="cursor:pointer;">
         ${skin.preview ? `<img src="${skin.preview}" class="skin-preview">` : ""}
         <div class="shop-text">
           <strong>${name}</strong>
@@ -283,6 +282,45 @@ function refreshShopUI() {
   });
 
   listEl.innerHTML = html;
+}
+
+/* ===========================================================
+   SKIN PREVIEW MODAL
+   =========================================================== */
+
+function openSkinPreview(skinId) {
+  if (!window.game) return;
+  const skin = window.game.skinManager.skins.find(s => s.id === skinId);
+  if (!skin) return;
+
+  const name = skin[`name_${currentLang}`] || skin.name_fr || skin.id;
+
+  let modal = document.getElementById("skinPreviewModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "skinPreviewModal";
+    modal.className = "skin-preview-modal";
+    modal.innerHTML = `
+      <div class="skin-preview-content">
+        <img id="skinPreviewImg" src="" alt="">
+        <div id="skinPreviewName"></div>
+        <button class="menu-btn" onclick="closeSkinPreview()">Fermer</button>
+      </div>
+    `;
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeSkinPreview();
+    });
+    document.body.appendChild(modal);
+  }
+
+  document.getElementById("skinPreviewImg").src = skin.preview || skin.img || "";
+  document.getElementById("skinPreviewName").innerText = name;
+  modal.style.display = "flex";
+}
+
+function closeSkinPreview() {
+  const modal = document.getElementById("skinPreviewModal");
+  if (modal) modal.style.display = "none";
 }
 
 /* ===========================================================
