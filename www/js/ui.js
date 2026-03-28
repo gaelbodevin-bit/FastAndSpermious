@@ -1,4 +1,4 @@
-(typeof dbg === "function" ? dbg : console.log)("?? ui.js chargù");
+(typeof dbg === "function" ? dbg : console.log)("?? ui.js chargÔøΩ");
 
 /* ===========================================================
    UI - Gestion des interfaces utilisateur
@@ -111,15 +111,15 @@ function backToMenu() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  showQuitBtn(); // la croix apparaùt UNIQUEMENT ici
+  showQuitBtn(); // la croix apparaÔøΩt UNIQUEMENT ici
 }
 
 /* =======================
-   QUITTER LùAPP
+   QUITTER LÔøΩAPP
    ======================= */
 
 function quitApp() {
-  dbg("? Quit app demandù");
+  dbg("? Quit app demandÔøΩ");
 
   // Cordova / Android
   if (window.cordova && navigator.app && navigator.app.exitApp) {
@@ -170,7 +170,7 @@ function loadLeaderboardForLevel(level) {
   if (title) title.innerText = `${t("leaderboardTitle")} ${level}s`;
 
   const scoresDiv = document.getElementById("scores");
-  scoresDiv.innerText = "Chargementù";
+  scoresDiv.innerText = "ChargementÔøΩ";
 
   window.game.leaderboardManager.loadTopScores(level).then(list => {
     if (!list || list.length === 0) {
@@ -179,7 +179,7 @@ function loadLeaderboardForLevel(level) {
     }
 
     scoresDiv.innerHTML = list
-      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} ù ${s.score}</p>`)
+      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} ÔøΩ ${s.score}</p>`)
       .join("");
   });
 }
@@ -202,7 +202,7 @@ function openShop() {
 
   refreshShopUI();
 
-  // ?? Affiche la notification UNIQUEMENT ù l'ouverture de la boutique
+  // ?? Affiche la notification UNIQUEMENT ÔøΩ l'ouverture de la boutique
   initSkinsInfoModal();
 }
 
@@ -218,12 +218,12 @@ function equipSkin(id) {
   }
 }
 
-// ? Dùbloquer un skin
+// ? DÔøΩbloquer un skin
 function unlockSkin(id) {
   if (!window.game) return;
   const result = window.game.skinManager.unlockSkin(id);
   if (result.ok) {
-    dbg("? Skin dùbloquù:", id);
+    dbg("? Skin dÔøΩbloquÔøΩ:", id);
     refreshShopUI();
   } else {
     dbg("? unlockSkin:", result.err);
@@ -257,21 +257,27 @@ function refreshShopUI() {
 
     if (!skin.owned && skin.type === "score") {
       status = "";
-      requirement = `<div class="skin-requirement">?? ${t("shopUnlockAt").replace("{score}", skin.requiredScore)}</div>`;
+      requirement = `<div class="skin-requirement">${t("shopUnlockAt").replace("{score}", skin.requiredScore.toLocaleString())}</div>`;
       if (skin.canUnlock) {
-        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'DÈbloquer'}</button>`;
+        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">${t('shopUnlock') || 'Debloquer'}</button>`;
       }
+    } else if (skin.owned && skin.type === "score" && skin.requiredScore > 0) {
+      status = "";
+      requirement = `<div class="skin-requirement" style="color:#2ecc71">Debloqu√© √† ${skin.requiredScore.toLocaleString()} pts</div>`;
+      button = skin.equipped
+        ? `<button disabled>${t("shopEquipped")}</button>`
+        : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
     } else if (!skin.owned && skin.type === "paid") {
       status = "";
-      requirement = `<div class="skin-requirement">?? Skin premium</div>`;
-      button = `<button onclick="alert('Achat bientÙt disponible !')" style="background:#8e44ad">?? Acheter</button>`;
+      requirement = `<div class="skin-requirement" style="color:#c39bd3">Premium - ${skin.price ? skin.price.toFixed(2) + " EUR" : "Premium"}</div>`;
+      button = `<button onclick="alert('Achat bientot disponible !')" style="background:#8e44ad">Acheter</button>`;
     } else {
-      status = t("shopOwned");
+      status = "";
+      requirement = skin.type === "paid" ? `<div class="skin-requirement" style="color:#c39bd3">Premium - ${skin.price ? skin.price.toFixed(2) + " EUR" : "Premium"}</div>` : "";
       button = skin.equipped
         ? `<button disabled>${t("shopEquipped")}</button>`
         : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
     }
-
     html += `
       <div class="shop-item">
         ${skin.preview ? `<img src="${skin.preview}" class="skin-preview" onclick="openSkinPreview('${skin.id}')" style="cursor:pointer;">` : ""}
@@ -359,7 +365,7 @@ async function submitScore() {
   const btn = document.getElementById("submitBtn");
   const err = document.getElementById("errorMsg");
 
-  btn.innerText = t("send") + "ù";
+  btn.innerText = t("send") + "ÔøΩ";
   btn.disabled = true;
   err.style.display = "none";
 
