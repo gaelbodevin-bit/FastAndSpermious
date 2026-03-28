@@ -1,4 +1,4 @@
-dbg("? config.js chargé");
+﻿dbg("? config.js chargé");
 
 /* ===========================================================
    CONFIG - Langues, Constantes, Configuration
@@ -39,7 +39,9 @@ const LANG = {
       "Les skins se débloquent en atteignant certains scores ou via des achats.",
     skinsInfoDontShow: "Ne plus afficher",
     skinsInfoOk: "Compris",
-    shopUnlock: "Débloquer"
+    shopUnlock: "Débloquer",
+    shopUnlockedAt: "Débloqué à {score} pts",
+    shopPremium: "Premium"
   },
 
   en: {
@@ -72,7 +74,9 @@ const LANG = {
       "Skins unlock by reaching certain scores or through purchases.",
     skinsInfoDontShow: "Don't show again",
     skinsInfoOk: "Got it",
-    shopUnlock: "Unlock"
+    shopUnlock: "Unlock",
+    shopUnlockedAt: "Unlocked at {score} pts",
+    shopPremium: "Premium"
   },
 
   es: {
@@ -105,7 +109,9 @@ const LANG = {
       "Las skins se desbloquean al alcanzar ciertas puntuaciones o mediante compras.",
     skinsInfoDontShow: "No volver a mostrar",
     skinsInfoOk: "Entendido",
-    shopUnlock: "Desbloquear"
+    shopUnlock: "Desbloquear",
+    shopUnlockedAt: "Desbloqueado con {score} pts",
+    shopPremium: "Premium"
   }
 };
 
