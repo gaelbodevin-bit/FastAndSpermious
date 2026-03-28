@@ -34,7 +34,7 @@ class SkinManager {
       this.loaded = true;
 
       // ?? DEBUG : déverrouiller tous les skins pour les tests — mettre false en prod !
-      const DEBUG_UNLOCK_ALL = TRUE;
+      const DEBUG_UNLOCK_ALL = false;
 
       this.skins.forEach(skin => {
         if (
