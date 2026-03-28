@@ -261,6 +261,10 @@ function refreshShopUI() {
       if (skin.canUnlock) {
         button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'Débloquer'}</button>`;
       }
+    } else if (!skin.owned && skin.type === "paid") {
+      status = "";
+      requirement = `<div class="skin-requirement">?? Skin premium</div>`;
+      button = `<button onclick="alert('Achat bientôt disponible !')" style="background:#8e44ad">?? Acheter</button>`;
     } else {
       status = t("shopOwned");
       button = skin.equipped
@@ -269,8 +273,8 @@ function refreshShopUI() {
     }
 
     html += `
-      <div class="shop-item" onclick="openSkinPreview('${skin.id}')" style="cursor:pointer;">
-        ${skin.preview ? `<img src="${skin.preview}" class="skin-preview">` : ""}
+      <div class="shop-item">
+        ${skin.preview ? `<img src="${skin.preview}" class="skin-preview" onclick="openSkinPreview('${skin.id}')" style="cursor:pointer;">` : ""}
         <div class="shop-text">
           <strong>${name}</strong>
           ${requirement}
