@@ -249,9 +249,9 @@ class Game {
      AUDIO - Chargement
   ------------------------------------------------------- */
   loadSounds() {
+    // Sons classiques (one-shot)
     const files = {
       "321":     "sounds/321.mp3",
-      "menu":    "sounds/Bouclemenu1.mp3",
       "intro":   "sounds/testintro.mp3",
       "timeout": "sounds/Timeout.mp3",
     };
@@ -262,21 +262,77 @@ class Game {
       this.sounds[key] = audio;
     });
 
-    // 🎵 Musique menu — boucle
-    this.sounds["menu"].loop   = true;
-    this.sounds["menu"].volume = 0.2; // 👈 Ajuste ici (0.0 → 1.0)
-
-    // 🎬 Musique intro — pas de boucle
     this.sounds["intro"].loop   = false;
-    this.sounds["intro"].volume = 0.8; // 👈 Ajuste ici (0.0 → 1.0)
+    this.sounds["intro"].volume = 0.8;
+    this.sounds["321"].volume   = 0.7;
+    this.sounds["timeout"].volume = 0.6;
 
-    // ⏱️ Countdown 3-2-1
-    this.sounds["321"].volume   = 0.7; // 👈 Ajuste ici (0.0 → 1.0)
+    // 🎵 Musique menu via Web Audio API — loop sans gap
+    this._audioCtx = null;
+    this._menuBuffer = null;
+    this._menuSource = null;
+    this._menuGain = null;
+    this._menuVolume = 0.2; // 👈 Ajuste ici (0.0 → 1.0)
 
-    // 🔔 Son de fin de niveau
-    this.sounds["timeout"].volume = 0.6; // 👈 Ajuste ici (0.0 → 1.0)
+    fetch("sounds/Bouclemenu1.mp3")
+      .then(r => r.arrayBuffer())
+      .then(buf => {
+        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return this._audioCtx.decodeAudioData(buf);
+      })
+      .then(decoded => {
+        this._menuBuffer = decoded;
+        dbg("🎵 Menu audio buffer prêt");
+      })
+      .catch(e => {
+        dbg("⚠️ Web Audio non disponible, fallback Audio:", e?.message);
+        // Fallback Audio classique
+        const audio = new Audio("sounds/Bouclemenu1.mp3");
+        audio.preload = "auto";
+        audio.loop = true;
+        audio.volume = 0.2;
+        this.sounds["menu"] = audio;
+      });
 
     dbg("🎵 Sons chargés");
+  }
+
+  _playMenuWebAudio() {
+    if (!this._audioCtx || !this._menuBuffer) return false;
+    try {
+      if (this._audioCtx.state === "suspended") {
+        this._audioCtx.resume();
+      }
+      this._menuGain = this._audioCtx.createGain();
+      this._menuGain.gain.value = this._menuVolume;
+      this._menuGain.connect(this._audioCtx.destination);
+
+      this._menuSource = this._audioCtx.createBufferSource();
+      this._menuSource.buffer = this._menuBuffer;
+      this._menuSource.loop = true;
+      this._menuSource.loopStart = 0;
+      this._menuSource.loopEnd = this._menuBuffer.duration;
+      this._menuSource.connect(this._menuGain);
+      this._menuSource.start(0);
+      return true;
+    } catch(e) {
+      dbg("⚠️ _playMenuWebAudio erreur:", e?.message);
+      return false;
+    }
+  }
+
+  _stopMenuWebAudio() {
+    try {
+      if (this._menuSource) {
+        this._menuSource.stop();
+        this._menuSource.disconnect();
+        this._menuSource = null;
+      }
+      if (this._menuGain) {
+        this._menuGain.disconnect();
+        this._menuGain = null;
+      }
+    } catch(e) {}
   }
 
   /* -------------------------------------------------------
@@ -293,13 +349,18 @@ class Game {
 
   // Joue une musique (arrête la précédente)
   playMusic(key) {
+    this.stopMusic();
+    this._currentMusicKey = key;
+
+    if (key === "menu" && this._menuBuffer) {
+      // ✅ Web Audio API — loop parfait sans gap
+      this._playMenuWebAudio();
+      return;
+    }
+
+    // Fallback Audio classique
     const snd = this.sounds[key];
     if (!snd) return;
-
-    // Déjà en cours → ne rien faire
-    if (this._currentMusic === snd && !snd.paused) return;
-
-    this.stopMusic();
     this._currentMusic = snd;
     snd.currentTime = 0;
     snd.play().catch(e => dbg("🔇 Music error:", e?.message));
@@ -307,18 +368,28 @@ class Game {
 
   // Arrête la musique en cours
   stopMusic() {
+    this._stopMenuWebAudio();
     if (this._currentMusic) {
       this._currentMusic.pause();
       this._currentMusic.currentTime = 0;
       this._currentMusic = null;
     }
+    this._currentMusicKey = null;
   }
 
   pauseMusic() {
+    if (this._currentMusicKey === "menu" && this._audioCtx) {
+      this._audioCtx.suspend();
+      return;
+    }
     this._currentMusic?.pause();
   }
 
   resumeMusic() {
+    if (this._currentMusicKey === "menu" && this._audioCtx) {
+      this._audioCtx.resume();
+      return;
+    }
     this._currentMusic?.play().catch(e => dbg("🔇 Resume error:", e?.message));
   }
 }
