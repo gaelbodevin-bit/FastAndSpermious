@@ -323,7 +323,7 @@ function showNewRecord() {
     document.body.appendChild(el);
   }
 
-  el.textContent = t("newRecord");
+  el.innerHTML = t("newRecord") || "NOUVEAU RECORD !";
 
   // Animation entrée
   el.style.transition = "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s";
@@ -402,7 +402,7 @@ function showGameOver(finalScore) {
     btn.innerText = t("send");
   }
 
-  document.getElementById("gameover").style.display = "block";
+  document.getElementById("gameover").style.display = "flex";
 }
 
 async function submitScore() {
