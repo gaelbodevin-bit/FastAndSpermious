@@ -1,16 +1,16 @@
-dbg("? LeaderboardManager chargÈ");
+dbg("? LeaderboardManager chargù");
 
 /* ===========================================================
    LEADERBOARD MANAGER
    - Firebase Auth anonyme
-   - Top 10 scores par niveau (toutes entrÈes confondues)
+   - Top 10 scores par niveau (toutes entrùes confondues)
    - Structure : leaderboards/{level}/{pushId}
    =========================================================== */
 
 class LeaderboardManager {
   constructor() {
     if (!window.firebaseDB || !firebase.auth) {
-      dbg("? Firebase non prÍt dans LeaderboardManager");
+      dbg("? Firebase non prùt dans LeaderboardManager");
       return;
     }
 
@@ -20,9 +20,9 @@ class LeaderboardManager {
 
   /* ===========================================================
      SAVE SCORE
-     - Chaque soumission crÈe une nouvelle entrÈe (push)
+     - Chaque soumission crùe une nouvelle entrùe (push)
      - On garde les 10 meilleurs scores au total par niveau
-     - Anti-spam : on vÈrifie que le score dÈpasse le 10e score actuel
+     - Anti-spam : on vùrifie que le score dùpasse le 10e score actuel
      =========================================================== */
 
   async saveScore(playerName, score, level) {
@@ -34,12 +34,12 @@ class LeaderboardManager {
 
       const user = this.auth.currentUser;
       if (!user) {
-        throw new Error("Utilisateur non authentifiÈ");
+        throw new Error("Utilisateur non authentifiù");
       }
 
       const ref = this.db.ref(`leaderboards/${lvl}`);
 
-      // RÈcupÈrer les 10 meilleurs scores actuels
+      // Rùcupùrer les 10 meilleurs scores actuels
       const snap = await ref
         .orderByChild("score")
         .limitToLast(10)
@@ -51,21 +51,26 @@ class LeaderboardManager {
         score: Number(v.score || 0)
       }));
 
-      // Si on a dÈj‡ 10 scores, vÈrifier que le nouveau est meilleur que le 10e
+      // Si on a dùjù 10 scores, vùrifier que le nouveau est meilleur que le 10e
       if (entries.length >= 10) {
         const minScore = Math.min(...entries.map(e => e.score));
         if (score <= minScore) {
-          dbg("?? Score ignorÈ (pas dans le top 10) :", score, "<= min", minScore);
+          dbg("?? Score ignorù (pas dans le top 10) :", score, "<= min", minScore);
           return { ok: true, skipped: true };
         }
 
-        // Supprimer le plus bas pour garder max 10 entrÈes
+        // Supprimer le plus bas pour garder max 10 entrùes
         const lowestEntry = entries.find(e => e.score === minScore);
         if (lowestEntry) {
           await this.db.ref(`leaderboards/${lvl}/${lowestEntry.key}`).remove();
-          dbg("??? Score le plus bas supprimÈ :", minScore);
+          dbg("??? Score le plus bas supprimù :", minScore);
         }
       }
+
+      // // ? VÈrifier si le nouveau score bat le top 1
+      const allScores = Object.values(raw).map(v => Number(v.score || 0));
+      const currentTop1 = allScores.length > 0 ? Math.max(...allScores) : 0;
+      const isNewRecord = score > currentTop1;
 
       // Ajouter le nouveau score avec un push (clÈ unique)
       await ref.push({
@@ -75,8 +80,8 @@ class LeaderboardManager {
         ts:    Date.now()
       });
 
-      dbg("? Score sauvegardÈ :", lvl, score);
-      return { ok: true };
+      dbg("Score sauvegardÈ :", lvl, score, isNewRecord ? "NOUVEAU RECORD !" : "");
+      return { ok: true, newRecord: isNewRecord };
 
     } catch (err) {
       dbg("? Erreur saveScore :", err);
@@ -86,7 +91,7 @@ class LeaderboardManager {
 
   /* ===========================================================
      LOAD TOP SCORES
-     - Retourne les 10 meilleurs scores triÈs du plus haut au plus bas
+     - Retourne les 10 meilleurs scores triùs du plus haut au plus bas
      =========================================================== */
 
   async loadTopScores(level, limit = 10) {

@@ -256,28 +256,19 @@ function refreshShopUI() {
     let requirement = "";
 
     if (!skin.owned && skin.type === "score") {
-      status = "";
-      requirement = `<div class="skin-requirement">${t("shopUnlockAt").replace("{score}", skin.requiredScore.toLocaleString())}</div>`;
+      status = t("shopUnlockAt").replace("{score}", skin.requiredScore);
+      requirement = `<div class="skin-requirement">?? ${status}</div>`;
+      // ? Bouton D�bloquer si score suffisant
       if (skin.canUnlock) {
-        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">${t('shopUnlock')}</button>`;
+        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'D�bloquer'}</button>`;
       }
-    } else if (skin.owned && skin.type === "score" && skin.requiredScore > 0) {
-      status = "";
-      requirement = `<div class="skin-requirement" style="color:#2ecc71">${t("shopUnlockedAt").replace("{score}", skin.requiredScore.toLocaleString())}</div>`;
-      button = skin.equipped
-        ? `<button disabled>${t("shopEquipped")}</button>`
-        : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
-    } else if (!skin.owned && skin.type === "paid") {
-      status = "";
-      requirement = `<div class="skin-requirement" style="color:#c39bd3">${t("shopPremium")} - ${skin.price ? skin.price.toFixed(2) + " EUR" : ""}</div>`;
-      button = `<button onclick="alert('Achat bientot disponible !')" style="background:#8e44ad">Acheter</button>`;
     } else {
-      status = "";
-      requirement = skin.type === "paid" ? `<div class="skin-requirement" style="color:#c39bd3">${t("shopPremium")} - ${skin.price ? skin.price.toFixed(2) + " EUR" : ""}</div>` : "";
+      status = t("shopOwned");
       button = skin.equipped
         ? `<button disabled>${t("shopEquipped")}</button>`
         : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
     }
+
     html += `
       <div class="shop-item">
         ${skin.preview ? `<img src="${skin.preview}" class="skin-preview" onclick="openSkinPreview('${skin.id}')" style="cursor:pointer;">` : ""}
@@ -292,6 +283,52 @@ function refreshShopUI() {
   });
 
   listEl.innerHTML = html;
+}
+
+/* ===========================================================
+   NOUVEAU RECORD
+   =========================================================== */
+
+function showNewRecord() {
+  let el = document.getElementById("newRecordBanner");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "newRecordBanner";
+    el.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, #ff4ca3, #c44dff);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 900;
+      padding: 20px 40px;
+      border-radius: 20px;
+      z-index: 99999;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255,76,163,0.8);
+      letter-spacing: 2px;
+      pointer-events: none;
+    `;
+    document.body.appendChild(el);
+  }
+
+  el.textContent = t("newRecord");
+
+  // Animation entrée
+  el.style.transition = "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s";
+  el.style.opacity = "1";
+  el.style.transform = "translate(-50%, -50%) scale(1)";
+
+  // Vibration
+  navigator.vibrate?.([100, 50, 100, 50, 200]);
+
+  // Sortie après 2.5s
+  setTimeout(() => {
+    el.style.transform = "translate(-50%, -50%) scale(0)";
+    el.style.opacity = "0";
+  }, 2500);
 }
 
 /* ===========================================================

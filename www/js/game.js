@@ -184,12 +184,26 @@ class Game {
     this.onGameOver();
   }
 
-  onGameOver() {
+  async onGameOver() {
     const finalScore = this.state.getFinalScore();
+    const level = this.state.lastLevelPlayed;
+
     this.playerState.addScore(finalScore);
     refreshShopUI();
-    showGameOver(finalScore);
-    // ✅ La musique menu se lance uniquement dans backToMenu()
+
+    // ✅ Vérifier si nouveau record AVANT d'afficher le game over
+    try {
+      const top = await this.leaderboardManager.loadTopScores(level, 1);
+      const currentTop1 = top.length > 0 ? top[0].score : 0;
+      if (finalScore > currentTop1) {
+        showNewRecord();
+        setTimeout(() => showGameOver(finalScore), 2800);
+      } else {
+        showGameOver(finalScore);
+      }
+    } catch(e) {
+      showGameOver(finalScore);
+    }
   }
 
   /* -------------------------------------------------------
@@ -309,9 +323,7 @@ class Game {
 
       this._menuSource = this._audioCtx.createBufferSource();
       this._menuSource.buffer = this._menuBuffer;
-      this._menuSource.loop = true;
-      this._menuSource.loopStart = 0;
-      this._menuSource.loopEnd = this._menuBuffer.duration;
+      this._menuSource.loop = true; // ✅ loop parfait via Web Audio
       this._menuSource.connect(this._menuGain);
       this._menuSource.start(0);
       return true;
