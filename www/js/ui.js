@@ -256,19 +256,28 @@ function refreshShopUI() {
     let requirement = "";
 
     if (!skin.owned && skin.type === "score") {
-      status = t("shopUnlockAt").replace("{score}", skin.requiredScore);
-      requirement = `<div class="skin-requirement">?? ${status}</div>`;
-      // ? Bouton D�bloquer si score suffisant
+      status = "";
+      requirement = `<div class="skin-requirement">${t("shopUnlockAt").replace("{score}", skin.requiredScore.toLocaleString())}</div>`;
       if (skin.canUnlock) {
-        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">?? ${t('shopUnlock') || 'D�bloquer'}</button>`;
+        button = `<button onclick="unlockSkin('${skin.id}')" style="background:#27ae60">${t('shopUnlock')}</button>`;
       }
+    } else if (skin.owned && skin.type === "score" && skin.requiredScore > 0) {
+      status = "";
+      requirement = `<div class="skin-requirement" style="color:#2ecc71">${t("shopUnlockedAt").replace("{score}", skin.requiredScore.toLocaleString())}</div>`;
+      button = skin.equipped
+        ? `<button disabled>${t("shopEquipped")}</button>`
+        : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
+    } else if (!skin.owned && skin.type === "paid") {
+      status = "";
+      requirement = `<div class="skin-requirement" style="color:#c39bd3">${t("shopPremium")} - ${skin.price ? skin.price.toFixed(2) + " EUR" : ""}</div>`;
+      button = `<button onclick="alert('Achat bientot disponible !')" style="background:#8e44ad">Acheter</button>`;
     } else {
-      status = t("shopOwned");
+      status = "";
+      requirement = skin.type === "paid" ? `<div class="skin-requirement" style="color:#c39bd3">${t("shopPremium")} - ${skin.price ? skin.price.toFixed(2) + " EUR" : ""}</div>` : "";
       button = skin.equipped
         ? `<button disabled>${t("shopEquipped")}</button>`
         : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
     }
-
     html += `
       <div class="shop-item">
         ${skin.preview ? `<img src="${skin.preview}" class="skin-preview" onclick="openSkinPreview('${skin.id}')" style="cursor:pointer;">` : ""}

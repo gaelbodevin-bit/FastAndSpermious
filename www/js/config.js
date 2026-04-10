@@ -40,6 +40,8 @@ const LANG = {
     skinsInfoDontShow: "Ne plus afficher",
     skinsInfoOk: "Compris",
     shopUnlock: "Débloquer",
+    shopUnlockedAt: "Débloqué à {score} pts",
+    shopPremium: "Premium",
     newRecord: "NOUVEAU RECORD !"
   },
 
@@ -74,6 +76,8 @@ const LANG = {
     skinsInfoDontShow: "Don't show again",
     skinsInfoOk: "Got it",
     shopUnlock: "Unlock",
+    shopUnlockedAt: "Unlocked at {score} pts",
+    shopPremium: "Premium",
     newRecord: "NEW RECORD!"
   },
 
@@ -108,6 +112,8 @@ const LANG = {
     skinsInfoDontShow: "No volver a mostrar",
     skinsInfoOk: "Entendido",
     shopUnlock: "Desbloquear",
+    shopUnlockedAt: "Desbloqueado con {score} pts",
+    shopPremium: "Premium",
     newRecord: "¡NUEVO RÉCORD!"
   }
 };
@@ -161,7 +167,7 @@ function setLang(lang) {
    ======================= */
 
 const GAME_CONFIG = {
-  VERSION: "2026.03.28",
+  VERSION: "2026.04.11",
 
   // Sprite
   FRAME_SIZE: 256,
