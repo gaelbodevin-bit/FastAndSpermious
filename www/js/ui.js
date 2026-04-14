@@ -182,7 +182,7 @@ function loadLeaderboardForLevel(level) {
     }
 
     scoresDiv.innerHTML = list
-      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} � ${s.score}</p>`)
+      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} - ${s.score}</p>`)
       .join("");
   });
 }
