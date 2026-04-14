@@ -444,6 +444,21 @@ window.onload = async () => {
     return;
   }
 
+  // ✅ Reset ownedSkins si nouvelle version (nettoie les données de test)
+  const _savedVer = localStorage.getItem("gameVersion");
+  if (_savedVer !== GAME_CONFIG.VERSION) {
+    dbg("🔄 Reset skins - version:", GAME_CONFIG.VERSION);
+    localStorage.removeItem("ownedSkins");
+    localStorage.removeItem("equippedSkin");
+    localStorage.setItem("gameVersion", GAME_CONFIG.VERSION);
+    // Recharger playerState proprement
+    window.game.playerState.ownedSkins = [];
+    window.game.playerState.equippedSkin = "base";
+    // Réappliquer les skins "always"
+    await window.game.skinManager.load();
+    window.game.updateCurrentSkin();
+  }
+
   // ✅ Sync score et skins depuis Firebase
   window.game.playerState.syncFromFirebase().then(() => {
     refreshShopUI();
