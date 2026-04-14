@@ -111,7 +111,10 @@ function backToMenu() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  showQuitBtn(); // la croix appara�t UNIQUEMENT ici
+  // ✅ Relancer la musique menu
+  window.game?.playMusic("menu");
+
+  showQuitBtn();
 }
 
 /* =======================
