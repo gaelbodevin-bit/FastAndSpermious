@@ -444,6 +444,12 @@ window.onload = async () => {
     return;
   }
 
+  // ✅ Connexion Google Play Games (si disponible)
+  if (typeof initPlayGames === "function") {
+    await initPlayGames();
+    dbg("🎮 Play Games initialisé");
+  }
+
   // ✅ Reset ownedSkins si nouvelle version (nettoie les données de test)
   const _savedVer = localStorage.getItem("gameVersion");
   if (_savedVer !== GAME_CONFIG.VERSION) {
