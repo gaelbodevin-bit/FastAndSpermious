@@ -175,8 +175,8 @@ const GAME_CONFIG = {
   SPRITE_SCALE: 0.6,
 
   // Physique
-  SHAKE_THRESHOLD: 20,
-  VELOCITY_DAMPING: 0.92,
+  SHAKE_THRESHOLD: 3,       // Seuil bas pour détecter les vrais mouvements
+  VELOCITY_DAMPING: 0.88,   // Amortissement plus fort pour descendre plus vite
 
   // Mouvement
   SPERM_AMPLITUDE: 30,

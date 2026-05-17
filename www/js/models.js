@@ -209,7 +209,11 @@ class GameState {
 
     /* ---------- SHAKE / VITESSE ---------- */
     if (this.shakeForce > 0) {
-      this.sperm.vy = Math.min(this.shakeForce / 12, 8);
+      // ? Vitesse proportionnelle au mouvement, max limité
+      // Pour atteindre le haut en ~15s il faut ~H/15/60 px/frame
+      const targetMaxVy = (this.H * 0.65) / (this.timeLeft * 60 + 1);
+      const force = Math.min(this.shakeForce / 20, targetMaxVy * 3);
+      this.sperm.vy = Math.max(this.sperm.vy, force);
       this.shakeForce = 0;
     } else {
       this.sperm.vy *= GAME_CONFIG.VELOCITY_DAMPING;
