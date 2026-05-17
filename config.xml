@@ -14,8 +14,8 @@
         Fast and Spermious - arcade reflex game.
     </description>
 
-    <author email="contact@onecellstudio.com">
-        One Cell Studio
+    <author email="contact@bluecellproduction.com">
+        Blue Cell Production
     </author>
 
     <content src="index.html" />
@@ -34,7 +34,7 @@
     <allow-intent href="geo:*" />
 
     <!-- =============================== -->
-    <!--      ANDROID SDK (FORCÉ)        -->
+    <!--      ANDROID SDK (FORC)        -->
     <!-- =============================== -->
     <preference name="android-minSdkVersion" value="22" />
     <preference name="android-targetSdkVersion" value="34" />
@@ -56,11 +56,11 @@
     <!-- =============================== -->
     <platform name="android">
 
-        <!-- Icône app (launcher) -->
+        <!-- Icne app (launcher) -->
         <icon src="www/assets/studio/logo_cell.png" />
 
         <!-- ================================================= -->
-        <!-- ANDROID 12+ SPLASH : NEUTRALISÉ VOLONTAIREMENT    -->
+        <!-- ANDROID 12+ SPLASH : NEUTRALIS VOLONTAIREMENT    -->
         <!-- ================================================= -->
         <!--
           IMPORTANT :
@@ -74,7 +74,7 @@
         <preference name="AndroidWindowSplashScreenBackground"
                     value="#0B0F10" />
 
-        <!-- Animation système désactivée -->
+        <!-- Animation systme dsactive -->
         <preference name="AndroidWindowSplashScreenAnimationDuration"
                     value="0" />
 
