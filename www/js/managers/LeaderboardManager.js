@@ -67,12 +67,12 @@ class LeaderboardManager {
         }
       }
 
-      // // ? Vérifier si le nouveau score bat le top 1
+      // // ? Vrifier si le nouveau score bat le top 1
       const allScores = Object.values(raw).map(v => Number(v.score || 0));
       const currentTop1 = allScores.length > 0 ? Math.max(...allScores) : 0;
       const isNewRecord = score > currentTop1;
 
-      // Ajouter le nouveau score avec un push (clé unique)
+      // Ajouter le nouveau score avec un push (cl unique)
       await ref.push({
         name:  playerName || "Anonyme",
         score: Number(score),
@@ -80,7 +80,7 @@ class LeaderboardManager {
         ts:    Date.now()
       });
 
-      dbg("Score sauvegardé :", lvl, score, isNewRecord ? "NOUVEAU RECORD !" : "");
+      dbg("Score sauvegard :", lvl, score, isNewRecord ? "NOUVEAU RECORD !" : "");
       return { ok: true, newRecord: isNewRecord };
 
     } catch (err) {
@@ -120,7 +120,56 @@ class LeaderboardManager {
       return list;
 
     } catch (err) {
-      dbg("? Erreur loadTopScores :", err);
+      dbg("Erreur loadTopScores :", err);
+      return [];
+    }
+  }
+
+  /* ===========================================================
+     SAVE TOTAL SCORE
+     - Sauvegarde le score cumulatif du joueur dans leaderboard_total
+     =========================================================== */
+  async saveTotalScore(playerName, totalScore) {
+    try {
+      const user = this.auth.currentUser;
+      if (!user) return;
+
+      await this.db.ref(`leaderboard_total/${user.uid}`).set({
+        name:  playerName || "Anonyme",
+        score: Number(totalScore) || 0,
+        ts:    Date.now()
+      });
+
+      dbg("Total score sauvegarde :", totalScore);
+    } catch (err) {
+      dbg("Erreur saveTotalScore :", err);
+    }
+  }
+
+  /* ===========================================================
+     LOAD TOTAL LEADERBOARD
+     - Retourne le classement par score cumulatif total
+     =========================================================== */
+  async loadTotalLeaderboard(limit = 100) {
+    try {
+      const snap = await this.db
+        .ref("leaderboard_total")
+        .orderByChild("score")
+        .limitToLast(limit)
+        .once("value");
+
+      const raw = snap.val() || {};
+
+      return Object.values(raw)
+        .map(v => ({
+          name:  v.name  || "?",
+          score: Number(v.score || 0),
+          ts:    v.ts    || 0
+        }))
+        .sort((a, b) => b.score - a.score);
+
+    } catch (err) {
+      dbg("Erreur loadTotalLeaderboard :", err);
       return [];
     }
   }
