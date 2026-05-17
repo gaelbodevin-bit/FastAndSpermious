@@ -175,26 +175,6 @@ function loadLeaderboardForLevel(level) {
   const scoresDiv = document.getElementById("scores");
   scoresDiv.innerText = "Chargement�";
 
-  // ✅ Afficher le score perso du joueur
-  const myScoreDiv = document.getElementById("myScore");
-  if (myScoreDiv && window.game) {
-    const totalScore = window.game.playerState.totalScore;
-    myScoreDiv.innerHTML = `
-      <div style="
-        background: rgba(255,76,163,0.1);
-        border: 1px solid rgba(255,76,163,0.4);
-        border-radius: 12px;
-        padding: 12px 20px;
-        margin: 0 auto 20px;
-        width: 85%;
-        text-align: center;
-      ">
-        <div style="color:#ff74c5; font-size:13px; letter-spacing:0.1em; margin-bottom:4px;">MON SCORE TOTAL</div>
-        <div style="color:#fff; font-size:24px; font-weight:bold;">${totalScore.toLocaleString()}</div>
-      </div>
-    `;
-  }
-
   window.game.leaderboardManager.loadTopScores(level).then(list => {
     if (!list || list.length === 0) {
       scoresDiv.innerHTML = "<p>Aucun score pour ce niveau.</p>";
