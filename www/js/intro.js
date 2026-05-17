@@ -3,24 +3,24 @@ window.addEventListener("load", () => {
   const text  = document.getElementById("studio-text");
   if (!intro || !text) return;
 
-  // ? Lancer la musique d'intro dËs le dÈbut de la cinÈmatique
-  // On attend que window.game soit prÍt (chargÈ aprËs intro.js)
+  // ? Lancer la musique d'intro dùs le dùbut de la cinùmatique
+  // On attend que window.game soit prùt (chargù aprùs intro.js)
   const tryPlayIntro = () => {
     if (window.game?.sounds?.["intro"]) {
       window.game.playMusic("intro");
     } else {
-      setTimeout(tryPlayIntro, 100); // rÈessaie si game pas encore prÍt
+      setTimeout(tryPlayIntro, 100); // rùessaie si game pas encore prùt
     }
   };
   tryPlayIntro();
 
   /* ===============================
-     CR…ATION DE LA CELLULE
+     CRùATION DE LA CELLULE
      =============================== */
   const cell = document.createElement("div");
   cell.style.width = "180px";
   cell.style.height = "180px";
-  cell.style.background = "url('assets/studio/logo_cell.png') center / contain no-repeat";
+  cell.style.background = "url('assets/studio/splash_icon_transparent.png') center / contain no-repeat";
   cell.style.opacity = "0";
   cell.style.transform = "scale(0.2)";
   cell.style.willChange = "transform, opacity";
@@ -74,7 +74,7 @@ window.addEventListener("load", () => {
     setTimeout(breathe, breathDuration);
   }
 
-  // Lancer la respiration juste aprËs la naissance
+  // Lancer la respiration juste aprùs la naissance
   setTimeout(breathe, 1800);
 
   /* ===============================
@@ -110,7 +110,7 @@ window.addEventListener("load", () => {
     ).onfinish = () => {
       intro.remove();
 
-      // ? Musique intro terminÈe ? lancer la musique du menu
+      // ? Musique intro terminùe ? lancer la musique du menu
       window.game?.stopMusic();
       window.game?.playMusic("menu");
     };
