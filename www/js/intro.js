@@ -9,9 +9,18 @@ window.addEventListener("load", () => {
     if (window.game?.sounds?.["intro"]) {
       window.game.playMusic("intro");
     } else {
-      setTimeout(tryPlayIntro, 100); // ressaie si game pas encore prt
+      setTimeout(tryPlayIntro, 100);
     }
   };
+
+  // ? Lancer au premier tap (deblocage autoplay Android)
+  const startOnTap = () => {
+    tryPlayIntro();
+  };
+  document.addEventListener("touchstart", startOnTap, { once: true });
+  document.addEventListener("pointerdown", startOnTap, { once: true });
+
+  // Essai immediat
   tryPlayIntro();
 
   /* ===============================
@@ -20,7 +29,7 @@ window.addEventListener("load", () => {
   const cell = document.createElement("div");
   cell.style.width = "180px";
   cell.style.height = "180px";
-  cell.style.background = "url('assets/studio/splash_icon_transparent.png') center / contain no-repeat";
+  cell.style.background = "url('assets/studio/logo_cell.png') center / contain no-repeat";
   cell.style.opacity = "0";
   cell.style.transform = "scale(0.2)";
   cell.style.willChange = "transform, opacity";

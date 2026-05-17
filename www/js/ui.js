@@ -139,13 +139,10 @@ function quitApp() {
    =========================================================== */
 
 function openLeaderboardSelect() {
-  hidePanels();
-
-  const canvas = document.getElementById("gameCanvas");
-  if (canvas) canvas.style.display = "none";
-
-  document.getElementById("leaderboardSelect").style.display = "block";
-  applyLang();
+  // ✅ Ouvrir directement le leaderboard sans passer par la sélection
+  if (!window.game) return;
+  window.game.state.lastLevelPlayed = window.game.state.lastLevelPlayed || 15;
+  openLeaderboard();
 }
 
 function openLeaderboard() {
@@ -156,9 +153,7 @@ function openLeaderboard() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  const lb = document.getElementById("leaderboard");
-  lb.style.display = "block";
-  lb.scrollTop = 0; // ✅ Remonter en haut pour voir myScore
+  document.getElementById("leaderboard").style.display = "block";
   loadLeaderboardForLevel(window.game.state.lastLevelPlayed);
 }
 
@@ -203,9 +198,23 @@ function loadLeaderboardForLevel(level) {
       return;
     }
 
+    // ✅ Trouver la position du joueur actuel
+    const playerName = document.getElementById("playerName")?.value?.trim() || "";
+    const playerBestScore = window.game?.playerState?.totalScore || 0;
+
     scoresDiv.innerHTML = list
-      .map((s, i) => `<p>${i + 1}. ${s.name || "?"} - ${s.score}</p>`)
+      .map((s, i) => {
+        const isMe = s.score > 0 && s.score === Math.max(...list.filter(x => x.name === s.name).map(x => x.score)) && playerBestScore > 0 && s.score <= playerBestScore && i === list.findIndex(x => x.score <= playerBestScore);
+        const style = isMe ? 'color:#ff4ca3; font-weight:bold;' : '';
+        return `<p style="${style}">${i + 1}. ${s.name || "?"} - ${s.score}</p>`;
+      })
       .join("");
+
+    // ✅ Afficher la position du joueur si pas dans le top
+    const playerRank = list.findIndex(s => s.score <= playerBestScore);
+    if (playerRank === -1 && playerBestScore > 0) {
+      scoresDiv.innerHTML += `<p style="color:#ff74c5; border-top:1px solid rgba(255,76,163,0.3); margin-top:10px; padding-top:10px;">Votre meilleur: ${playerBestScore}</p>`;
+    }
   });
 }
 
