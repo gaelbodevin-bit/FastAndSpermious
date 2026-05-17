@@ -5,23 +5,26 @@ window.addEventListener("load", () => {
 
   // ? Lancer la musique d'intro dùs le dùbut de la cinùmatique
   // On attend que window.game soit prùt (chargù aprùs intro.js)
+  // ? Lancer la musique intro uniquement pendant la cinÈmatique
+  // On attend que game soit prÍt, mais on n'Ècoute pas de tap
+  let introStarted = false;
   const tryPlayIntro = () => {
+    if (introStarted) return;
     if (window.game?.sounds?.["intro"]) {
+      introStarted = true;
       window.game.playMusic("intro");
     } else {
       setTimeout(tryPlayIntro, 100);
     }
   };
-
-  // ? Lancer au premier tap (deblocage autoplay Android)
-  const startOnTap = () => {
+  // Lancer uniquement si l'intro est encore visible
+  const introCheckInterval = setInterval(() => {
+    if (!document.getElementById("studio-intro")) {
+      clearInterval(introCheckInterval);
+      return;
+    }
     tryPlayIntro();
-  };
-  document.addEventListener("touchstart", startOnTap, { once: true });
-  document.addEventListener("pointerdown", startOnTap, { once: true });
-
-  // Essai immediat
-  tryPlayIntro();
+  }, 100);
 
   /* ===============================
      CRùATION DE LA CELLULE
@@ -117,9 +120,8 @@ window.addEventListener("load", () => {
         fill: "forwards"
       }
     ).onfinish = () => {
+      clearInterval(introCheckInterval);
       intro.remove();
-
-      // ? Musique intro terminùe ? lancer la musique du menu
       window.game?.stopMusic();
       window.game?.playMusic("menu");
     };

@@ -170,24 +170,16 @@ function loadLeaderboardForLevel(level) {
   if (title) title.innerText = `${t("leaderboardTitle")} ${level}s`;
 
   const scoresDiv = document.getElementById("scores");
-  scoresDiv.innerText = "Chargement�";
+  scoresDiv.innerText = "Chargement...";
 
-  // ✅ Afficher le score perso du joueur
+  // ✅ Score total du joueur
   const myScoreDiv = document.getElementById("myScore");
   if (myScoreDiv && window.game) {
     const totalScore = window.game.playerState.totalScore;
     myScoreDiv.innerHTML = `
-      <div style="
-        background: rgba(255,76,163,0.1);
-        border: 1px solid rgba(255,76,163,0.4);
-        border-radius: 12px;
-        padding: 12px 20px;
-        margin: 0 auto 20px;
-        width: 85%;
-        text-align: center;
-      ">
-        <div style="color:#ff74c5; font-size:13px; letter-spacing:0.1em; margin-bottom:4px;">MON SCORE TOTAL</div>
-        <div style="color:#fff; font-size:24px; font-weight:bold;">${totalScore.toLocaleString()}</div>
+      <div style="background:rgba(255,76,163,0.1);border:1px solid rgba(255,76,163,0.4);border-radius:12px;padding:12px 20px;margin:0 auto 20px;width:85%;text-align:center;">
+        <div style="color:#ff74c5;font-size:13px;letter-spacing:0.1em;margin-bottom:4px;">MON SCORE TOTAL</div>
+        <div style="color:#fff;font-size:24px;font-weight:bold;">${totalScore.toLocaleString()}</div>
       </div>
     `;
   }
@@ -209,42 +201,22 @@ function loadLeaderboardForLevel(level) {
     }
 
     // ✅ Position dans le classement total
-    window.game.leaderboardManager.loadTotalLeaderboard().then(totalList => {
-      if (!totalList || totalList.length === 0 || !savedName) return;
-      const rank = totalList.findIndex(s => s.name === savedName) + 1;
-      if (rank > 0) {
-        scoresDiv.innerHTML += `
-          <div style="border-top:1px solid rgba(255,76,163,0.3); margin-top:16px; padding-top:14px; color:#ff74c5; text-align:center; font-size:15px;">
-            Classement total : ${rank}e / ${totalList.length}<br>
-            <span style="color:#fff; font-size:18px; font-weight:bold;">${playerTotal.toLocaleString()} pts</span>
-          </div>`;
-      }
-    });
-  })window.game.leaderboardManager.loadTopScores(level).then(list => {
-    if (!list || list.length === 0) {
-      scoresDiv.innerHTML = "<p>Aucun score pour ce niveau.</p>";
-      return;
-    }
-
-    // ✅ Trouver la position du joueur actuel
-    const playerName = document.getElementById("playerName")?.value?.trim() || "";
-    const playerBestScore = window.game?.playerState?.totalScore || 0;
-
-    scoresDiv.innerHTML = list
-      .map((s, i) => {
-        const isMe = s.score > 0 && s.score === Math.max(...list.filter(x => x.name === s.name).map(x => x.score)) && playerBestScore > 0 && s.score <= playerBestScore && i === list.findIndex(x => x.score <= playerBestScore);
-        const style = isMe ? 'color:#ff4ca3; font-weight:bold;' : '';
-        return `<p style="${style}">${i + 1}. ${s.name || "?"} - ${s.score}</p>`;
-      })
-      .join("");
-
-    // ✅ Afficher la position du joueur si pas dans le top
-    const playerRank = list.findIndex(s => s.score <= playerBestScore);
-    if (playerRank === -1 && playerBestScore > 0) {
-      scoresDiv.innerHTML += `<p style="color:#ff74c5; border-top:1px solid rgba(255,76,163,0.3); margin-top:10px; padding-top:10px;">Votre meilleur: ${playerBestScore}</p>`;
+    if (window.game.leaderboardManager.loadTotalLeaderboard) {
+      window.game.leaderboardManager.loadTotalLeaderboard().then(totalList => {
+        if (!totalList || totalList.length === 0 || !savedName) return;
+        const rank = totalList.findIndex(s => s.name === savedName) + 1;
+        if (rank > 0) {
+          scoresDiv.innerHTML += `
+            <div style="border-top:1px solid rgba(255,76,163,0.3);margin-top:16px;padding-top:14px;color:#ff74c5;text-align:center;font-size:15px;">
+              Classement total : ${rank}e / ${totalList.length}<br>
+              <span style="color:#fff;font-size:18px;font-weight:bold;">${playerTotal.toLocaleString()} pts</span>
+            </div>`;
+        }
+      });
     }
   });
 }
+
 
 function closeLeaderboard() {
   backToMenu();
