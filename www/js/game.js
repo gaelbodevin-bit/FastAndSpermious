@@ -191,18 +191,27 @@ class Game {
     this.playerState.addScore(finalScore);
     refreshShopUI();
 
-    // ✅ Vérifier si nouveau record AVANT d'afficher le game over
-    try {
-      const top = await this.leaderboardManager.loadTopScores(level, 1);
-      const currentTop1 = top.length > 0 ? top[0].score : 0;
-      if (finalScore > currentTop1) {
-        showNewRecord();
-        setTimeout(() => showGameOver(finalScore), 2800);
-      } else {
+    // ✅ Pub interstitielle après la manche (sautée si Premium),
+    //    PUIS record éventuel + écran de game over.
+    const proceed = async () => {
+      try {
+        const top = await this.leaderboardManager.loadTopScores(level, 1);
+        const currentTop1 = top.length > 0 ? top[0].score : 0;
+        if (finalScore > currentTop1) {
+          showNewRecord();
+          setTimeout(() => showGameOver(finalScore), 2800);
+        } else {
+          showGameOver(finalScore);
+        }
+      } catch (e) {
         showGameOver(finalScore);
       }
-    } catch(e) {
-      showGameOver(finalScore);
+    };
+
+    if (typeof showInterstitial === "function") {
+      showInterstitial(() => proceed());
+    } else {
+      proceed();
     }
   }
 
@@ -444,10 +453,10 @@ window.onload = async () => {
     return;
   }
 
-  // ✅ Connexion Google Play Games (si disponible)
-  if (typeof initPlayGames === "function") {
-    await initPlayGames();
-    dbg("🎮 Play Games initialisé");
+  // ✅ Connexion Google OBLIGATOIRE (overlay bloquant tant que non connecté)
+  if (typeof initAuth === "function") {
+    await initAuth();
+    dbg("🔐 Auth Google initialisée");
   }
 
   // ✅ Reset ownedSkins si nouvelle version (nettoie les données de test)

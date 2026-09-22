@@ -42,7 +42,14 @@ const LANG = {
     shopUnlock: "Débloquer",
     shopUnlockedAt: "Débloqué à {score} pts",
     shopPremium: "Premium",
-    newRecord: "NOUVEAU RECORD !"
+        newRecord: "NOUVEAU RECORD !",
+    premiumBtn: "👑 Passer Premium (sans pub)",
+    premiumActive: "👑 Premium actif",
+    adTitle: "Une petite pub...",
+    adSpace: "Espace publicitaire",
+    adSkip: "Fermer",
+    loginTitle: "Connecte-toi pour jouer",
+    loginGoogle: "Se connecter avec Google"
   },
 
   en: {
@@ -78,7 +85,14 @@ const LANG = {
     shopUnlock: "Unlock",
     shopUnlockedAt: "Unlocked at {score} pts",
     shopPremium: "Premium",
-    newRecord: "NEW RECORD!"
+        newRecord: "NEW RECORD!",
+    premiumBtn: "👑 Go Premium (no ads)",
+    premiumActive: "👑 Premium active",
+    adTitle: "A short ad...",
+    adSpace: "Ad space",
+    adSkip: "Close",
+    loginTitle: "Sign in to play",
+    loginGoogle: "Sign in with Google"
   },
 
   es: {
@@ -114,7 +128,14 @@ const LANG = {
     shopUnlock: "Desbloquear",
     shopUnlockedAt: "Desbloqueado con {score} pts",
     shopPremium: "Premium",
-    newRecord: "¡NUEVO RÉCORD!"
+        newRecord: "¡NUEVO RÉCORD!",
+    premiumBtn: "👑 Ser Premium (sin anuncios)",
+    premiumActive: "👑 Premium activo",
+    adTitle: "Un pequeño anuncio...",
+    adSpace: "Espacio publicitario",
+    adSkip: "Cerrar",
+    loginTitle: "Inicia sesión para jugar",
+    loginGoogle: "Iniciar sesión con Google"
   }
 };
 

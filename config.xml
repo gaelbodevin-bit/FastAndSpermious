@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <widget
     id="com.fast.spermious"
-    version="1.0.0"
+    version="1.1.0"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
@@ -34,7 +34,7 @@
     <allow-intent href="geo:*" />
 
     <!-- =============================== -->
-    <!--      ANDROID SDK (FORC)        -->
+    <!--        ANDROID SDK (FORCE)      -->
     <!-- =============================== -->
     <preference name="android-minSdkVersion" value="22" />
     <preference name="android-targetSdkVersion" value="34" />
@@ -56,25 +56,14 @@
     <!-- =============================== -->
     <platform name="android">
 
-        <!-- Icne app (launcher) -->
+        <!-- Icone app (launcher) -->
         <icon src="www/assets/studio/logo_cell.png" />
 
-        <!-- ================================================= -->
-        <!-- ANDROID 12+ SPLASH : NEUTRALIS VOLONTAIREMENT    -->
-        <!-- ================================================= -->
-        <!--
-          IMPORTANT :
-          Le splash Android affichait ta cellule en taille fixe
-          AVANT ton intro HTML. On le rend donc transparent.
-        -->
-
+        <!-- Splash Android 12+ neutralise (l'intro HTML prend le relais) -->
         <preference name="AndroidWindowSplashScreenAnimatedIcon"
                     value="www/assets/studio/splash_icon_transparent.png" />
-
         <preference name="AndroidWindowSplashScreenBackground"
                     value="#0B0F10" />
-
-        <!-- Animation systme dsactive -->
         <preference name="AndroidWindowSplashScreenAnimationDuration"
                     value="0" />
 
@@ -92,5 +81,20 @@
         <preference name="Orientation" value="portrait" />
 
     </platform>
+
+    <!-- =============================== -->
+    <!--            PLUGINS              -->
+    <!-- =============================== -->
+    <!-- Connexion Google (Firebase Auth) -->
+    <plugin name="cordova-plugin-googleplus" spec="^8.5.2">
+        <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.791766983410-auisv28tqpmqk0qfrl6rftth5pdlou2t" />
+        <variable name="WEB_APPLICATION_CLIENT_ID" value="791766983410-auisv28tqpmqk0qfrl6rftth5pdlou2t.apps.googleusercontent.com" />
+    </plugin>
+
+    <!-- Publicite interstitielle -->
+    <plugin name="admob-plus-cordova" spec="^1.28.0" />
+
+    <!-- Achats integres (premium no-ads) -->
+    <plugin name="cordova-plugin-purchase" spec="^13.11.1" />
 
 </widget>

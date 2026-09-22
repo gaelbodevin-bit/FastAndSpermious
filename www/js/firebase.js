@@ -29,8 +29,8 @@
     databaseURL: "https://fast-and-spermious-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "fast-and-spermious",
     storageBucket: "fast-and-spermious.appspot.com",
-    messagingSenderId: "977624754717",
-    appId: "1:977624754717:web:a30466f297977c570432a1"
+    messagingSenderId: "791766983410",
+    appId: "1:791766983410:web:6b1d77401727b52f60a66b"
   };
 
   /* =========================
@@ -87,24 +87,13 @@
     }
   );
 
-  // Démarre l'auth anonyme si pas déjà authentifié
-  // (getFirebaseUser gère aussi ce cas)
-  auth.signInAnonymously().catch((e) => {
-    errlog("❌ Auth anonyme impossible:", e);
-    // on ne reject pas forcément ici, car on peut être déjà connecté
-  });
+  // ⚠️ Auth anonyme retirée : la connexion Google est OBLIGATOIRE
+  //    et gérée par AuthManager.js (signInWithGoogle). getFirebaseUser
+  //    attend simplement qu'un utilisateur Google soit connecté.
 
   async function getFirebaseUser(timeoutMs = 8000) {
     if (currentUser) return currentUser;
-
-    // Si pas connecté, on tente à nouveau
-    if (!auth.currentUser) {
-      try {
-        await auth.signInAnonymously();
-      } catch (e) {
-        // si ça échoue, on laisse authReady tenter de se résoudre via onAuthStateChanged
-      }
-    }
+    if (auth.currentUser) { currentUser = auth.currentUser; return currentUser; }
 
     // Attente avec timeout pour éviter un await infini
     const timeout = new Promise((_, reject) =>
