@@ -38,7 +38,8 @@ function hidePanels() {
     "leaderboard",
     "leaderboardSelect",
     "gameover",
-    "shop"
+    "shop",
+    "legalPanel"
   ].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";

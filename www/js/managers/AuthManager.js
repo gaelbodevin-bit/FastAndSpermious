@@ -167,9 +167,14 @@
     }
     const userLabel = document.getElementById("userLabel");
     if (userLabel) {
-      userLabel.innerText = window.authUser
-        ? (window.authUser.displayName || window.authUser.email || "")
-        : "";
+      if (window.authUser) {
+        const name = window.authUser.displayName || window.authUser.email || "";
+        userLabel.innerHTML =
+          `<span class="user-name">${name}</span>` +
+          `<button class="profile-btn" onclick="openProfile()" aria-label="Profil">👤</button>`;
+      } else {
+        userLabel.innerHTML = "";
+      }
     }
   }
 

@@ -71,10 +71,10 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; }
   font-size: 34px;
   line-height: 1.02;
   letter-spacing: .3px;
-  background: linear-gradient(92deg, #ff4ca3, #ffb23e 38%, #3ddc84 60%, #22e4db 78%, #8b5cf6);
+  background: linear-gradient(92deg, #22E4DB, #4FB6F0 45%, #8B5CF6);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 3px 14px rgba(255,76,163,.30));
+  filter: drop-shadow(0 3px 14px rgba(34,228,219,.30));
 }
 
 .mode-cards {
@@ -587,3 +587,114 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; }
   0%   { transform: scale(0.7); opacity: 0.2; }
   100% { transform: scale(1);   opacity: 1; }
 }
+
+/* ==========================================================================
+   PROFIL (bouton + modale) + PANNEAU LÉGAL
+   ========================================================================== */
+
+/* Nom + bouton profil dans le menu */
+#userLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.user-name { color: var(--muted); font-size: 13px; }
+.profile-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.profile-btn:hover {
+  transform: scale(1.08);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px -2px var(--cyan);
+}
+
+/* Modale profil */
+.profile-card { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.profile-card h2 { margin: 0; font-size: 20px; color: var(--text); }
+.profile-avatar {
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22E4DB, #8B5CF6);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 28px; color: #06202a;
+}
+.profile-sub { margin: 0; font-size: 13px; color: var(--muted); }
+.profile-status {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  font-size: 14px;
+  color: var(--muted);
+}
+.profile-status .badge {
+  padding: 3px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.profile-status .badge.free {
+  color: var(--cyan); background: rgba(34,228,219,.14); border: 1px solid rgba(34,228,219,.4);
+}
+.profile-status .badge.premium {
+  color: #24123a; font-weight: 700;
+  background: linear-gradient(90deg, #ffb23e, #ff7ac0);
+}
+.profile-card .menu-btn { width: 100%; }
+.profile-card .profile-logout {
+  color: var(--pink-soft);
+  border-color: rgba(255,76,163,.4);
+}
+.profile-card .ghost { background: transparent; color: var(--muted); }
+
+/* Panneau légal */
+#legalPanel { text-align: center; }
+.legal-nav {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  width: 90%; max-width: 400px;
+  margin: 8px auto 18px;
+}
+.legal-nav .menu-btn {
+  flex: 1 1 45%;
+  width: auto;
+  padding: 10px 8px;
+  font-size: 13px;
+}
+.legal-nav .menu-btn.active {
+  color: var(--cyan);
+  background: rgba(34,228,219,.14);
+  border-color: var(--cyan);
+}
+.legal-content {
+  width: 90%; max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 18px 18px 20px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #cfd4ee;
+}
+.legal-content h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--cyan);
+  margin: 0 0 12px;
+}
+.legal-content p { margin: 0 0 12px; }
+.legal-content b { color: var(--text); font-weight: 600; }
