@@ -1,4 +1,4 @@
-/* ===========================================================
+﻿/* ===========================================================
    AUTH MANAGER — Connexion Google obligatoire + statut Premium
    -----------------------------------------------------------
    - Web (navigateur)  : signInWithPopup(GoogleAuthProvider)
@@ -50,7 +50,7 @@
         localStorage.setItem("playerName", result.user.displayName);
       }
 
-      window.isPremium = await checkPremium();
+      window.isPremium = (typeof restorePremium === "function") ? await restorePremium() : await checkPremium();
       hideLoginOverlay();
       updateAuthUI();
 
@@ -91,7 +91,10 @@
     }
   }
 
-  async function setPremium() {
+  // NB : le premium n'est plus écrit côté client (non sécurisé).
+  //      C'est la Cloud Function verifyPurchase qui l'active après
+  //      vérification du reçu Play. setPremium ne sert qu'au mode dev.
+  async function setPremiumDev() {
     const uid = window.authUser?.uid;
     if (!uid || !window.firebaseDB) return false;
     await window.firebaseDB.ref(`users/${uid}/premium`).set(true);
@@ -101,7 +104,7 @@
   }
 
   /* -------------------------------------------------------
-     ACHAT PREMIUM
+     ACHAT PREMIUM — via Cloud Function (vérif serveur)
   ------------------------------------------------------- */
   async function buyPremium() {
     if (!window.authUser) {
@@ -110,20 +113,18 @@
     }
 
     // Google Play Billing (Android)
-    if (window.cordova && window.inAppPurchase) {
+    if (window.cordova && window.CdvPurchase) {
       try {
-        await window.inAppPurchase.buy("premium_no_ads");
-        await setPremium();
-        log("✓ Premium activé via Play");
+        await purchasePremiumViaPlay();   // défini dans PurchaseManager.js
       } catch (e) {
         log("❌ Achat annulé :", e);
       }
       return;
     }
 
-    // Fallback dev (navigateur)
+    // Fallback dev (navigateur) — pas de Play Billing hors app
     if (confirm("Activer Premium (mode dev) ?")) {
-      await setPremium();
+      await setPremiumDev();
       log("✓ Premium activé (dev)");
     }
   }
@@ -192,7 +193,7 @@
     const existing = auth.currentUser;
     if (existing && !existing.isAnonymous) {
       window.authUser  = existing;
-      window.isPremium = await checkPremium();
+      window.isPremium = (typeof restorePremium === "function") ? await restorePremium() : await checkPremium();
       hideLoginOverlay();
       updateAuthUI();
       log("✓ Session Google restaurée :", existing.displayName);
@@ -210,7 +211,7 @@
   window.signInWithGoogle = signInWithGoogle;
   window.signOutGoogle    = signOutGoogle;
   window.checkPremium     = checkPremium;
-  window.setPremium       = setPremium;
+  window.setPremiumDev    = setPremiumDev;
   window.buyPremium       = buyPremium;
   window.initAuth         = initAuth;
   window.updateAuthUI     = updateAuthUI;

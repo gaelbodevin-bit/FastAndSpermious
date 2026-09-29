@@ -29,3 +29,7 @@ npm-debug.log*
 # IDE
 .vscode/
 .idea/
+
+# Cloud Functions
+functions/node_modules/
+functions/.runtimeconfig.json

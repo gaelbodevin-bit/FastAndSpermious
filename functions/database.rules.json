@@ -1,0 +1,39 @@
+{
+  "rules": {
+    "scores": {
+      "$level": {
+        ".read": true,
+        ".write": "auth != null"
+      }
+    },
+    "leaderboards": {
+      "$level": {
+        ".read": true,
+        ".write": "auth != null"
+      }
+    },
+    "leaderboard_total": {
+      ".read": true,
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        "premium": {
+          ".write": false,
+          "_comment": "premium n'est modifiable QUE par la Cloud Function (admin)"
+        },
+        "$other": {
+          ".write": "$uid === auth.uid"
+        }
+      }
+    },
+    "purchaseTokens": {
+      ".read": false,
+      ".write": false,
+      "_comment": "géré uniquement côté serveur (Cloud Function admin)"
+    }
+  }
+}

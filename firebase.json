@@ -1,0 +1,9 @@
+{
+  "database": {
+    "rules": "functions/database.rules.json"
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  }
+}
