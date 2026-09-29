@@ -35,11 +35,16 @@ ctx.drawImage(
 
   drawHUD() {
     const { ctx, timeLeft, sperm } = this.gameState;
-    
+
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 1;
     ctx.fillStyle = "#fff";
-    ctx.font = "18px sans-serif";
+    ctx.font = "bold 18px sans-serif";
     ctx.fillText(timeLeft + "s", 10, 24);
     ctx.fillText("Score: " + Math.round(sperm.dist), 10, 48);
+    ctx.restore();
   }
 
   render() {

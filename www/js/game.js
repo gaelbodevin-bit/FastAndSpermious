@@ -118,6 +118,7 @@ class Game {
     hidePanels();
     showQuitBtn();
     this.canvas.style.display = "block";
+    if (typeof showGameBackground === "function") showGameBackground();
     this.state.run = false;
 
     // ✅ Positionner le perso au centre dès l'affichage

@@ -46,6 +46,7 @@ function hidePanels() {
   });
 
   hideQuitBtn();
+  if (typeof hideGameBackground === "function") hideGameBackground();
 }
 
 function showQuitBtn() {

@@ -144,6 +144,7 @@
           <span class="badge ${statusCls}">${statusTxt}</span>
         </div>
 
+        <button class="menu-btn" onclick="openBgSelector()">${t("profileBg")}</button>
         <button class="menu-btn" onclick="openLegal()">${t("profileLegal")}</button>
         <button class="menu-btn profile-logout" onclick="profileLogout()">${t("profileLogout")}</button>
         <button class="menu-btn ghost" onclick="closeProfile()">${t("close") || "Fermer"}</button>
@@ -214,6 +215,60 @@
   window.openLegal     = openLegal;
   window.showLegal     = showLegal;
   window.closeLegal    = closeLegal;
+
+  /* -------------------------------------------------------
+     SÉLECTEUR DE FOND DE JEU (modale)
+  ------------------------------------------------------- */
+  function openBgSelector() {
+    closeProfile();
+    let modal = document.getElementById("bgModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "bgModal";
+      modal.className = "modal";
+      document.body.appendChild(modal);
+    }
+    const themes = window.BG_THEMES || [];
+    const current = (typeof getBgTheme === "function") ? getBgTheme() : "nebula";
+
+    const cards = themes.map(th => {
+      const name = t(th.key) || th.fallback;
+      const sel = th.id === current ? " selected" : "";
+      return `<button class="bg-card${sel}" data-bg="${th.id}" onclick="chooseBg('${th.id}')">
+                <span class="bg-swatch bg-${th.id}"></span>
+                <span class="bg-name">${name}</span>
+              </button>`;
+    }).join("");
+
+    modal.innerHTML = `
+      <div class="modal-content bg-selector">
+        <h2>${t("bgTitle")}</h2>
+        <div class="bg-grid">${cards}</div>
+        <button class="menu-btn ghost" onclick="closeBgSelector()">${t("close") || "Fermer"}</button>
+      </div>`;
+    modal.style.display = "flex";
+    // Aperçu live du fond pendant la sélection
+    if (typeof showGameBackground === "function") showGameBackground();
+  }
+
+  function chooseBg(id) {
+    if (typeof setBgTheme === "function") setBgTheme(id);
+    // mettre à jour la sélection visuelle
+    document.querySelectorAll("#bgModal .bg-card").forEach(c => {
+      c.classList.toggle("selected", c.dataset.bg === id);
+    });
+  }
+
+  function closeBgSelector() {
+    const m = document.getElementById("bgModal");
+    if (m) m.style.display = "none";
+    // Recacher le fond (on revient au menu)
+    if (typeof hideGameBackground === "function") hideGameBackground();
+  }
+
+  window.openBgSelector  = openBgSelector;
+  window.chooseBg        = chooseBg;
+  window.closeBgSelector = closeBgSelector;
 
   log("✓ ProfileManager.js chargé");
 })();
