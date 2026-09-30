@@ -273,11 +273,12 @@ class Game {
      AUDIO - Chargement
   ------------------------------------------------------- */
   loadSounds() {
-    // Sons classiques (one-shot)
+    // Tous les sons en Audio classique (fiable sur WebView Android)
     const files = {
       "321":     "sounds/321.mp3",
       "intro":   "sounds/testintro.mp3",
       "timeout": "sounds/Timeout.mp3",
+      "menu":    "sounds/Bouclemenu1.mp3",
     };
 
     Object.entries(files).forEach(([key, src]) => {
@@ -286,75 +287,18 @@ class Game {
       this.sounds[key] = audio;
     });
 
-    this.sounds["intro"].loop   = false;
-    this.sounds["intro"].volume = 0.8;
-    this.sounds["321"].volume   = 0.7;
+    this.sounds["intro"].loop     = false;
+    this.sounds["intro"].volume   = 0.8;
+    this.sounds["321"].volume     = 0.7;
     this.sounds["timeout"].volume = 0.6;
+    this.sounds["menu"].loop      = true;
+    this.sounds["menu"].volume    = 0.2;
 
-    // 🎵 Musique menu via Web Audio API — loop sans gap
-    this._audioCtx = null;
-    this._menuBuffer = null;
-    this._menuSource = null;
-    this._menuGain = null;
-    this._menuVolume = 0.2; // 👈 Ajuste ici (0.0 → 1.0)
-
-    fetch("sounds/Bouclemenu1.mp3")
-      .then(r => r.arrayBuffer())
-      .then(buf => {
-        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        return this._audioCtx.decodeAudioData(buf);
-      })
-      .then(decoded => {
-        this._menuBuffer = decoded;
-        dbg("🎵 Menu audio buffer prêt");
-      })
-      .catch(e => {
-        dbg("⚠️ Web Audio non disponible, fallback Audio:", e?.message);
-        // Fallback Audio classique
-        const audio = new Audio("sounds/Bouclemenu1.mp3");
-        audio.preload = "auto";
-        audio.loop = true;
-        audio.volume = 0.2;
-        this.sounds["menu"] = audio;
-      });
+    this._currentMusic = null;
+    this._currentMusicKey = null;
+    this._pendingMusicKey = null; // musique demandée mais bloquée (autoplay)
 
     dbg("🎵 Sons chargés");
-  }
-
-  _playMenuWebAudio() {
-    if (!this._audioCtx || !this._menuBuffer) return false;
-    try {
-      if (this._audioCtx.state === "suspended") {
-        this._audioCtx.resume();
-      }
-      this._menuGain = this._audioCtx.createGain();
-      this._menuGain.gain.value = this._menuVolume;
-      this._menuGain.connect(this._audioCtx.destination);
-
-      this._menuSource = this._audioCtx.createBufferSource();
-      this._menuSource.buffer = this._menuBuffer;
-      this._menuSource.loop = true; // ✅ loop parfait via Web Audio
-      this._menuSource.connect(this._menuGain);
-      this._menuSource.start(0);
-      return true;
-    } catch(e) {
-      dbg("⚠️ _playMenuWebAudio erreur:", e?.message);
-      return false;
-    }
-  }
-
-  _stopMenuWebAudio() {
-    try {
-      if (this._menuSource) {
-        this._menuSource.stop();
-        this._menuSource.disconnect();
-        this._menuSource = null;
-      }
-      if (this._menuGain) {
-        this._menuGain.disconnect();
-        this._menuGain = null;
-      }
-    } catch(e) {}
   }
 
   /* -------------------------------------------------------
@@ -374,23 +318,22 @@ class Game {
     this.stopMusic();
     this._currentMusicKey = key;
 
-    if (key === "menu" && this._menuBuffer) {
-      // ✅ Web Audio API — loop parfait sans gap
-      this._playMenuWebAudio();
-      return;
-    }
-
-    // Fallback Audio classique
     const snd = this.sounds[key];
     if (!snd) return;
     this._currentMusic = snd;
     snd.currentTime = 0;
-    snd.play().catch(e => dbg("🔇 Music error:", e?.message));
+    const p = snd.play();
+    if (p && p.catch) {
+      p.catch(e => {
+        // Bloqué par l'autoplay policy → on retient pour relancer au 1er tap
+        this._pendingMusicKey = key;
+        dbg("🔇 Music bloquée (autoplay), en attente d'un tap:", e?.message);
+      });
+    }
   }
 
   // Arrête la musique en cours
   stopMusic() {
-    this._stopMenuWebAudio();
     if (this._currentMusic) {
       this._currentMusic.pause();
       this._currentMusic.currentTime = 0;
@@ -400,32 +343,24 @@ class Game {
   }
 
   pauseMusic() {
-    if (this._currentMusicKey === "menu" && this._audioCtx) {
-      this._audioCtx.suspend();
-      return;
-    }
     this._currentMusic?.pause();
   }
 
   resumeMusic() {
-    if (this._currentMusicKey === "menu" && this._audioCtx) {
-      this._audioCtx.resume();
-      return;
-    }
     this._currentMusic?.play().catch(e => dbg("🔇 Resume error:", e?.message));
   }
 
-  // Relance la musique en cours après un déblocage audio (autoplay policy)
+  // Relance la musique après un déblocage audio (1er tap) si elle était bloquée
   resumeCurrentMusic() {
-    const key = this._currentMusicKey;
+    const key = this._pendingMusicKey || this._currentMusicKey;
     if (!key) return;
-    if (key === "menu") {
-      if (this._audioCtx && this._audioCtx.state === "suspended") this._audioCtx.resume();
-      // si le buffer menu n'a jamais démarré, le (re)lancer
-      if (!this._menuGain && this._menuBuffer) this._playMenuWebAudio();
-    } else if (this._currentMusic) {
-      this._currentMusic.play().catch(e => dbg("🔇 Resume error:", e?.message));
-    }
+    const snd = this.sounds[key];
+    if (!snd) return;
+    this._currentMusic = snd;
+    this._currentMusicKey = key;
+    snd.play()
+      .then(() => { this._pendingMusicKey = null; })
+      .catch(e => dbg("🔇 Resume error:", e?.message));
   }
 }
 
@@ -436,26 +371,9 @@ function setupGlobalAudioUnlock(gameInstanceGetter) {
   const unlock = () => {
     const g = gameInstanceGetter?.();
     if (!g) return;
-    dbg("🔊 Audio unlocked");
-
-    // Réveiller l'AudioContext bloqué par le navigateur (autoplay policy)
-    try {
-      if (g._audioCtx && g._audioCtx.state === "suspended") {
-        g._audioCtx.resume();
-      }
-    } catch (e) { dbg("⚠️ resume ctx:", e?.message); }
-
-    // (Re)lancer la musique en cours si elle n'a pas pu démarrer
-    try {
-      if (typeof g.resumeCurrentMusic === "function") {
-        g.resumeCurrentMusic();
-      } else if (g._currentMusicKey) {
-        g.playMusic(g._currentMusicKey);
-      }
-    } catch (e) { dbg("⚠️ resume music:", e?.message); }
+    // Relancer la musique si elle a été bloquée par l'autoplay policy
+    if (typeof g.resumeCurrentMusic === "function") g.resumeCurrentMusic();
   };
-
-  // once:true retiré → on peut re-tenter à chaque interaction tant que bloqué
   window.addEventListener("pointerdown", unlock);
   window.addEventListener("touchstart",  unlock);
   window.addEventListener("keydown",     unlock);
