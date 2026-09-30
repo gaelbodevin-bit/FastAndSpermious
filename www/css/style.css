@@ -71,9 +71,7 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; }
   font-size: 34px;
   line-height: 1.02;
   letter-spacing: .3px;
-  background: linear-gradient(92deg, #22E4DB, #4FB6F0 45%, #8B5CF6);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--cyan);
   filter: drop-shadow(0 3px 14px rgba(34,228,219,.30));
 }
 

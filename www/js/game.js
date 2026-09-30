@@ -414,6 +414,19 @@ class Game {
     }
     this._currentMusic?.play().catch(e => dbg("🔇 Resume error:", e?.message));
   }
+
+  // Relance la musique en cours après un déblocage audio (autoplay policy)
+  resumeCurrentMusic() {
+    const key = this._currentMusicKey;
+    if (!key) return;
+    if (key === "menu") {
+      if (this._audioCtx && this._audioCtx.state === "suspended") this._audioCtx.resume();
+      // si le buffer menu n'a jamais démarré, le (re)lancer
+      if (!this._menuGain && this._menuBuffer) this._playMenuWebAudio();
+    } else if (this._currentMusic) {
+      this._currentMusic.play().catch(e => dbg("🔇 Resume error:", e?.message));
+    }
+  }
 }
 
 /* ===========================================================
@@ -424,12 +437,28 @@ function setupGlobalAudioUnlock(gameInstanceGetter) {
     const g = gameInstanceGetter?.();
     if (!g) return;
     dbg("🔊 Audio unlocked");
-    // ✅ On ne lance PAS la musique ici — c'est intro.js qui gère le séquençage audio
+
+    // Réveiller l'AudioContext bloqué par le navigateur (autoplay policy)
+    try {
+      if (g._audioCtx && g._audioCtx.state === "suspended") {
+        g._audioCtx.resume();
+      }
+    } catch (e) { dbg("⚠️ resume ctx:", e?.message); }
+
+    // (Re)lancer la musique en cours si elle n'a pas pu démarrer
+    try {
+      if (typeof g.resumeCurrentMusic === "function") {
+        g.resumeCurrentMusic();
+      } else if (g._currentMusicKey) {
+        g.playMusic(g._currentMusicKey);
+      }
+    } catch (e) { dbg("⚠️ resume music:", e?.message); }
   };
 
-  window.addEventListener("pointerdown", unlock, { once: true });
-  window.addEventListener("touchstart",  unlock, { once: true });
-  window.addEventListener("keydown",     unlock, { once: true });
+  // once:true retiré → on peut re-tenter à chaque interaction tant que bloqué
+  window.addEventListener("pointerdown", unlock);
+  window.addEventListener("touchstart",  unlock);
+  window.addEventListener("keydown",     unlock);
 }
 
 /* ===========================================================
