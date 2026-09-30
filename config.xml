@@ -92,7 +92,10 @@
     </plugin>
 
     <!-- Publicite interstitielle -->
-    <plugin name="admob-plus-cordova" spec="^1.28.0" />
+    <plugin name="admob-plus-cordova" spec="^1.28.0">
+        <!-- App ID de TEST Google. Remplacer par le vrai App ID AdMob avant publication. -->
+        <variable name="APP_ID_ANDROID" value="ca-app-pub-3940256099942544~3347511713" />
+    </plugin>
 
     <!-- Achats integres (premium no-ads) -->
     <plugin name="cordova-plugin-purchase" spec="^13.11.1" />
