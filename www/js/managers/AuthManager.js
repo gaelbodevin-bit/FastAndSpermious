@@ -51,7 +51,6 @@
       }
 
       window.isPremium = (typeof restorePremium === "function") ? await restorePremium() : await checkPremium();
-      hideLoginOverlay();
       updateAuthUI();
 
       return { ok: true, user: result.user };
@@ -72,7 +71,6 @@
     }
     window.authUser  = null;
     window.isPremium = false;
-    showLoginOverlay();
     updateAuthUI();
   }
 
@@ -130,33 +128,6 @@
   }
 
   /* -------------------------------------------------------
-     OVERLAY DE CONNEXION (bloque le jeu)
-  ------------------------------------------------------- */
-  function showLoginOverlay() {
-    let ov = document.getElementById("loginOverlay");
-    if (!ov) {
-      ov = document.createElement("div");
-      ov.id = "loginOverlay";
-      ov.innerHTML = `
-        <div class="login-box">
-          <h1>Fast and Spermious</h1>
-          <p id="loginSubtitle">Connecte-toi pour jouer</p>
-          <button id="googleLoginBtn" class="google-btn">
-            <span>Se connecter avec Google</span>
-          </button>
-        </div>`;
-      document.body.appendChild(ov);
-      document.getElementById("googleLoginBtn").onclick = () => signInWithGoogle();
-    }
-    ov.style.display = "flex";
-  }
-
-  function hideLoginOverlay() {
-    const ov = document.getElementById("loginOverlay");
-    if (ov) ov.style.display = "none";
-  }
-
-  /* -------------------------------------------------------
      UI (bouton premium + label utilisateur dans le menu)
   ------------------------------------------------------- */
   function updateAuthUI() {
@@ -174,7 +145,8 @@
           `<span class="user-name">${name}</span>` +
           `<button class="profile-btn" onclick="openProfile()" aria-label="Profil">👤</button>`;
       } else {
-        userLabel.innerHTML = "";
+        userLabel.innerHTML =
+          `<button class="login-btn-menu" onclick="handleLoginGoogle()">${t("loginGoogle")}</button>`;
       }
     }
   }
@@ -189,26 +161,74 @@
     }
     const auth = firebase.auth();
 
-    // Récupérer une session Google déjà ouverte (persistée par Firebase)
+    // Restaurer une session Google déjà ouverte (persistée par Firebase)
     const existing = auth.currentUser;
     if (existing && !existing.isAnonymous) {
       window.authUser  = existing;
       window.isPremium = (typeof restorePremium === "function") ? await restorePremium() : await checkPremium();
-      hideLoginOverlay();
-      updateAuthUI();
       log("✓ Session Google restaurée :", existing.displayName);
-      return;
     }
-
-    // Sinon, on bloque avec l'overlay de connexion
-    showLoginOverlay();
+    // Sinon : pas de blocage. Le menu est accessible, connexion optionnelle.
+    // La connexion sera demandée au moment de lancer un niveau.
     updateAuthUI();
+  }
+
+  /* -------------------------------------------------------
+     POPUP "Connexion requise pour jouer"
+  ------------------------------------------------------- */
+  function showLoginRequired(afterLogin) {
+    window._pendingAfterLogin = (typeof afterLogin === "function") ? afterLogin : null;
+
+    let modal = document.getElementById("loginRequiredModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "loginRequiredModal";
+      modal.className = "modal";
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+      <div class="modal-content login-required">
+        <h2>${t("loginRequiredTitle")}</h2>
+        <p>${t("loginRequiredText")}</p>
+        <button class="google-btn" onclick="handleLoginGoogle()">
+          <span>${t("loginGoogle")}</span>
+        </button>
+        <button class="menu-btn ghost" onclick="closeLoginRequired()">${t("close") || "Fermer"}</button>
+      </div>`;
+    modal.style.display = "flex";
+  }
+
+  function closeLoginRequired() {
+    const m = document.getElementById("loginRequiredModal");
+    if (m) m.style.display = "none";
+    window._pendingAfterLogin = null;
+  }
+
+  /* -------------------------------------------------------
+     Handler bouton "Se connecter" (menu)
+  ------------------------------------------------------- */
+  async function handleLoginGoogle() {
+    const r = await signInWithGoogle();
+    if (r && r.ok) {
+      closeLoginRequired();
+      updateAuthUI();
+      // Reprendre l'action qui attendait la connexion (ex: lancer un niveau)
+      if (typeof window._pendingAfterLogin === "function") {
+        const cb = window._pendingAfterLogin;
+        window._pendingAfterLogin = null;
+        cb();
+      }
+    }
+    return r;
   }
 
   /* -------------------------------------------------------
      EXPORT GLOBAL
   ------------------------------------------------------- */
   window.signInWithGoogle = signInWithGoogle;
+  window.handleLoginGoogle = handleLoginGoogle;
+  window.showLoginRequired = showLoginRequired;
+  window.closeLoginRequired = closeLoginRequired;
   window.signOutGoogle    = signOutGoogle;
   window.checkPremium     = checkPremium;
   window.setPremiumDev    = setPremiumDev;

@@ -73,7 +73,9 @@ const LANG = {
     adSpace: "Espace publicitaire",
     adSkip: "Fermer",
     loginTitle: "Connecte-toi pour jouer",
-    loginGoogle: "Se connecter avec Google"
+    loginGoogle: "Se connecter avec Google",
+    loginRequiredTitle: "Connexion requise",
+    loginRequiredText: "Connecte-toi avec Google pour jouer, sauvegarder ta progression et apparaître au classement."
   },
 
   en: {
@@ -140,7 +142,9 @@ const LANG = {
     adSpace: "Ad space",
     adSkip: "Close",
     loginTitle: "Sign in to play",
-    loginGoogle: "Sign in with Google"
+    loginGoogle: "Sign in with Google",
+    loginRequiredTitle: "Sign-in required",
+    loginRequiredText: "Sign in with Google to play, save your progress and appear on the leaderboard."
   },
 
   es: {
@@ -207,7 +211,9 @@ const LANG = {
     adSpace: "Espacio publicitario",
     adSkip: "Cerrar",
     loginTitle: "Inicia sesión para jugar",
-    loginGoogle: "Iniciar sesión con Google"
+    loginGoogle: "Iniciar sesión con Google",
+    loginRequiredTitle: "Inicio de sesión requerido",
+    loginRequiredText: "Inicia sesión con Google para jugar, guardar tu progreso y aparecer en la clasificación."
   }
 };
 

@@ -436,6 +436,13 @@ function setupGlobalAudioUnlock(gameInstanceGetter) {
    FONCTIONS GLOBALES (appelées depuis index.html)
    =========================================================== */
 function startGame(duration) {
+  // Connexion Google obligatoire pour jouer
+  if (!window.authUser) {
+    if (typeof showLoginRequired === "function") {
+      showLoginRequired(() => window.game?.start(duration));
+    }
+    return;
+  }
   window.game?.start(duration);
 }
 

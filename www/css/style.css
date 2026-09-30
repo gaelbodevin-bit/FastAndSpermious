@@ -759,3 +759,58 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; }
     radial-gradient(circle at 65% 60%, rgba(60,220,255,.8), transparent 45%),
     #0a0018;
 }
+
+/* ==========================================================================
+   CONNEXION (bouton menu + popup requise)
+   ========================================================================== */
+
+/* Bouton "Se connecter" à la place du profil quand non connecté */
+.login-btn-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 20px;
+  border: none;
+  background: #fff;
+  color: #3c4043;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.login-btn-menu:hover  { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
+.login-btn-menu:active { transform: scale(0.97); }
+
+/* Popup "Connexion requise" */
+.login-required {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.login-required h2 { margin: 0; font-size: 22px; color: var(--cyan); }
+.login-required p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: #cfd4ee;
+}
+.login-required .google-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  color: #3c4043;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.login-required .google-btn:active { transform: scale(0.97); }
+.login-required .ghost { background: transparent; color: var(--muted); width: 100%; }
