@@ -22,18 +22,16 @@
       "$uid": {
         ".read": "$uid === auth.uid",
         "premium": {
-          ".write": false,
-          "_comment": "premium n'est modifiable QUE par la Cloud Function (admin)"
+          ".write": false
         },
         "$other": {
-          ".write": "$uid === auth.uid"
+          ".write": "$uid === auth.uid && $other !== 'premium'"
         }
       }
     },
     "purchaseTokens": {
       ".read": false,
-      ".write": false,
-      "_comment": "géré uniquement côté serveur (Cloud Function admin)"
+      ".write": false
     }
   }
 }
