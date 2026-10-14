@@ -93,8 +93,8 @@
 
     <!-- Publicite interstitielle -->
     <plugin name="admob-plus-cordova" spec="^1.28.0">
-        <!-- App ID de TEST Google. Remplacer par le vrai App ID AdMob avant publication. -->
-        <variable name="APP_ID_ANDROID" value="ca-app-pub-3940256099942544~3347511713" />
+        <!-- App ID AdMob (Fast and Spermious) -->
+        <variable name="APP_ID_ANDROID" value="ca-app-pub-1631547194835241~5319870661" />
     </plugin>
 
     <!-- Achats integres (premium no-ads) -->

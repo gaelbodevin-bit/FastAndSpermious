@@ -10,7 +10,7 @@
   const log = (...a) => (typeof dbg === "function" ? dbg(...a) : console.log(...a));
 
   // Remplacer par le vrai bloc d'annonces AdMob avant publication
-  const INTERSTITIAL_ID = "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX";
+  const INTERSTITIAL_ID = "ca-app-pub-1631547194835241/8222945184";
 
   let _interstitial = null; // instance admob-plus réutilisée
 
