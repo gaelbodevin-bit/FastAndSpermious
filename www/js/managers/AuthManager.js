@@ -207,9 +207,32 @@
   /* -------------------------------------------------------
      Handler bouton "Se connecter" (menu)
   ------------------------------------------------------- */
+  // Toast visible (diagnostic + UX connexion)
+  function showAuthToast(msg, isError) {
+    let el = document.getElementById("authToast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "authToast";
+      el.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);"
+        + "max-width:90%;padding:12px 18px;border-radius:12px;z-index:99999;"
+        + "font-family:sans-serif;font-size:14px;font-weight:600;color:#fff;"
+        + "box-shadow:0 8px 24px rgba(0,0,0,.5);text-align:center;word-break:break-word;";
+      document.body.appendChild(el);
+    }
+    el.style.background = isError ? "#B3123A" : "#0E7C5A";
+    el.textContent = msg;
+    el.style.display = "block";
+    clearTimeout(window._authToastT);
+    window._authToastT = setTimeout(() => { el.style.display = "none"; }, isError ? 9000 : 3500);
+  }
+  window.showAuthToast = showAuthToast;
+
   async function handleLoginGoogle() {
+    showAuthToast("Connexion en cours\u2026");
+    const hasPlugin = !!(window.cordova && window.plugins && window.plugins.googleplus);
     const r = await signInWithGoogle();
     if (r && r.ok) {
+      showAuthToast("Connect\u00e9 : " + (r.user.displayName || r.user.email || ""));
       closeLoginRequired();
       updateAuthUI();
       // Reprendre l'action qui attendait la connexion (ex: lancer un niveau)
@@ -218,6 +241,9 @@
         window._pendingAfterLogin = null;
         cb();
       }
+    } else {
+      const code = (r && r.err) ? r.err : "inconnu";
+      showAuthToast("\u00c9chec connexion" + (hasPlugin ? "" : " [plugin googleplus absent]") + " : " + code, true);
     }
     return r;
   }

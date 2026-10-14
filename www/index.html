@@ -136,13 +136,16 @@
 
       <!-- ===== LANGUES ===== -->
       <div class="lang-select">
-        <button class="lang-btn" onclick="setLang('fr')" style="background-image:url('img/flags/fr.png')">
+        <button class="lang-btn" onclick="setLang('fr')">
+          <img class="flag-img" src="img/flags/fr.png" alt="">
           <span>FR</span>
         </button>
-        <button class="lang-btn" onclick="setLang('en')" style="background-image:url('img/flags/en.png')">
+        <button class="lang-btn" onclick="setLang('en')">
+          <img class="flag-img" src="img/flags/en.png" alt="">
           <span>EN</span>
         </button>
-        <button class="lang-btn" onclick="setLang('es')" style="background-image:url('img/flags/es.png')">
+        <button class="lang-btn" onclick="setLang('es')">
+          <img class="flag-img" src="img/flags/es.png" alt="">
           <span>ES</span>
         </button>
       </div>
@@ -231,6 +234,8 @@
   <!-- =============================== -->
   <!--           SCRIPTS JS            -->
   <!-- =============================== -->
+  <!-- Cordova : initialise window.cordova / window.plugins (natif Android) -->
+  <script src="cordova.js"></script>
   <script src="js/background.js"></script>
   <script src="js/firebase.js"></script>
   <script src="js/config.js"></script>

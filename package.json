@@ -11,11 +11,31 @@
     "release": "cordova clean android && cordova build android --release",
     "serve": "cordova serve"
   },
-  "keywords": ["ecosystem:cordova", "android", "game"],
+  "keywords": [
+    "ecosystem:cordova",
+    "android",
+    "game"
+  ],
   "devDependencies": {
-    "cordova-android": "^14.0.1"
+    "cordova-android": "^14.0.1",
+    "cordova-plugin-googleplus": "^8.5.2",
+    "admob-plus-cordova": "^1.28.0",
+    "cordova-plugin-purchase": "^13.11.1"
   },
   "cordova": {
-    "platforms": ["android"]
-  }
+    "platforms": [
+      "android"
+    ],
+    "plugins": {
+      "cordova-plugin-googleplus": {
+        "REVERSED_CLIENT_ID": "com.googleusercontent.apps.791766983410-auisv28tqpmqk0qfrl6rftth5pdlou2t",
+        "WEB_APPLICATION_CLIENT_ID": "791766983410-auisv28tqpmqk0qfrl6rftth5pdlou2t.apps.googleusercontent.com"
+      },
+      "admob-plus-cordova": {
+        "APP_ID_ANDROID": "ca-app-pub-1631547194835241~5319870661"
+      },
+      "cordova-plugin-purchase": {}
+    }
+  },
+  "dependencies": {}
 }
