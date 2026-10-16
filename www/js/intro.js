@@ -123,7 +123,7 @@ window.addEventListener("load", () => {
       clearInterval(introCheckInterval);
       intro.remove();
       window.game?.stopMusic();
-      window.game?.playMusic("menu");
+      window.game?.playRandomLoop();
     };
   }, 7000);
 });

@@ -113,8 +113,8 @@ function backToMenu() {
   const canvas = document.getElementById("gameCanvas");
   if (canvas) canvas.style.display = "none";
 
-  // ✅ Relancer la musique menu
-  window.game?.playMusic("menu");
+  // ✅ Relancer une boucle de fond au hasard
+  window.game?.playRandomLoop();
 
   showQuitBtn();
 }

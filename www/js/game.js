@@ -114,7 +114,8 @@ class Game {
   start(duration) {
     dbg("▶️ START", duration);
 
-    this.stopMusic();
+    // Musique de fond en jeu : nouvelle boucle au hasard
+    this.playRandomLoop();
     hidePanels();
     showQuitBtn();
     this.canvas.style.display = "block";
@@ -278,7 +279,10 @@ class Game {
       "321":     "sounds/321.mp3",
       "intro":   "sounds/testintro.mp3",
       "timeout": "sounds/Timeout.mp3",
-      "menu":    "sounds/Bouclemenu1.mp3",
+      // Boucles de fond (menu + en jeu) — tirées au hasard
+      "loop1":   "sounds/Bouclemenu1.mp3",
+      "loop2":   "sounds/Boucle%20menu%20jeu%202.mp3",
+      "loop3":   "sounds/Boucle%20menu%20jeu%203.mp3",
     };
 
     Object.entries(files).forEach(([key, src]) => {
@@ -291,8 +295,12 @@ class Game {
     this.sounds["intro"].volume   = 0.8;
     this.sounds["321"].volume     = 0.7;
     this.sounds["timeout"].volume = 0.6;
-    this.sounds["menu"].loop      = true;
-    this.sounds["menu"].volume    = 0.2;
+
+    // Boucles de fond interchangeables (menu + en jeu)
+    this._musicLoops = ["loop1", "loop2", "loop3"];
+    this._musicLoops.forEach((k) => {
+      if (this.sounds[k]) { this.sounds[k].loop = true; this.sounds[k].volume = 0.2; }
+    });
 
     this._currentMusic = null;
     this._currentMusicKey = null;
@@ -330,6 +338,13 @@ class Game {
         dbg("🔇 Music bloquée (autoplay), en attente d'un tap:", e?.message);
       });
     }
+  }
+
+  // Choisit une boucle de fond au hasard et la joue (menu + en jeu)
+  playRandomLoop() {
+    const pool = this._musicLoops || ["loop1"];
+    const key = pool[Math.floor(Math.random() * pool.length)];
+    this.playMusic(key);
   }
 
   // Arrête la musique en cours
