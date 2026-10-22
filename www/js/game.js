@@ -114,8 +114,10 @@ class Game {
   start(duration) {
     dbg("▶️ START", duration);
 
-    // Musique de fond en jeu : nouvelle boucle au hasard
-    this.playRandomLoop();
+    // Musique de fond : on GARDE la boucle du menu (pas de changement de morceau),
+    // on baisse juste un peu le volume en fondu. Si aucune boucle ne tourne, on en lance une.
+    this.setMusicLevel("game");
+    this.ensureLoop();
     hidePanels();
     showQuitBtn();
     this.canvas.style.display = "block";
@@ -197,7 +199,11 @@ class Game {
     //    PUIS record éventuel + écran de game over.
     const proceed = async () => {
       try {
-        const top = await this.leaderboardManager.loadTopScores(level, 1);
+        // Délai max : sans réseau, la requête Firebase pourrait ne jamais répondre
+        const top = await Promise.race([
+          this.leaderboardManager.loadTopScores(level, 1),
+          new Promise((_, rej) => setTimeout(() => rej(new Error("leaderboard-timeout")), 4000)),
+        ]);
         const currentTop1 = top.length > 0 ? top[0].score : 0;
         if (finalScore > currentTop1) {
           showNewRecord();
@@ -297,9 +303,12 @@ class Game {
     this.sounds["timeout"].volume = 0.6;
 
     // Boucles de fond interchangeables (menu + en jeu)
-    this._musicLoops = ["loop1", "loop2", "loop3"];
+    this._musicLoops  = ["loop1", "loop2", "loop3"];
+    this._musicLevels = { menu: 0.2, game: 0.12 };  // volume des boucles : menu / en partie
+    this._musicLevel  = "menu";
+    this._fadeTimer   = null;
     this._musicLoops.forEach((k) => {
-      if (this.sounds[k]) { this.sounds[k].loop = true; this.sounds[k].volume = 0.2; }
+      if (this.sounds[k]) { this.sounds[k].loop = true; this.sounds[k].volume = this._musicLevels.menu; }
     });
 
     this._currentMusic = null;
@@ -331,6 +340,7 @@ class Game {
     const token = ++this._musicToken;
     this._currentMusic    = snd;
     this._currentMusicKey = key;
+    if ((this._musicLoops || []).includes(key)) snd.volume = this._musicLevels[this._musicLevel];
     snd.currentTime = 0;
 
     const p = snd.play();
@@ -369,6 +379,7 @@ class Game {
 
   // Arrête TOUTES les musiques de fond (intro + boucles) → aucune piste ne peut rester orpheline
   stopMusic() {
+    this._cancelFade();
     this._musicToken++; // invalide toute demande de lecture encore en cours
     const keys = ["intro"].concat(this._musicLoops || []);
     keys.forEach((k) => {
@@ -384,12 +395,49 @@ class Game {
     this._currentMusic?.pause();
   }
 
+  // Reprend la musique courante (retour d'arrière-plan, après le sélecteur de compte Google…).
+  // Si Android refuse la reprise, elle sera relancée au prochain tap.
   resumeMusic() {
-    this._currentMusic?.play().catch(e => dbg("🔇 Resume error:", e?.message));
+    const snd = this._currentMusic;
+    if (!snd || !snd.paused) return;
+    const key = this._currentMusicKey;
+    const token = this._musicToken;
+    const p = snd.play();
+    if (p && typeof p.then === "function") {
+      p.catch((e) => {
+        if (token !== this._musicToken || (e && e.name === "AbortError")) return;
+        this._pendingMusicKey = key;
+        dbg("🔇 Reprise musique refusée, relance au prochain tap:", e?.message);
+      });
+    }
+  }
+
+  // Volume des boucles selon le contexte : "menu" ou "game" (fondu doux)
+  setMusicLevel(level, fadeMs = 600) {
+    if (!this._musicLevels || !(level in this._musicLevels)) return;
+    this._musicLevel = level;
+    const target = this._musicLevels[level];
+    const snd = this._currentMusic;
+    this._cancelFade();
+    if (!snd || !(this._musicLoops || []).includes(this._currentMusicKey)) return; // jamais l'intro
+    if (!fadeMs) { snd.volume = target; return; }
+    const from  = snd.volume;
+    const steps = Math.max(1, Math.round(fadeMs / 30));
+    let i = 0;
+    this._fadeTimer = setInterval(() => {
+      i++;
+      snd.volume = Math.min(1, Math.max(0, from + (target - from) * (i / steps)));
+      if (i >= steps) this._cancelFade();
+    }, 30);
+  }
+
+  _cancelFade() {
+    if (this._fadeTimer) { clearInterval(this._fadeTimer); this._fadeTimer = null; }
   }
 
   // Au 1er tap : relance UNIQUEMENT la musique courante si elle avait été bloquée par l'autoplay
   resumeCurrentMusic() {
+    if (document.getElementById("studio-intro")) return; // pendant l'intro : un tap ne lance rien
     const key = this._pendingMusicKey;
     if (!key) return;                                  // rien en attente → on ne fait rien
     if (key !== this._currentMusicKey || !this._currentMusic) {

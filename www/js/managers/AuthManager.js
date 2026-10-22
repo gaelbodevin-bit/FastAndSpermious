@@ -231,6 +231,8 @@
     showAuthToast("Connexion en cours\u2026");
     const hasPlugin = !!(window.cordova && window.plugins && window.plugins.googleplus);
     const r = await signInWithGoogle();
+    // Le sélecteur de compte Google met l'app en pause → on relance la musique au retour
+    if (window.game && typeof window.game.resumeMusic === "function") window.game.resumeMusic();
     if (r && r.ok) {
       showAuthToast("Connect\u00e9 : " + (r.user.displayName || r.user.email || ""));
       closeLoginRequired();

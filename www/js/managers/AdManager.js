@@ -1,17 +1,19 @@
 /* ===========================================================
    AD MANAGER — Pub interstitielle après chaque manche
    -----------------------------------------------------------
-   - Premium (window.isPremium) : aucune pub.
-   - Android : AdMob interstitiel (admob-plus-cordova), PRÉCHARGÉ.
-   - Navigateur : overlay HTML "fausse pub" (5s) pour tester le flux.
-
+   Plugin : admob-plus-cordova 2.x
+     - événements PAR ANNONCE : ad.on("dismiss"), ad.on("showfail")
+       (→ document "admob.ad.dismiss" / "admob.ad.showfail")
    Principes :
-   - onDone() est TOUJOURS appelé, exactement une fois → le jeu
-     n'est JAMAIS bloqué.
-   - L'annonce est préchargée à l'avance. À la fin d'une manche :
-       • une annonce est prête → on l'affiche ;
-       • sinon → on enchaîne IMMÉDIATEMENT (aucun délai) et on
-         relance un préchargement pour la prochaine fois.
+     - onDone() est TOUJOURS appelé, exactement une fois → le jeu
+       n'est JAMAIS bloqué.
+     - L'annonce est préchargée. Fin de manche :
+         • annonce prête  → affichage, reprise à sa fermeture ;
+         • pas prête      → on enchaîne IMMÉDIATEMENT.
+     - Filets de sécurité si la fermeture n'est pas captée :
+         • événement Android "resume" (la pub est une activité
+           séparée : l'app revient au premier plan à sa fermeture) ;
+         • délai maximum armé AVANT l'affichage.
    =========================================================== */
 
 (function () {
@@ -19,67 +21,61 @@
 
   // Bloc d'annonces interstitiel (AdMob)
   const INTERSTITIAL_ID = "ca-app-pub-1631547194835241/8222945184";
+  const SAFETY_MS = 45000;   // délai maximum d'une pub affichée
 
-  let _interstitial = null;  // instance admob-plus réutilisée
-  let _started      = false; // admob.start() déjà appelé
-  let _evtBound     = false; // écouteurs liés une seule fois
-  let _loaded       = false; // une annonce est prête
-  let _loading      = false; // chargement en cours
-  let _currentDone  = null;  // reprise de la manche en cours
+  let _ad            = null;  // InterstitialAd réutilisée
+  let _started       = false; // admob.start() appelé
+  let _loaded        = false; // une annonce est prête
+  let _loading       = false; // chargement en cours
+  let _currentDone   = null;  // reprise de la manche en cours
+  let _safetyTimer   = null;
+  let _resumeHandler = null;
 
-  /* Initialise le SDK AdMob une seule fois (après deviceready) */
-  async function startAdmob() {
-    const admob = window.admob;
-    if (!admob || _started) return;
-    try {
-      if (typeof admob.start === "function") await admob.start();
-      _started = true;
-    } catch (e) {
-      log("⚠️ admob.start :", e && e.message);
-    }
+  async function startAdmob(admob) {
+    if (_started) return;
+    if (typeof admob.start === "function") await admob.start();
+    _started = true;
   }
 
+  // Crée l'annonce une seule fois et branche SES événements (API du plugin)
   function getAd(admob) {
-    if (!_interstitial) {
-      _interstitial = new admob.InterstitialAd({ adUnitId: INTERSTITIAL_ID });
+    if (_ad) return _ad;
+    _ad = new admob.InterstitialAd({ adUnitId: INTERSTITIAL_ID });
+    if (typeof _ad.on === "function") {
+      _ad.on("dismiss",  () => finishAd("dismiss"));
+      _ad.on("showfail", () => finishAd("showfail"));
     }
-    return _interstitial;
+    return _ad;
   }
 
-  /* Événements de fermeture AdMob (liés une seule fois) */
-  function bindEventsOnce(admob) {
-    if (_evtBound || !admob || typeof admob.on !== "function") return;
-    _evtBound = true;
-
-    const resume = () => {
-      const d = _currentDone;
-      _currentDone = null;
-      _loaded = false;            // annonce consommée
-      if (typeof d === "function") d();
-      preload();                  // prépare la suivante
-    };
-
-    const E = admob.events || {};
-    [
-      E.INTERSTITIAL_DISMISS, E.INTERSTITIAL_SHOW_FAIL, E.INTERSTITIAL_FAIL_TO_SHOW,
-      "interstitialdismiss", "interstitialshowfail", "admob.interstitial.dismiss",
-    ].filter(Boolean).forEach((n) => { try { admob.on(n, resume); } catch (e) {} });
+  // Termine l'affichage d'une pub (une seule fois) puis prépare la suivante
+  function finishAd(reason) {
+    if (_safetyTimer)   { clearTimeout(_safetyTimer); _safetyTimer = null; }
+    if (_resumeHandler) { document.removeEventListener("resume", _resumeHandler, false); _resumeHandler = null; }
+    _loaded = false;
+    const d = _currentDone;
+    _currentDone = null;
+    if (typeof d === "function") {
+      log("📺 Pub terminée :", reason);
+      d();
+    }
+    setTimeout(preload, 1000);
   }
 
-  /* Précharge une annonce en arrière-plan (non bloquant) */
+  // Précharge une annonce en arrière-plan (non bloquant)
   async function preload() {
     const admob = window.admob;
     if (!admob || !admob.InterstitialAd) return;
-    if (_loaded || _loading) return;
+    if (_loaded || _loading || _currentDone) return;
     _loading = true;
     try {
-      await startAdmob();
-      bindEventsOnce(admob);
+      await startAdmob(admob);
       await getAd(admob).load();
       _loaded = true;
+      log("📺 Pub préchargée");
     } catch (e) {
       _loaded = false;
-      log("⚠️ Préchargement pub indisponible :", e && e.message);
+      log("⚠️ Préchargement pub indisponible :", e && (e.message || e));
     } finally {
       _loading = false;
     }
@@ -99,35 +95,26 @@
 
     const admob = window.admob;
 
-    // Android — admob-plus-cordova
-    if (admob && admob.InterstitialAd) {
-      if (_loaded) {
-        _currentDone = done;
-        try {
-          await getAd(admob).show();
-          // Reprise normale sur l'événement "dismiss" ; garde-fou ultime :
-          setTimeout(() => {
-            if (_currentDone === done) { _currentDone = null; _loaded = false; done(); preload(); }
-          }, 60000);
-          return;
-        } catch (e) {
-          log("⚠️ Affichage pub :", e && e.message);
-          _loaded = false;
-          _currentDone = null;
-          done();
-          preload();
-          return;
-        }
+    // Navigateur (dev) — overlay "fausse pub" 5 s
+    if (!admob || !admob.InterstitialAd) { showWebAd(done); return; }
+
+    // Aucune annonce prête → on n'attend PAS
+    if (!_loaded) { done(); preload(); return; }
+
+    // Annonce prête → affichage
+    _currentDone = done;
+    _safetyTimer = setTimeout(() => finishAd("délai max"), SAFETY_MS);
+    try {
+      await getAd(admob).show();
+      // Filet : à la fermeture de la pub, Android ramène l'app au premier plan
+      if (_currentDone === done) {
+        _resumeHandler = () => setTimeout(() => finishAd("resume"), 400);
+        document.addEventListener("resume", _resumeHandler, false);
       }
-
-      // Aucune annonce prête → on n'attend PAS : on enchaîne et on précharge.
-      done();
-      preload();
-      return;
+    } catch (e) {
+      log("⚠️ Affichage pub :", e && (e.message || e));
+      finishAd("erreur affichage");
     }
-
-    // Fallback navigateur (dev) — overlay "fausse pub" 5 s
-    showWebAd(done);
   }
 
   /* -------------------------------------------------------

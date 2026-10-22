@@ -115,6 +115,8 @@ function backToMenu() {
 
   // ✅ Relancer une boucle de fond au hasard
   // (ne relance rien si une boucle tourne déjà ; ne coupe pas l'intro)
+  // Volume "menu" : remonte en fondu après une partie
+  window.game?.setMusicLevel("menu");
   window.game?.ensureLoop();
 
   showQuitBtn();
