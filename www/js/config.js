@@ -267,7 +267,11 @@ function setLang(lang) {
    ======================= */
 
 const GAME_CONFIG = {
-  VERSION: "2026.05.17",
+  // Numéro affiché en bas à droite du menu
+  VERSION: "1.1.1",
+  // Clé de reset des skins locaux (données de test). À changer UNIQUEMENT pour
+  // forcer ce reset : la modifier efface les skins enregistrés sur les téléphones.
+  DATA_VERSION: "2026.05.17",
 
   // Sprite
   FRAME_SIZE: 256,

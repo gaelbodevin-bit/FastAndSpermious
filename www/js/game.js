@@ -506,13 +506,14 @@ window.onload = async () => {
     dbg("🔐 Auth Google initialisée");
   }
 
-  // ✅ Reset ownedSkins si nouvelle version (nettoie les données de test)
+  // ✅ Reset ownedSkins si la clé de données change (nettoie les données de test)
+  //    Indépendant du numéro affiché : changer VERSION n'efface plus rien.
   const _savedVer = localStorage.getItem("gameVersion");
-  if (_savedVer !== GAME_CONFIG.VERSION) {
-    dbg("🔄 Reset skins - version:", GAME_CONFIG.VERSION);
+  if (_savedVer !== GAME_CONFIG.DATA_VERSION) {
+    dbg("🔄 Reset skins - données:", GAME_CONFIG.DATA_VERSION);
     localStorage.removeItem("ownedSkins");
     localStorage.removeItem("equippedSkin");
-    localStorage.setItem("gameVersion", GAME_CONFIG.VERSION);
+    localStorage.setItem("gameVersion", GAME_CONFIG.DATA_VERSION);
     // Recharger playerState proprement
     window.game.playerState.ownedSkins = [];
     window.game.playerState.equippedSkin = "base";
@@ -529,7 +530,7 @@ window.onload = async () => {
 
   // ✅ Affichage version
   const vTag = document.getElementById("versionTag");
-  if (vTag) vTag.textContent = "v" + GAME_CONFIG.VERSION;
+  if (vTag) vTag.textContent = "V" + GAME_CONFIG.VERSION;
 
   backToMenu();
   dbg("✅ Jeu prêt");
