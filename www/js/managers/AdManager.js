@@ -2,11 +2,16 @@
    AD MANAGER — Pub interstitielle après chaque manche
    -----------------------------------------------------------
    - Premium (window.isPremium) : aucune pub.
-   - Android : AdMob interstitiel (admob-plus-cordova).
+   - Android : AdMob interstitiel (admob-plus-cordova), PRÉCHARGÉ.
    - Navigateur : overlay HTML "fausse pub" (5s) pour tester le flux.
-   - IMPORTANT : onDone() est TOUJOURS appelé (pub vue, sautée,
-     échec de chargement, compte en validation, premium…) afin de
-     ne JAMAIS bloquer le jeu.
+
+   Principes :
+   - onDone() est TOUJOURS appelé, exactement une fois → le jeu
+     n'est JAMAIS bloqué.
+   - L'annonce est préchargée à l'avance. À la fin d'une manche :
+       • une annonce est prête → on l'affiche ;
+       • sinon → on enchaîne IMMÉDIATEMENT (aucun délai) et on
+         relance un préchargement pour la prochaine fois.
    =========================================================== */
 
 (function () {
@@ -15,34 +20,69 @@
   // Bloc d'annonces interstitiel (AdMob)
   const INTERSTITIAL_ID = "ca-app-pub-1631547194835241/8222945184";
 
-  // Garde-fou : si l'annonce ne charge pas sous ce délai, on continue le jeu.
-  const LOAD_TIMEOUT_MS = 3000;
-
   let _interstitial = null;  // instance admob-plus réutilisée
-  let _evtBound = false;     // écouteurs d'événements liés une seule fois
-  let _currentDone = null;   // callback de reprise de la manche en cours
+  let _started      = false; // admob.start() déjà appelé
+  let _evtBound     = false; // écouteurs liés une seule fois
+  let _loaded       = false; // une annonce est prête
+  let _loading      = false; // chargement en cours
+  let _currentDone  = null;  // reprise de la manche en cours
 
-  /* -------------------------------------------------------
-     Lie une seule fois les événements de fermeture AdMob.
-     Quelle que soit la version, on tente plusieurs noms.
-  ------------------------------------------------------- */
+  /* Initialise le SDK AdMob une seule fois (après deviceready) */
+  async function startAdmob() {
+    const admob = window.admob;
+    if (!admob || _started) return;
+    try {
+      if (typeof admob.start === "function") await admob.start();
+      _started = true;
+    } catch (e) {
+      log("⚠️ admob.start :", e && e.message);
+    }
+  }
+
+  function getAd(admob) {
+    if (!_interstitial) {
+      _interstitial = new admob.InterstitialAd({ adUnitId: INTERSTITIAL_ID });
+    }
+    return _interstitial;
+  }
+
+  /* Événements de fermeture AdMob (liés une seule fois) */
   function bindEventsOnce(admob) {
     if (_evtBound || !admob || typeof admob.on !== "function") return;
     _evtBound = true;
 
-    const fire = () => {
+    const resume = () => {
       const d = _currentDone;
       _currentDone = null;
+      _loaded = false;            // annonce consommée
       if (typeof d === "function") d();
+      preload();                  // prépare la suivante
     };
 
     const E = admob.events || {};
-    const names = [
+    [
       E.INTERSTITIAL_DISMISS, E.INTERSTITIAL_SHOW_FAIL, E.INTERSTITIAL_FAIL_TO_SHOW,
       "interstitialdismiss", "interstitialshowfail", "admob.interstitial.dismiss",
-    ].filter(Boolean);
+    ].filter(Boolean).forEach((n) => { try { admob.on(n, resume); } catch (e) {} });
+  }
 
-    names.forEach((n) => { try { admob.on(n, fire); } catch (e) {} });
+  /* Précharge une annonce en arrière-plan (non bloquant) */
+  async function preload() {
+    const admob = window.admob;
+    if (!admob || !admob.InterstitialAd) return;
+    if (_loaded || _loading) return;
+    _loading = true;
+    try {
+      await startAdmob();
+      bindEventsOnce(admob);
+      await getAd(admob).load();
+      _loaded = true;
+    } catch (e) {
+      _loaded = false;
+      log("⚠️ Préchargement pub indisponible :", e && e.message);
+    } finally {
+      _loading = false;
+    }
   }
 
   /* -------------------------------------------------------
@@ -61,33 +101,29 @@
 
     // Android — admob-plus-cordova
     if (admob && admob.InterstitialAd) {
-      bindEventsOnce(admob);
-      _currentDone = done;
-
-      try {
-        if (!_interstitial) {
-          _interstitial = new admob.InterstitialAd({ adUnitId: INTERSTITIAL_ID });
+      if (_loaded) {
+        _currentDone = done;
+        try {
+          await getAd(admob).show();
+          // Reprise normale sur l'événement "dismiss" ; garde-fou ultime :
+          setTimeout(() => {
+            if (_currentDone === done) { _currentDone = null; _loaded = false; done(); preload(); }
+          }, 60000);
+          return;
+        } catch (e) {
+          log("⚠️ Affichage pub :", e && e.message);
+          _loaded = false;
+          _currentDone = null;
+          done();
+          preload();
+          return;
         }
-
-        // Chargement borné : si l'annonce ne charge pas (compte AdMob en
-        // validation, pas de remplissage, réseau…), on ne bloque pas le jeu.
-        await Promise.race([
-          _interstitial.load(),
-          new Promise((_, rej) => setTimeout(() => rej(new Error("load-timeout")), LOAD_TIMEOUT_MS)),
-        ]);
-
-        await _interstitial.show();
-
-        // show() a réussi : la reprise se fait sur l'événement "dismiss".
-        // Garde-fou ultime si l'événement n'est jamais émis.
-        setTimeout(() => { if (_currentDone === done) { _currentDone = null; done(); } }, 60000);
-        return;
-      } catch (err) {
-        log("⚠️ AdMob indisponible, on continue :", err && err.message);
-        _currentDone = null;
-        done();  // on NE montre PAS de fausse pub sur mobile : on enchaîne.
-        return;
       }
+
+      // Aucune annonce prête → on n'attend PAS : on enchaîne et on précharge.
+      done();
+      preload();
+      return;
     }
 
     // Fallback navigateur (dev) — overlay "fausse pub" 5 s
@@ -137,6 +173,10 @@
       done();
     };
   }
+
+  // Préchargement dès que Cordova est prêt (+ si deviceready est déjà passé)
+  document.addEventListener("deviceready", () => { preload(); }, false);
+  if (window.admob) preload();
 
   window.showInterstitial = showInterstitial;
   log("✓ AdManager.js chargé");

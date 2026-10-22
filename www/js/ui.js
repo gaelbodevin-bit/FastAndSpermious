@@ -114,7 +114,8 @@ function backToMenu() {
   if (canvas) canvas.style.display = "none";
 
   // ✅ Relancer une boucle de fond au hasard
-  window.game?.playRandomLoop();
+  // (ne relance rien si une boucle tourne déjà ; ne coupe pas l'intro)
+  window.game?.ensureLoop();
 
   showQuitBtn();
 }

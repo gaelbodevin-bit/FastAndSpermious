@@ -305,6 +305,7 @@ class Game {
     this._currentMusic = null;
     this._currentMusicKey = null;
     this._pendingMusicKey = null; // musique demandée mais bloquée (autoplay)
+    this._musicToken      = 0;    // n° de la dernière demande de musique (anti-requêtes périmées)
 
     dbg("🎵 Sons chargés");
   }
@@ -321,40 +322,62 @@ class Game {
     snd.play().catch(e => dbg("🔇 Sound error:", e?.message));
   }
 
-  // Joue une musique (arrête la précédente)
+  // Joue une musique : coupe TOUTE musique en cours, puis lance celle-ci
   playMusic(key) {
     this.stopMusic();
-    this._currentMusicKey = key;
 
     const snd = this.sounds[key];
     if (!snd) return;
-    this._currentMusic = snd;
+    const token = ++this._musicToken;
+    this._currentMusic    = snd;
+    this._currentMusicKey = key;
     snd.currentTime = 0;
+
     const p = snd.play();
-    if (p && p.catch) {
-      p.catch(e => {
-        // Bloqué par l'autoplay policy → on retient pour relancer au 1er tap
+    if (p && typeof p.then === "function") {
+      p.then(() => {
+        if (token === this._musicToken) this._pendingMusicKey = null;
+      }).catch((e) => {
+        // Demande périmée (une autre musique a été demandée depuis) → on ignore
+        if (token !== this._musicToken) return;
+        // AbortError = play() interrompu par un pause() volontaire → PAS un blocage autoplay
+        if (e && e.name === "AbortError") return;
+        // Vrai blocage autoplay → on relancera au 1er tap
         this._pendingMusicKey = key;
-        dbg("🔇 Music bloquée (autoplay), en attente d'un tap:", e?.message);
+        dbg("🔇 Musique bloquée (autoplay), en attente d'un tap:", e?.message);
       });
     }
   }
 
-  // Choisit une boucle de fond au hasard et la joue (menu + en jeu)
+  // Lance une boucle de fond au hasard (différente de celle en cours si possible)
   playRandomLoop() {
     const pool = this._musicLoops || ["loop1"];
-    const key = pool[Math.floor(Math.random() * pool.length)];
+    const choices = pool.length > 1 ? pool.filter((k) => k !== this._currentMusicKey) : pool;
+    const key = choices[Math.floor(Math.random() * choices.length)];
     this.playMusic(key);
   }
 
-  // Arrête la musique en cours
+  // Lance une boucle SEULEMENT si aucune ne tourne déjà (pas de coupure au retour menu,
+  // en fermant la boutique, etc.). Pendant l'intro, on ne touche à rien : intro.js
+  // lance la boucle à la fin de la cinématique.
+  ensureLoop() {
+    if (document.getElementById("studio-intro")) return;
+    const loops = this._musicLoops || [];
+    if (this._currentMusicKey && loops.includes(this._currentMusicKey)) return;
+    this.playRandomLoop();
+  }
+
+  // Arrête TOUTES les musiques de fond (intro + boucles) → aucune piste ne peut rester orpheline
   stopMusic() {
-    if (this._currentMusic) {
-      this._currentMusic.pause();
-      this._currentMusic.currentTime = 0;
-      this._currentMusic = null;
-    }
+    this._musicToken++; // invalide toute demande de lecture encore en cours
+    const keys = ["intro"].concat(this._musicLoops || []);
+    keys.forEach((k) => {
+      const s = this.sounds[k];
+      if (s) { try { s.pause(); s.currentTime = 0; } catch (e) {} }
+    });
+    this._currentMusic    = null;
     this._currentMusicKey = null;
+    this._pendingMusicKey = null;
   }
 
   pauseMusic() {
@@ -365,17 +388,23 @@ class Game {
     this._currentMusic?.play().catch(e => dbg("🔇 Resume error:", e?.message));
   }
 
-  // Relance la musique après un déblocage audio (1er tap) si elle était bloquée
+  // Au 1er tap : relance UNIQUEMENT la musique courante si elle avait été bloquée par l'autoplay
   resumeCurrentMusic() {
-    const key = this._pendingMusicKey || this._currentMusicKey;
-    if (!key) return;
-    const snd = this.sounds[key];
-    if (!snd) return;
-    this._currentMusic = snd;
-    this._currentMusicKey = key;
-    snd.play()
-      .then(() => { this._pendingMusicKey = null; })
-      .catch(e => dbg("🔇 Resume error:", e?.message));
+    const key = this._pendingMusicKey;
+    if (!key) return;                                  // rien en attente → on ne fait rien
+    if (key !== this._currentMusicKey || !this._currentMusic) {
+      this._pendingMusicKey = null;                    // attente périmée → on l'oublie
+      return;
+    }
+    // Sécurité : aucune autre piste musicale ne doit jouer
+    ["intro"].concat(this._musicLoops || []).forEach((k) => {
+      const s = this.sounds[k];
+      if (s && s !== this._currentMusic) { try { s.pause(); } catch (e) {} }
+    });
+    const token = this._musicToken;
+    this._currentMusic.play()
+      .then(() => { if (token === this._musicToken) this._pendingMusicKey = null; })
+      .catch((e) => dbg("🔇 Resume error:", e?.message));
   }
 }
 
