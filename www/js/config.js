@@ -33,6 +33,7 @@ const LANG = {
     purchaseSkinOk: "Skin débloqué !",
     purchaseError: "Achat impossible, réessaie plus tard",
     purchaseAppOnly: "Achat disponible uniquement dans l'app",
+    purchasePending: "Paiement reçu : déblocage en attente, relance l'app dans un instant",
     shopUnlockAt: "Débloqué dès {score} points",
     leaderboardSelectTitle: "Classement par niveaux",
     leaderboardSelectInstruction: "Choisissez un niveau.",
@@ -107,6 +108,7 @@ const LANG = {
     purchaseSkinOk: "Skin unlocked!",
     purchaseError: "Purchase failed, please try again later",
     purchaseAppOnly: "Purchases are only available in the app",
+    purchasePending: "Payment received: unlock pending, restart the app in a moment",
     shopUnlockAt: "Unlocked at {score} points",
     leaderboardSelectTitle: "Leaderboard by level",
     leaderboardSelectInstruction: "Choose a level.",
@@ -181,6 +183,7 @@ const LANG = {
     purchaseSkinOk: "¡Skin desbloqueado!",
     purchaseError: "Compra imposible, inténtalo más tarde",
     purchaseAppOnly: "Compras disponibles solo en la app",
+    purchasePending: "Pago recibido: desbloqueo pendiente, reinicia la app en un momento",
     shopUnlockAt: "Se desbloquea con {score} puntos",
     leaderboardSelectTitle: "Clasificación por niveles",
     leaderboardSelectInstruction: "Elige un nivel.",
@@ -283,7 +286,7 @@ function setLang(lang) {
 
 const GAME_CONFIG = {
   // Numéro affiché en bas à droite du menu
-  VERSION: "1.1.2",
+  VERSION: "1.1.3",
   // Clé de reset des skins locaux (données de test). À changer UNIQUEMENT pour
   // forcer ce reset : la modifier efface les skins enregistrés sur les téléphones.
   DATA_VERSION: "2026.05.17",

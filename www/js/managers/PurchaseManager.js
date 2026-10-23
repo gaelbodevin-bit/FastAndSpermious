@@ -88,7 +88,9 @@
           .then(() => transaction.finish())
           .catch((err) => {
             log("❌ Vérif serveur :", err && err.message);
-            if (typeof showAuthToast === "function") showAuthToast(t("purchaseError"), true);
+            // Le paiement est passé : seule la validation a échoué. La transaction
+            // n'est pas finalisée, elle sera revalidée au prochain lancement.
+            if (typeof showAuthToast === "function") showAuthToast(t("purchasePending"), true);
           });
       })
       .finished(() => log("✓ Transaction finalisée"));
@@ -196,15 +198,31 @@
      RESTAURATION (à la connexion) : Premium + skins payants
      Renvoie le statut premium (booléen), comme avant.
   ------------------------------------------------------- */
+  // Lecture DIRECTE dans Firebase (users/{uid}) : quasi instantané, pas de
+  // démarrage à froid de Cloud Function. Sécurisé : le joueur peut lire ses
+  // achats mais seules les Cloud Functions peuvent les écrire (règles RTDB).
   async function restorePremium() {
+    const apply = (premium, skins) => {
+      if (Array.isArray(skins)) setPaidSkins(skins);
+      window.isPremium = premium === true;
+      if (typeof updateAuthUI === "function") updateAuthUI();
+      return window.isPremium;
+    };
+    try {
+      const uid = window.authUser && window.authUser.uid;
+      if (uid && window.firebaseDB) {
+        const snap = await window.firebaseDB.ref("users/" + uid).once("value");
+        const u = snap.val() || {};
+        const skins = u.paidSkins || {};
+        return apply(u.premium, Object.keys(skins).filter((k) => skins[k] === true));
+      }
+    } catch (e) {
+      log("⚠️ Lecture achats Firebase :", e.message);
+    }
+    // Secours : Cloud Function
     try {
       const res = await callFunction("restorePremium", {});
-      if (res && Array.isArray(res.paidSkins)) setPaidSkins(res.paidSkins);
-      if (res && res.premium) {
-        window.isPremium = true;
-        if (typeof updateAuthUI === "function") updateAuthUI();
-      }
-      return !!(res && res.premium);
+      return apply(res && res.premium, res && res.paidSkins);
     } catch (e) {
       log("⚠️ restorePremium :", e.message);
       return false;

@@ -52,8 +52,8 @@
         localStorage.setItem("playerName", result.user.displayName);
       }
 
-      window.isPremium = (typeof restorePremium === "function") ? await restorePremium() : await checkPremium();
-      updateAuthUI();
+      updateAuthUI();        // connecté tout de suite
+      refreshPurchases();    // Premium + skins achetés en arrière-plan (ne bloque pas)
 
       return { ok: true, user: result.user };
     } catch (e) {
@@ -79,6 +79,14 @@
   /* -------------------------------------------------------
      PREMIUM
   ------------------------------------------------------- */
+  // Restaure Premium + skins achetés sans bloquer l'interface
+  function refreshPurchases() {
+    const p = (typeof restorePremium === "function")
+      ? restorePremium()
+      : checkPremium().then((v) => { window.isPremium = v; updateAuthUI(); return v; });
+    return Promise.resolve(p).catch(() => false);
+  }
+
   async function checkPremium() {
     try {
       const uid = window.authUser?.uid;
@@ -167,7 +175,7 @@
     const existing = auth.currentUser;
     if (existing && !existing.isAnonymous) {
       window.authUser  = existing;
-      window.isPremium = (typeof restorePremium === "function") ? await restorePremium() : await checkPremium();
+      refreshPurchases();    // en arrière-plan : ne retarde pas l'arrivée au menu
       log("✓ Session Google restaurée :", existing.displayName);
     }
     // Sinon : pas de blocage. Le menu est accessible, connexion optionnelle.

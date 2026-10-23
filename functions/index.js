@@ -20,7 +20,13 @@ const crypto = require("crypto");
 admin.initializeApp();
 
 // Région Europe (proche de la base RTDB europe-west1)
-setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
+// serviceAccount : compte invité dans la Play Console (autorisation "données
+// financières / commandes"), nécessaire pour vérifier les achats via l'API Play.
+setGlobalOptions({
+  region: "europe-west1",
+  maxInstances: 10,
+  serviceAccount: "firebase-adminsdk-fbsvc@fast-and-spermious.iam.gserviceaccount.com",
+});
 
 // Nom du package de l'app (doit correspondre à config.xml)
 const PACKAGE_NAME = "com.fast.spermious";
