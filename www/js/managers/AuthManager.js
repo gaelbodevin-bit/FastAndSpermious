@@ -47,6 +47,8 @@
       window.authUser = result.user;
       log("✓ Connecté Google :", result.user.displayName);
 
+      try { localStorage.setItem("googleLinked", "1"); } catch (e) {}
+
       // Nom joueur par défaut = nom Google
       if (result.user.displayName) {
         localStorage.setItem("playerName", result.user.displayName);
@@ -63,6 +65,7 @@
   }
 
   async function signOutGoogle() {
+    try { localStorage.removeItem("googleLinked"); } catch (e) {}
     try {
       if (window.cordova && window.plugins && window.plugins.googleplus) {
         await new Promise(res => window.plugins.googleplus.logout(res, res));
@@ -172,16 +175,57 @@
     }
     const auth = firebase.auth();
 
-    // Restaurer une session Google déjà ouverte (persistée par Firebase)
-    const existing = auth.currentUser;
-    if (existing && !existing.isAnonymous) {
-      window.authUser  = existing;
-      refreshPurchases();    // en arrière-plan : ne retarde pas l'arrivée au menu
-      log("✓ Session Google restaurée :", existing.displayName);
-    }
-    // Sinon : pas de blocage. Le menu est accessible, connexion optionnelle.
-    // La connexion sera demandée au moment de lancer un niveau.
+    // Session restaurée : Firebase relit la session sauvegardée de façon
+    // ASYNCHRONE au lancement (auth.currentUser est encore vide ici).
+    // On écoute donc l'état d'authentification pour reconnecter le joueur
+    // dès que la session est relue, sans bloquer l'arrivée au menu.
+    const applyUser = (u, how) => {
+      if (!u || u.isAnonymous) return;
+      if (window.authUser && window.authUser.uid === u.uid) return;
+      window.authUser = u;
+      try { localStorage.setItem("googleLinked", "1"); } catch (e) {}
+      updateAuthUI();
+      refreshPurchases();    // en arrière-plan
+      log("✓ Session Google restaurée (" + how + ") :", u.displayName);
+    };
+
+    applyUser(auth.currentUser, "immédiate");
+
+    let firstState = true;
+    auth.onAuthStateChanged((u) => {
+      const wasFirst = firstState;
+      firstState = false;
+      if (u) { applyUser(u, "Firebase"); return; }
+      // Aucune session Firebase relue alors que le joueur s'était connecté :
+      // reconnexion Google silencieuse (sans fenêtre de choix de compte).
+      if (wasFirst && localStorage.getItem("googleLinked") === "1") silentLogin(auth);
+    });
+
+    // Pas de blocage : le menu reste accessible, la connexion est demandée
+    // au moment de lancer un niveau.
     updateAuthUI();
+  }
+
+  // Reconnexion silencieuse via le compte Google déjà autorisé sur l'appareil
+  async function silentLogin(auth) {
+    const gp = window.cordova && window.plugins && window.plugins.googleplus;
+    if (!gp || window.authUser) return;
+    try {
+      const res = await new Promise((ok, ko) =>
+        gp.trySilentLogin({ webClientId: WEB_CLIENT_ID }, ok, ko)
+      );
+      if (!res || !res.idToken || window.authUser) return;
+      const cred = firebase.auth.GoogleAuthProvider.credential(res.idToken);
+      const r = await auth.signInWithCredential(cred);
+      if (r && r.user && !window.authUser) {
+        window.authUser = r.user;
+        updateAuthUI();
+        refreshPurchases();
+      }
+      log("✓ Reconnexion Google silencieuse");
+    } catch (e) {
+      log("ℹ️ Reconnexion silencieuse impossible :", (e && e.message) || e);
+    }
   }
 
   /* -------------------------------------------------------
@@ -220,6 +264,9 @@
   ------------------------------------------------------- */
   // Toast visible (diagnostic + UX connexion)
   function showAuthToast(msg, isError) {
+    // Pas de bulle de confirmation (verte) : l'écran montre déjà le résultat.
+    // Seuls les messages d'erreur sont affichés.
+    if (!isError) return;
     let el = document.getElementById("authToast");
     if (!el) {
       el = document.createElement("div");

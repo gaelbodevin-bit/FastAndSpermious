@@ -310,7 +310,7 @@ function setLang(lang) {
 
 const GAME_CONFIG = {
   // Numéro affiché en bas à droite du menu
-  VERSION: "1.1.5",
+  VERSION: "1.1.6",
   // Clé de reset des skins locaux (données de test). À changer UNIQUEMENT pour
   // forcer ce reset : la modifier efface les skins enregistrés sur les téléphones.
   DATA_VERSION: "2026.05.17",

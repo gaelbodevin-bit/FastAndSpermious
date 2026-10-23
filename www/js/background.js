@@ -24,10 +24,11 @@
   `;
   document.body.appendChild(canvas);
   const ctx = canvas.getContext("2d");
+  canvas.style.opacity = "1";
 
-  // Le fond animé n'est visible que pendant la partie (body.in-game)
+  // Le fond choisi reste affiché en permanence (menu ET partie)
   function updateVisibility() {
-    canvas.style.opacity = document.body.classList.contains("in-game") ? "1" : "0";
+    canvas.style.opacity = "1";
   }
   window.showGameBackground = function () { document.body.classList.add("in-game"); updateVisibility(); };
   window.hideGameBackground = function () { document.body.classList.remove("in-game"); updateVisibility(); };
