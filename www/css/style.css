@@ -655,8 +655,10 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; }
   color: var(--cyan); background: rgba(34,228,219,.14); border: 1px solid rgba(34,228,219,.4);
 }
 .profile-status .badge.premium {
-  color: #24123a; font-weight: 700;
-  background: linear-gradient(90deg, #ffb23e, #ff7ac0);
+  /* discret : simple contour doré */
+  color: #ffc46b; font-weight: 600;
+  background: transparent;
+  border: 1px solid rgba(255,196,107,.45);
 }
 .profile-card .menu-btn { width: 100%; }
 .profile-card .profile-logout {
@@ -664,6 +666,33 @@ h1, h2 { font-family: var(--font-display); font-weight: 700; }
   border-color: rgba(255,76,163,.4);
 }
 .profile-card .ghost { background: transparent; color: var(--muted); }
+
+/* Suppression de compte : lien discret + confirmation */
+.profile-card .profile-delete {
+  width: auto;
+  margin-top: 2px;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: underline;
+  opacity: .7;
+  cursor: pointer;
+}
+.delete-card .delete-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--muted);
+}
+.delete-card .delete-confirm {
+  background: #B3123A;
+  border-color: #B3123A;
+  color: #fff;
+}
+.delete-card .delete-confirm:disabled { opacity: .6; }
 
 /* Panneau légal */
 #legalPanel { text-align: center; }

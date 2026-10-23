@@ -143,7 +143,8 @@
   function updateAuthUI() {
     const premiumBtn = document.getElementById("btnPremium");
     if (premiumBtn) {
-      premiumBtn.style.display = window.authUser ? "block" : "none";
+      // Une fois Premium, le bouton disparaît (le statut est visible dans le profil)
+      premiumBtn.style.display = (window.authUser && !window.isPremium) ? "block" : "none";
       premiumBtn.innerText = window.isPremium ? t("premiumActive") : t("premiumBtn");
       premiumBtn.disabled  = window.isPremium;
     }

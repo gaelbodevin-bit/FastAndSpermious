@@ -162,3 +162,54 @@ exports.restorePremium = onCall(async (request) => {
     paidSkins: Object.keys(skins).filter((k) => skins[k] === true),
   };
 });
+
+/* ============================================================
+   deleteAccount — suppression du compte et de TOUTES les données
+   (droit à l'effacement RGPD, exigence Google Play)
+   - players/{uid}, users/{uid} (Premium, skins achetés),
+     leaderboard_total/{uid}, entrées de classement, jetons d'achat
+   - puis le compte Firebase Authentication
+   ============================================================ */
+exports.deleteAccount = onCall(async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) {
+    throw new HttpsError("unauthenticated", "Connexion requise.");
+  }
+  const db = admin.database();
+  const updates = {};
+
+  updates["players/" + uid] = null;
+  updates["users/" + uid] = null;
+  updates["leaderboard_total/" + uid] = null;
+
+  // Classements par niveau (entrées indexées par uid OU poussées avec un champ uid)
+  for (const root of ["leaderboards", "scores"]) {
+    for (const lvl of [15, 30, 60]) {
+      const snap = await db.ref(root + "/" + lvl).once("value");
+      snap.forEach((child) => {
+        const v = child.val() || {};
+        if (child.key === uid || v.uid === uid) {
+          updates[root + "/" + lvl + "/" + child.key] = null;
+        }
+      });
+    }
+  }
+
+  // Jetons d'achat rattachés à ce compte
+  const tokens = await db.ref("purchaseTokens").orderByChild("uid").equalTo(uid).once("value");
+  tokens.forEach((child) => { updates["purchaseTokens/" + child.key] = null; });
+
+  await db.ref().update(updates);
+
+  // Compte de connexion
+  try {
+    await admin.auth().deleteUser(uid);
+  } catch (err) {
+    if (!err || err.code !== "auth/user-not-found") {
+      console.error("deleteUser:", err && err.message);
+      throw new HttpsError("internal", "Suppression du compte impossible.");
+    }
+  }
+  console.log("Compte supprimé:", uid, "| chemins effacés:", Object.keys(updates).length);
+  return { ok: true };
+});

@@ -39,6 +39,7 @@
       }
     },
     "purchaseTokens": {
+      ".indexOn": ["uid"],
       ".read": false,
       ".write": false
     }
