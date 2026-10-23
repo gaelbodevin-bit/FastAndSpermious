@@ -90,7 +90,7 @@
             log("❌ Vérif serveur :", err && err.message);
             // Le paiement est passé : seule la validation a échoué. La transaction
             // n'est pas finalisée, elle sera revalidée au prochain lancement.
-            if (typeof showAuthToast === "function") showAuthToast(t("purchasePending"), true);
+            if (_isUserOrder(transaction) && typeof showAuthToast === "function") showAuthToast(t("purchasePending"), true);
           });
       })
       .finished(() => log("✓ Transaction finalisée"));
@@ -119,6 +119,15 @@
   /* -------------------------------------------------------
      ACHAT générique (ouvre la fenêtre Google Play)
   ------------------------------------------------------- */
+  // Produits dont l'achat a été lancé par le joueur pendant cette session.
+  // Les transactions re-livrées par Google Play au lancement (achats déjà
+  // possédés) sont revalidées en silence : aucun message à l'écran.
+  const _userOrders = new Set();
+  const _isUserOrder = (tr) => {
+    const id = tr && tr.products && tr.products[0] && tr.products[0].id;
+    return !!id && _userOrders.has(id);
+  };
+
   async function purchaseProduct(productId) {
     if (!window.CdvPurchase) throw new Error("Store indisponible");
     const { store, Platform, ErrorCode } = window.CdvPurchase;
@@ -129,6 +138,7 @@
     if (!offer) throw new Error("Offre indisponible : " + productId);
 
     if (window.keepMusicForOverlay) window.keepMusicForOverlay();   // musique continue pendant la fenêtre d'achat
+    _userOrders.add(productId);
     const err = await store.order(offer);   // v13 : renvoie une erreur au lieu de rejeter
     if (err && !(ErrorCode && err.code === ErrorCode.PAYMENT_CANCELLED)) {
       throw new Error(err.message || "Achat impossible");
@@ -181,14 +191,17 @@
       log("👑 Premium activé (vérifié serveur)");
     }
     if (res && res.skinId) {
-      setPaidSkins(window.paidSkins.concat([res.skinId]));
-      // Équiper directement le skin acheté
-      const g = window.game;
-      if (g && g.skinManager.equipSkin(res.skinId)) {
-        g.updateCurrentSkin();
-        if (typeof refreshShopUI === "function") refreshShopUI();
+      const isNew = _isUserOrder(transaction) && !window.paidSkins.includes(res.skinId);
+      if (!window.paidSkins.includes(res.skinId)) setPaidSkins(window.paidSkins.concat([res.skinId]));
+      if (isNew) {
+        // Nouvel achat du joueur : on équipe directement le skin et on le signale
+        const g = window.game;
+        if (g && g.skinManager.equipSkin(res.skinId)) {
+          g.updateCurrentSkin();
+          if (typeof refreshShopUI === "function") refreshShopUI();
+        }
+        if (typeof showAuthToast === "function") showAuthToast(t("purchaseSkinOk"));
       }
-      if (typeof showAuthToast === "function") showAuthToast(t("purchaseSkinOk"));
       log("🎨 Skin acheté (vérifié serveur) :", res.skinId);
     }
     return res;
