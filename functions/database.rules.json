@@ -18,14 +18,23 @@
         ".write": "$uid === auth.uid"
       }
     },
+    "players": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
     "users": {
       "$uid": {
         ".read": "$uid === auth.uid",
         "premium": {
           ".write": false
         },
+        "paidSkins": {
+          ".write": false
+        },
         "$other": {
-          ".write": "$uid === auth.uid && $other !== 'premium'"
+          ".write": "$uid === auth.uid && $other !== 'premium' && $other !== 'paidSkins'"
         }
       }
     },

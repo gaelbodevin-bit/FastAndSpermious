@@ -31,6 +31,8 @@
 
       if (window.cordova && window.plugins && window.plugins.googleplus) {
         // --- Android natif ---
+        // Musique continue pendant la fenêtre de choix du compte Google
+        if (window.keepMusicForOverlay) window.keepMusicForOverlay();
         const gp = await new Promise((res, rej) =>
           window.plugins.googleplus.login({ webClientId: WEB_CLIENT_ID }, res, rej)
         );
@@ -233,6 +235,8 @@
     const r = await signInWithGoogle();
     // Le sélecteur de compte Google met l'app en pause → on relance la musique au retour
     if (window.game && typeof window.game.resumeMusic === "function") window.game.resumeMusic();
+    // Fin de la fenêtre Google : on revient au comportement normal (pause si l'app passe en fond)
+    setTimeout(() => { window._keepMusicOverlay = false; }, 1500);
     if (r && r.ok) {
       showAuthToast("Connect\u00e9 : " + (r.user.displayName || r.user.email || ""));
       closeLoginRequired();

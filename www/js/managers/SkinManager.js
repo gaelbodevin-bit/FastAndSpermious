@@ -48,7 +48,10 @@ class SkinManager {
       });
 
       // Vùrifier que le skin ùquipù est valide
-      if (!this.playerState.ownedSkins.includes(this.playerState.equippedSkin)) {
+      // Skin equipe invalide (non possede, ou skin payant non achete) -> base
+      const eq = this.skins.find(s => s.id === this.playerState.equippedSkin);
+      const paidKo = eq && eq.type === "paid" && !(window.paidSkins || []).includes(eq.id);
+      if (paidKo || !this.playerState.ownedSkins.includes(this.playerState.equippedSkin)) {
         this.playerState.equippedSkin = "base";
         this.playerState.save();
       }
@@ -82,7 +85,10 @@ class SkinManager {
   getAvailableSkins() {
     return this.skins.map(skin => ({
       ...skin,
-      owned: this.playerState.ownedSkins.includes(skin.id) || skin.type === "always",
+      // Skin payant : possede uniquement s'il a ete achete (verifie par le serveur)
+      owned: skin.type === "paid"
+        ? (window.paidSkins || []).includes(skin.id)
+        : (this.playerState.ownedSkins.includes(skin.id) || skin.type === "always"),
       equipped: skin.id === this.playerState.equippedSkin,
       canUnlock: skin.type === "score" && this.playerState.totalScore >= skin.requiredScore
     }));
@@ -110,6 +116,9 @@ class SkinManager {
   }
 
   equipSkin(skinId) {
+    // Skin payant : equipable uniquement s'il a ete achete
+    const s = this.skins.find(x => x.id === skinId);
+    if (s && s.type === "paid" && !(window.paidSkins || []).includes(skinId)) return false;
     if (this.playerState.equipSkin(skinId)) {
       dbg("? Skin ùquipù:", skinId);
       return true;

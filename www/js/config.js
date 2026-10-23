@@ -28,6 +28,11 @@ const LANG = {
     shopEquip: "Équiper",
     shopEquipped: "Équipé",
     shopComingSoon: "Disponible prochainement",
+    shopBuy: "Acheter",
+    shopPurchased: "Acheté",
+    purchaseSkinOk: "Skin débloqué !",
+    purchaseError: "Achat impossible, réessaie plus tard",
+    purchaseAppOnly: "Achat disponible uniquement dans l'app",
     shopUnlockAt: "Débloqué dès {score} points",
     leaderboardSelectTitle: "Classement par niveaux",
     leaderboardSelectInstruction: "Choisissez un niveau.",
@@ -97,6 +102,11 @@ const LANG = {
     shopEquip: "Equip",
     shopEquipped: "Equipped",
     shopComingSoon: "Coming soon",
+    shopBuy: "Buy",
+    shopPurchased: "Purchased",
+    purchaseSkinOk: "Skin unlocked!",
+    purchaseError: "Purchase failed, please try again later",
+    purchaseAppOnly: "Purchases are only available in the app",
     shopUnlockAt: "Unlocked at {score} points",
     leaderboardSelectTitle: "Leaderboard by level",
     leaderboardSelectInstruction: "Choose a level.",
@@ -166,6 +176,11 @@ const LANG = {
     shopEquip: "Equipar",
     shopEquipped: "Equipado",
     shopComingSoon: "Próximamente",
+    shopBuy: "Comprar",
+    shopPurchased: "Comprado",
+    purchaseSkinOk: "¡Skin desbloqueado!",
+    purchaseError: "Compra imposible, inténtalo más tarde",
+    purchaseAppOnly: "Compras disponibles solo en la app",
     shopUnlockAt: "Se desbloquea con {score} puntos",
     leaderboardSelectTitle: "Clasificación por niveles",
     leaderboardSelectInstruction: "Elige un nivel.",
@@ -268,7 +283,7 @@ function setLang(lang) {
 
 const GAME_CONFIG = {
   // Numéro affiché en bas à droite du menu
-  VERSION: "1.1.1",
+  VERSION: "1.1.2",
   // Clé de reset des skins locaux (données de test). À changer UNIQUEMENT pour
   // forcer ce reset : la modifier efface les skins enregistrés sur les téléphones.
   DATA_VERSION: "2026.05.17",

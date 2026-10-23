@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <widget
     id="com.fast.spermious"
-    version="1.1.1"
+    version="1.1.2"
     xmlns="http://www.w3.org/ns/widgets"
     xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
@@ -37,8 +37,8 @@
     <!--        ANDROID SDK (FORCE)      -->
     <!-- =============================== -->
     <preference name="android-minSdkVersion" value="24" />
-    <preference name="android-targetSdkVersion" value="35" />
-    <preference name="android-compileSdkVersion" value="35" />
+    <preference name="android-targetSdkVersion" value="36" />
+    <preference name="android-compileSdkVersion" value="36" />
 
     <!-- =============================== -->
     <!--          GLOBAL PREFS           -->

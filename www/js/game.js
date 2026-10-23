@@ -65,25 +65,43 @@ class Game {
     applyLang();
     refreshShopUI();
 
+    // ✅ Fenêtre système par-dessus le jeu (choix du compte Google, achat Play) :
+    //    l'app passe en pause mais on GARDE la musique (continuité).
+    //    Le mode se coupe au retour dans l'app, ou au bout de 2 min par sécurité.
+    window.keepMusicForOverlay = () => {
+      window._keepMusicOverlay = true;
+      clearTimeout(window._keepMusicOverlayT);
+      window._keepMusicOverlayT = setTimeout(() => { window._keepMusicOverlay = false; }, 120000);
+    };
+    const endOverlay = () => {
+      if (!window._keepMusicOverlay) return;
+      clearTimeout(window._keepMusicOverlayT);
+      setTimeout(() => { window._keepMusicOverlay = false; }, 800);
+    };
+
     // ✅ Pause/reprise musique quand l'app passe en arrière-plan
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
+        if (window._keepMusicOverlay) return;   // fenêtre Google : on garde la musique
         this.pauseMusic();
         dbg("⏸️ Musique en pause (app masquée)");
       } else {
         this.resumeMusic();
+        endOverlay();
         dbg("▶️ Musique reprise (app visible)");
       }
     });
 
     // ✅ Cordova : événements pause/resume natifs Android
     document.addEventListener("pause",  () => {
+      if (window._keepMusicOverlay) return;     // fenêtre Google : on garde la musique
       this.pauseMusic();
       dbg("⏸️ Cordova pause");
     }, false);
 
     document.addEventListener("resume", () => {
       this.resumeMusic();
+      endOverlay();
       dbg("▶️ Cordova resume");
     }, false);
 

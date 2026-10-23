@@ -317,12 +317,16 @@ function refreshShopUI() {
         ? `<button disabled>${t("shopEquipped")}</button>`
         : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
     } else if (!skin.owned && skin.type === "paid") {
+      // Prix Google Play localisé si dispo, sinon prix de skins.json
       status = "";
-      requirement = `<div class="skin-requirement" style="color:#c39bd3">${t("shopPremium")} - ${skin.price ? skin.price.toFixed(2) + " EUR" : ""}</div>`;
-      button = `<button onclick="alert('Achat bientot disponible !')" style="background:#8e44ad">Acheter</button>`;
+      const playPrice = (typeof getProductPrice === "function")
+        ? getProductPrice((window.SKIN_PRODUCT_PREFIX || "skin_") + skin.id) : null;
+      const price = playPrice || (skin.price ? skin.price.toFixed(2).replace(".", ",") + " €" : "");
+      requirement = `<div class="skin-requirement" style="color:#c39bd3">${price}</div>`;
+      button = `<button onclick="buySkin('${skin.id}')" style="background:#8e44ad">${t("shopBuy")}</button>`;
     } else {
       status = "";
-      requirement = skin.type === "paid" ? `<div class="skin-requirement" style="color:#c39bd3">${t("shopPremium")} - ${skin.price ? skin.price.toFixed(2) + " EUR" : ""}</div>` : "";
+      requirement = skin.type === "paid" ? `<div class="skin-requirement" style="color:#2ecc71">${t("shopPurchased")}</div>` : "";
       button = skin.equipped
         ? `<button disabled>${t("shopEquipped")}</button>`
         : `<button onclick="equipSkin('${skin.id}')">${t("shopEquip")}</button>`;
